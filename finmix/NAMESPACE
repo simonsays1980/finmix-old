@@ -1,0 +1,31 @@
+exportPattern("^[[:alpha:]]+")
+
+importFrom(graphics, plot)
+importFrom(graphics, barplot)
+export( ## user-defined constructors
+	"model",
+	"data"
+)
+exportClasses( ## all classes
+	"model",
+	"data"
+)
+exportMethods( ## name of the generic, as with other methods
+	"plot",
+	"y",
+	"y<-",
+	"r",
+	"r<-",
+	"S",
+	"S<-",
+	"bycolumn",
+	"bycolumn<-",
+	"name",
+	"name<-",
+	"type",
+	"type<-",
+	"sim",
+	"sim<-",
+	"data.model",
+	"data.model<-"
+)
