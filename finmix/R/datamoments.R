@@ -1,17 +1,29 @@
-## 'datamoments' is a virtual classes from which the corresponding           ##
-## datamoments for 'continuous' and 'discrete' and 'classifications' inherit ## 
+## 'datamoments' is a virtual classes from which the corresponding      ##
+## datamoments for 'continuous' and 'discrete' inherit	 		## 
 setClass("datamoments",
 	representation(
 		mean = "matrix",
-		variance = "matrix",
+		var = "matrix",
+		data = "data",
+		sdatamoments = "sdatamoments",
 		"VIRTUAL")
+)
 
-setGeneric("show", function(.Object) standardGeneric("show"))
+## Getters ##
+setGeneric("getData", function(.Object) standardGeneric("getData"))
+setGeneric("getSDataMoments", function(.Object) standardGeneric("getSDataMoments"))
 
-setGeneric("mean", function(.Object) standardGeneric("mean"))
-setGeneric("variance", function(.Object) standardGeneric("variance"))
-setGeneric("mean<-", function(.Object, value) standardGeneric("mean<-"))
-setGeneric("variance<-", function(.Object, value) standardGeneric("variance<-"))
+## Setters ##
+## No setters as users should not manipulate a 'datamoments' object ##
 
-
+## mutual constructor for all type of datamoments ##
+"datamoments" <- function(dataset) {
+		if(getType(dataset) == "continuous") {
+			.Object <- new("cdatamoments", data = dataset)
+		}
+		else { 
+			.Object <- new("ddatamoments", data = dataset)
+		}
+		return(.Object)
+}
 

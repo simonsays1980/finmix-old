@@ -10,5 +10,22 @@ License: What license is it under?
 Depends:
 	graphics
 Collate:
+	distributions.R
 	model.R
+	mixturemoments.R
+	modelmoments.R
+	nsmodelmoments.R
+	dmodelmoments.R
 	data.R
+	groupmoments.R
+	sdatamoments.R
+	csdatamoments.R
+	datamoments.R
+	cdatamoments.R
+	ddatamoments.R
+	prior.R
+	mcmc.R
+	mcmcstart.R
+	dataclass.R
+	likelihood.R
+	mcmcoutput.R

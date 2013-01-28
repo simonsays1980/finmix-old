@@ -1,47 +1,33 @@
-#' @include data.R
 setClass("groupmoments", 
 	representation(
 		NK = "matrix",
 		group.mean = "matrix",
-		g.data = "data"), 
-	prototype = list(
-		NK = matrix(),
-		group.mean = matrix(),
-		g.data = data()
-		),
+		data = "data"), 
 	validity = function(object) {
 				mom.nk <- object@NK
 				mom.group.means <- object@group.mean
-				mom.K <- length(levels(factor(getY(object@g.data))))
+				mom.K <- length(levels(factor(getS(object@data))))
 				if(mom.K != ncol(mom.nk)) 
-					return("Data dimension and dimension of group sizes do not match.")
+					return("[Error] Data dimension and dimension of group sizes do not match.")
 				if(mom.K != ncol(mom.group.means))
-					return("Data dimension and dimension of the group means fo not match.")
+					return("[Error] Data dimension and dimension of the group means fo not match.")
 				if(any(mom.nk < 0))
-					return("Group size is negative.") 
+					return("[Error] Group size is negative.") 
 				## else: ok
 				TRUE
 			}
 )
 
-setMethod("initialize", "groupmoments", function(.Object, ..., data) {
-							.Object@g.data <- data
-							gmoments(.Object) <- .Object@g.data
-							callNextMethod(.Object, ...)
-							return(.Object)
-						}
-)
-
-"gmoments<-" <- function(.Object, value) {
+"groupmoments" <- function(data) {
 			## Compute group sizes ##
 			## work only with  ordered by column ##
-			if(!getByColumn(value)) {
-				datam <- t(getY(value))
-				classm <- t(getS(value))
+			if(!data@bycolumn) {
+				datam <- t(data@y)
+				classm <- t(data@S)
 			}
 			else {
-				datam <- getY(value)
-				classm <- getS(value)
+				datam <- data@y
+				classm <- data@S
 			}
 			
 			## Calculate group sizes and group means ##
@@ -49,7 +35,7 @@ setMethod("initialize", "groupmoments", function(.Object, ..., data) {
 			## 'group.mean' is a 1 x K matrix for r == 1 ## 
 			## 'group.mean' is a r x K matrix for r > 1 ##
 			level.set <- as.numeric(levels(factor(classm)))
-			if(getR(value) == 1) {
+			if(data@r == 1) {
 				nkm <- matrix(0, ncol = length(level.set), nrow = 1)
 				group.means <- matrix(0, ncol = length(level.set), nrow = 1)
 				for(i in 1:length(level.set)) {
@@ -59,31 +45,34 @@ setMethod("initialize", "groupmoments", function(.Object, ..., data) {
 			}
 			else {
 				nkm <- matrix(0, ncol = length(level.set), nrow = 1)
-				group.means <- matrix(0, ncol = length(level.set), nrow = getR(value))
+				group.means <- matrix(0, ncol = length(level.set), nrow = data@r)
 				for(i in 1:length(level.set)) {
 					nkm[i] <- sum(match(classm, level.set[i]), na.rm = TRUE)
 					group.means[,i] <- apply(datam[which(classm == level.set[i]), , drop = FALSE], 2, mean,na.rm = TRUE)
 				}
 			}
-			.Object@NK <- as.matrix(nkm)
-			.Object@group.mean <- as.matrix(group.means)
-
+		
+			groupmoments <- new("groupmoments", NK = as.matrix(nkm), group.mean = as.matrix(group.means), 
+						data = data)
 			
-			return(.Object)
+			return(groupmoments)
 }
 
 ## R usual 'show' function ##
 setMethod("show", "groupmoments", function(object) {
-						data.name <- getName(getG.Data(object))
+						data.name <- getName(object@data)
 						oname <- ifelse(length(data.name) == 0, "", data.name)
 						cat("Groupmoments object '", oname, "'\n")
-						cat("	NK		: [", format(getNK(object), trim = TRUE), "]\n")
-						cat("	group.mean	: [", format(getGroupMean(object)[1,], trim = TRUE), "]\n")
-						r <- nrow(getGroupMean(object))
-						if(r > 1) {
-							for(i in 2:r) 
-								cat("		  [", format(getGroupMean(object)[i,], trim = TRUE), "]\n")
-						}
+						cat("	Type		:", class(object), "\n")
+						cat("	NK		:", paste(dim(object@NK), collapse="x"), "\n")
+						cat("	Group Mean	:", paste(dim(object@group.mean), collapse="x"), "\n")
+					##	cat("	NK		: [", format(object@NK, trim = TRUE), "]\n")
+					##	cat("	group.mean	: [", format(object@group.mean[1,], trim = TRUE), "]\n")
+					##	r <- nrow(object@group.mean)
+					##	if(r > 1) {
+					##		for(i in 2:r) 
+					##			cat("		  	  [", format(object@group.mean[i,], trim = TRUE), "]\n")
+					##	}
 						
 					}
 )
@@ -99,9 +88,9 @@ setMethod("getGroupMean", "groupmoments", function(.Object) {
 						return(.Object@group.mean)	
 					}
 )
-setGeneric("getG.Data", function(.Object) standardGeneric("getG.Data"))
-setMethod("getG.Data", "groupmoments", function(.Object) {
-						return(.Object@g.data)		
+setGeneric("getData", function(.Object) standardGeneric("getData"))
+setMethod("getData", "groupmoments", function(.Object) {
+						return(.Object@data)		
 					}
 )
 ## R usual Setters ##
@@ -117,9 +106,9 @@ setReplaceMethod("setGroupMean", "groupmoments", function(.Object, value) {
 						return(.Object)
 					}
 )
-setGeneric("setG.Data<-", function(.Object, value) standardGeneric("setG.Data<-"))
-setReplaceMethod("setG.Data", "groupmoments", function(.Object, value) {
-							.Object@g.data <- value
+setGeneric("setData<-", function(.Object, value) standardGeneric("setData<-"))
+setReplaceMethod("setData", "groupmoments", function(.Object, value) {
+							.Object@data <- value
 							validObject(.Object)
 							return(.Object)
 						}
