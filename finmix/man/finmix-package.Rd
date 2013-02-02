@@ -15,7 +15,7 @@ More about what it does (maybe more than one line)
 Package: \tab finmix\cr
 Type: \tab Package\cr
 Version: \tab 1.0\cr
-Date: \tab 2012-12-14\cr
+Date: \tab 2013-02-02\cr
 License: \tab What license is it under?\cr
 }
 ~~ An overview of how to use the package, including the most important ~~

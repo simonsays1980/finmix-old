@@ -1,31 +1,11 @@
 Package: finmix
 Type: Package
-Title: Methods for finite mixture models
+Title: What the package does (short line)
 Version: 1.0
-Date: 2012-12-14
-Author: Simon Zehnder
-Maintainer: Who to complain to <zehnder@wiso.uni-koeln.de>
+Date: 2013-02-02
+Author: Who wrote it
+Maintainer: Who to complain to <yourfault@somewhere.net>
 Description: More about what it does (maybe more than one line)
 License: What license is it under?
-Depends:
-	graphics
-Collate:
-	distributions.R
-	model.R
-	mixturemoments.R
-	modelmoments.R
-	nsmodelmoments.R
-	dmodelmoments.R
-	data.R
-	groupmoments.R
-	sdatamoments.R
-	csdatamoments.R
-	datamoments.R
-	cdatamoments.R
-	ddatamoments.R
-	prior.R
-	mcmc.R
-	mcmcstart.R
-	dataclass.R
-	likelihood.R
-	mcmcoutput.R
+Depends: Rcpp (>= 0.10.2), RcppArmadillo (>= 0.3.6.2)
+LinkingTo: Rcpp, RcppArmadillo
