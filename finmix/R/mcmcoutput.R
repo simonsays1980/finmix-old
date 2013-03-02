@@ -19,6 +19,171 @@ setClass("mcmcoutput",
 	}
 )
 
+"mixturemcmc" <- function(data, model, prior, mcmc) {
+	## check if all arguments are provided ##
+	if(nargs() < 4) 
+		return("[Error] All arguments must be provided.")
+
+	## check data object ##
+	validObject(data)
+	has.data <- !all(is.na(data@y))
+	has.S <- !all(is.na(data@S))
+	K <- model@K
+	if(has.data) {
+		if(data@bycolumn) {
+			datam <- data@y
+			if(has.S && K == 1) {
+				classm <- matrix(1, nrow = nrow(datam), ncol = 1)
+			}
+			else if(has.S && K > 1) {
+				classm <- data@S
+			}
+		}
+		else { ## data stored by row
+			datam <- t(data@y)
+			if(has.S && K == 1) {
+				classm <- matrix(1, nrow = nrow(datam), ncol = 1)
+			}
+			else if(has.S && K > 1) {
+				classm <- t(data@S)
+			}
+		}
+		r <- ncol(datam)
+		N <- nrow(datam)
+	}
+	else { ## data has no observations
+		return("[Error] Observations in 'y' of 'data' object are obligatory for MCMC sampling.")
+	}
+	if(model@dist == "poisson") {
+		has.exposures <- !all(is.na(data@exp))
+		if(has.exposures) {
+			if(data@bycolumn) {
+				if(nrow(data@exp) != N && nrow(exposures) != 1) {
+					return("[Error] number of exposures 'exp' in 'data' does not match number of observations in 'y'.")
+				}
+				else if(nrow(data@exp) == N) {
+					exp <- data@exp
+				}
+				else { ## exp has dimension 1 x 1
+					exp <-matrix(data@exp[1], nrow = N, ncol = 1)
+				}
+			}
+			else { ## data stored by row
+				if(ncol(data@exp) != N && ncol(data@exp) != 1) {
+					return("[Error] number of exposures 'exp' in 'data' does not match number of observations in 'y'.")
+				}
+				else if(ncol(data@exp) == N) {
+					exp <- t(data@exp)
+				}
+				else {
+					exp <- matrix(data@exp[1], nrow = N, ncol = 1)
+				}
+			}
+		}
+		else { ## no exposures set default all to 1
+			exp <- matrix(1, nrow = N, ncol = 1)
+		}	
+	}
+	if(model@dist == "binomial") {
+		## check for repetitions ##
+		has.reps <- !all(is.na(data@T))
+		if(has.reps) {
+			if(bycolumn) {
+				if(nrow(data@T) != N && nrow(data@T) != 1)  {
+					return("[Error] number of repetitions 'T' in 'data' does not match number of observations in 'y'.")
+				}
+				else if(nrow(data@T) == N) {
+					T <- data@T
+				}
+				else { ## dimension of T is 1 x 1
+					T <- matrix(data@T[1], nrow = N, ncol = 1)
+				}
+			}
+			else { ## data stored by row 
+				if(ncol(data@T) != N && ncol(data@T) != 1) {
+					return("[Error] number of repetitions 'T' in 'data' does not match number of observations in 'y'.")
+				}
+				else if(ncol(data@T) == N) {
+					T <- t(data@T)
+				}
+				else { ## dimension of T is 1 x 1
+					T <- matrix(data@T[1], nrow = N, ncol = 1)	
+				}
+			}
+		}
+		else { ## then check in model ##
+			if(nrow(model@T) != N && nrow(model@T) != 1) {
+				return("[Error] neither 'data' nor 'model' has correctly specified repetitions 'T'.")
+			}	
+			else if(nrow(model@T) == N) {
+				T <- model@T
+			}
+			else { ## dimension of T is 1 x 1 
+				T <- matrix(model@T[1], nrow = N, ncol = 1)
+			}
+		}
+	}
+	## check 'model' object ##
+	validObject(model)
+	K <- model@K
+	norstud <- (model@dist == "normal" || model@dist == "normult" || model@dist == "student" || model@dist == "studmult")
+	if(model@indicfix) {
+		ranperm <- FALSE
+	}
+	if (mcmc@startpar && !model@indicfix && K > 1) { ## i.e. it should be started by sampling allocations
+		if(length(model@par) == 0) 
+			return("[Error] for starting with sampling allocations 'model' must provide starting parameters.")
+		if(any(is.na(model@weight)) && model@indicmod == "multinomial") 
+			return("[Error] for starting with sampling allocations 'model' must provide starting weights.")
+	} 
+	else { ## begin by sampling the parameters 
+		if(!has.S && K > 1) 
+			return("[Error] for starting with sampling parameters 'data' must provide starting allocations.")			
+		if(norstud) {
+			if(prior@type == "independent") { ## independent prior
+				## later regression model ##
+
+				## here only finite mixture ##
+				if(length(model@par) == 0) 
+					return("[Error] for an independent prior, starting values for the component means have to be provided.")
+				has.mu <- "mu" %in% names(model@par)
+				if(!has.mu) 
+					return("[Error] for an independent prior, starting values for the component means have to be provided.")
+			}
+			norstudmult <- (model@dist == "normult" || model@dist == "studmult")
+			has.logdet <- "logdet" %in% prior@par$sigma  
+			if(norstudmult && !has.logdet) {
+				has.C <- "C" %in% prior@par$sigma
+				if(!has.C) { 
+					return("[Error] for an independent prior entry 'C' in 'prior@par$sigma' has to be provided.")
+				}
+				else { ## if C is there check if array of dimension (r x r x K) 
+					if(!is.array(C)) {
+						return("[Error] 'C' in 'prior@par$sigma' must be an array of dimension (r x r x K).")
+					}
+					else {
+						## check dimensions ##
+						dims <- dim(prior@par$sigma$C)
+						has.dim <- (dims[1] == r && dims[2] == r && dims[3] == K)
+						if(!has.dim) 
+							return("[Error] 'C' in 'prior@par$sigma' must be an array of dimension (r x r x K).")
+						logdetC <- array(0, dim = c(r,r,K))
+						for(k in 1:K) { ## TODO: check if Cs are given and check priordefine for thi
+							logdetC[,,k] <- log(det(prior@par$sigma$C[,,k]))
+						}
+					}
+				}
+			} ## end norstudmult
+		
+		} ## end norstud 
+			
+		######################### MCMC SAMPLING #############################
+		if(model@dist == "poisson") {
+			.Call("mcmc_poisson_cc", data, model, prior, mcmc, PACKAGE = "finmix")
+		}	
+	}
+	
+}
 ## Getters ##
 ## Generic set in 'data' class ##
 setMethod("getName", "mcmcoutput", function(.Object) {

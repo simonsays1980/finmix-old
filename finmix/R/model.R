@@ -7,7 +7,8 @@ setClass("model",
 		par = "list",
 		indicmod = "character",
 		indicfix = "logical",
-		T = "matrix"
+		T = "matrix",
+		.cache = "environment"
 	),
 	validity = function(object) {
 				choices <- c("normal", "normult", "exponential", "student", "studmult", "poisson", "binomial")
@@ -16,14 +17,20 @@ setClass("model",
 				indicmod.choices <- c("multinomial")
 				if(!(object@dist %in% choices)) 
 					return("[Error] Unknown distribution.")
-				if(ncol(object@weight) != object@K) 
-					return("[Error] Weight entries and number of components 'K' do not match.") 
+				if(object@K <= 0) 
+					return("[Error] Number of components 'K' must be a positive integer.")
 				if(object@indicmod != "multinomial")
 					return("[Error] Distribution of the indicator model 'indicmod' must be Multinomial.")
 				# else: OK ##
 
 				TRUE
 			}
+)
+
+## Initializer ##
+setMethod("initialize", "model", function(.Object, ..., .cache = new.env()){
+					callNextMethod(.Object, .cache = .cache, ...)				
+				}
 )
 
 ## Constructor for class 'model' ##
@@ -289,21 +296,23 @@ setMethod("mixturemar", "model", function(.Object, J) {
 ## Show ##
 setMethod("show", "model", function(object) {
 					cat("Object 'model'\n")
-					cat("	Type	:", class(object), "\n")
-					cat("	Dist 	:", object@dist, "\n")
+					cat("	type	:", class(object), "\n")
+					cat("	dist 	:", object@dist, "\n")
 					cat("	r	:", object@r, "\n")
 					cat("	K	:", object@K, "\n")
 					cat("	weight	:", paste(dim(object@weight), collapse = "x"), "\n")
 					if(!all(is.na(object@par))) {
-						cat("	Par	: List of ", length(names(getPar(object))), "\n")
+						cat("	par	: List of ", length(names(getPar(object))), "\n")
 					}	
 					cat("	indicmod:", object@indicmod,"\n")
 					cat("	indicfix:", object@indicfix, "\n")
-					if(length(T) > 1) {
-						cat("	T	:", paste(dim(object@T), collapse = "x"), "\n")
-					}
-					else { ## T is the same for all 
-						cat("	T	:", object@T, "\n")
+					if(object@dist == "binomial") {
+						if(length(T) > 1) {
+							cat("	T	:", paste(dim(object@T), collapse = "x"), "\n")
+						}
+						else { ## T is the same for all 
+							cat("	T	:", object@T, "\n")
+						}
 					}
 				}
 )

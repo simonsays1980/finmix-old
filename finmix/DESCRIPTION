@@ -7,5 +7,25 @@ Author: Who wrote it
 Maintainer: Who to complain to <yourfault@somewhere.net>
 Description: More about what it does (maybe more than one line)
 License: What license is it under?
-Depends: Rcpp (>= 0.10.2), RcppArmadillo (>= 0.3.6.2)
+Depends: Rcpp (>= 0.10.2), RcppArmadillo (>= 0.3.6.2), graphics
 LinkingTo: Rcpp, RcppArmadillo
+Collate: distributions.R
+         model.R
+         mixturemoments.R
+         modelmoments.R
+         nsmodelmoments.R
+         dmodelmoments.R
+         data.R
+         groupmoments.R
+         sdatamoments.R
+         csdatamoments.R
+         datamoments.R
+         cdatamoments.R
+         ddatamoments.R
+         prior.R
+         mcmc.R
+	 unass.R
+         mcmcstart.R
+         dataclass.R
+         likelihood.R
+         mcmcoutput.R

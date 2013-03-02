@@ -24,14 +24,14 @@
 	N <- nrow(y)
 	K <- ncol(mu)
 	y <- matrix(y, nrow = N, ncol = K)
+	mu <- matrix(mu, nrow = N, ncol = K, byrow = TRUE)
+	sigma <- matrix(sigma, nrow = N, ncol = K, byrow = TRUE)
+	df <- matrix(df, nrow = N, ncol = K, byrow = TRUE)
 
-	err <- t(apply(y, 1, "-", mu))
-	err <- t(apply(err^2, 1, "/", sigma))
-	err <- t(apply(err, 1, "/", df))
-	err <- t(apply(log(1 + err), 1, "*", (df + 1)/2))
+	err <- (y - mu)^2/sigma
+
 	
-	loglik <- lgamma((df + 1)/2) - lgamma(df/2) - .5 * (log(df * pi) + log(sigma))
-	loglik <- t(apply(-err, 1, "+", loglik))
+	loglik <- lgamma((df + 1)/2) - lgamma(df/2) - .5 * (log(df * pi) + log(sigma)) - (df + 1)/2 * log(1 + err/df)
 
 	if(K == 1) {
 		max.lik <- loglik
@@ -95,13 +95,7 @@
 	nst <- nrow(T)
 	
 	y <- matrix(y, nrow = N, ncol = K)
-
-	if(nst == 1) {
-		T <- matrix(T, nrow = N, ncol = K)
-	}	
-	else {
-		T <- t(apply(matrix(1, nrow = N, ncol = K), 1, "*", T))
-	}
+	T <- matrix(T, nrow = N, ncol = K)
 	
 	loglik <- lgamma(T + 1) - lgamma(T - y + 1) - lgamma(y + 1)
 	loglik <- loglik + t((apply(y, 1, "*", log(p)))) + t((apply(T - y, 1, "*", log(1 - p))))
@@ -124,7 +118,7 @@
 
 	for(k in 1:K) {
 		eps <- t(apply(y, 1, "-",  t(matrix(mu[,k]))))
-		loglik[, k] <- loglik1 + .5 * logdet[k] - .5 * apply(eps %*% sigmainv[,,1] * eps, 1, sum)		
+		loglik[, k] <- loglik1 + .5 * logdet[k] - .5 * apply(eps %*% sigmainv[,,k] * eps, 1, sum)		
 	}
 
 	maxlik <- t(apply(loglik, 1, max))
@@ -143,8 +137,10 @@
 	loglik <- matrix(0, nrow = N, ncol = K)
 	
 	for(k in 1:K) {
-		eps <- t(apply(y, 1, "-", t(matrix(mu[,k]))))
-		err <- apply(eps %*% sigmainv[,,k] * eps, 1, sum)
+		mum <- matrix(mu[,k], nrow = N, ncol = r, byrow = TRUE)
+		err <- y - mum
+		err <- err %*% sigmainv[,,k] * err
+		err <- apply(err, 1, sum)
 		loglik[, k] <- lgamma((df[k] + r)/2) - lgamma(df[k]/2) + .5 * logdet[k] - .5 * r * log(df[k] * pi) 
 	        loglik[, k] <- loglik[, k] - ((df[k] + r)/2) * log(1 + err/df[k])
 	}		

@@ -13,6 +13,11 @@ setClass("dataclass",
 )
 
 "dataclass" <- function(data, model, simS = FALSE) {
+
+		if(model@indicfix) {
+			cat("[Error] dataclass is not supposed to give back any values if allocations are given.\n")
+			return(FALSE)
+		}
 		## 'simS' for simulating S ##
 		has.exposures <- !all(is.na(data@exp)) ## (exposures) can only be true for poisson
 		has.T <- !all(is.na(data@T)) ## (repetitions) can only be true for binomial
@@ -83,7 +88,7 @@ setClass("dataclass",
 		
 		## binomial mixtures ##
 		else if(dist == "binomial") {
-			lik.list <- likelihood.binomial(datam, Ti, model@p)					
+			lik.list <- likelihood.binomial(datam, Ti, model@par$p)					
 		}
 
 		## multivariate normal mixtures ##
@@ -213,6 +218,22 @@ setClass("dataclass",
 	
 }
 
+setMethod("show", "dataclass", function(object) {
+					has.loglikcd <- !all(is.na(object@loglikcd))
+					has.postS <- !all(is.na(object@postS))
+					cat("Dataclass object\n")
+					cat("	logpy		:", paste(dim(object@logpy), collapse = "x"), "\n")
+					cat("	prob		:", paste(dim(object@prob), collapse = "x"), "\n")
+					cat("	mixlik		:", object@mixlik, "\n")
+					cat("	entropy		:", object@entropy, "\n")
+					if(has.loglikcd) {
+						cat("	loglikcd	:", paste(dim(object@loglikcd), collapse = "x"), "\n")	
+					}
+					if(has.postS) {
+						cat("	postS		:", object@postS, "\n")
+					}
+				}
+)
 ## Getters ##
 setGeneric("getLogPY", function(.Object) standardGeneric("getLogPY"))
 setMethod("getLogPY", "dataclass", function(.Object) {

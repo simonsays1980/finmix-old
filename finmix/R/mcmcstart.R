@@ -51,8 +51,8 @@
 
 	## check if weights have been already initialized in case of mcmc@startpar == TRUE ##	
 	if(K > 1) {
-		if(model@indicmod) {
-			if(mcmc@starpar && is.na(model@weight)) {
+		if(model@indicmod == "multinomial") {
+			if(mcmc@startpar && is.na(model@weight)) {
 				model@weight <- matrix(1/K, nrow = 1, ncol = K)
 			}
 		}
@@ -84,7 +84,8 @@
 					pm <- array(pm, dim = c(1, K))
 				}
 				else { ## K > 1
-					pm <- mean(datam, na.rm) * exp(runif(K))
+					pm <- mean(datam, na.rm = TRUE) * exp(runif(K))
+					pm <- matrix(pm, nrow = 1, ncol = K)
 					pm <- apply(pm, 2, max, 0.1)
 					pm <- array(pm, dim = c(1, K))
 				}
@@ -97,10 +98,10 @@
 	else if(dist == "exponential") {
 		if(K == 1) {
 			pm <- 1/mean(datam, na.rm = TRUE)
-			pm <- array(pm, dim = c(1, K))
+			pm <- matrix(pm, nrow = 1, ncol = K)
 		}	
 		else { ## K > 1
-			pm <- exp(runif(K))/mean(datam, na.rm = TRUE)
+			pm <- matrix(exp(runif(K))/mean(datam, na.rm = TRUE), nrow = 1, ncol = K)
 		}
 		model@par <- list(lambda = pm)
 	}
@@ -110,14 +111,14 @@
 		if(K == 1) {
 			pm <- mean(datam, na.rm = TRUE)/model@par$n
 			pm <- min(max(pm, 0.1),0.9)
-			pm <- array(pm, dim = c(1, K))
+			pm <- matrix(pm, nrow = 1, ncol = K)
 		}
 		else { ## K > 1
-			pm <- mean(datam, na.rm = TRUE)/model@par$n * exp(runif(K))
+			pm <- mean(datam, na.rm = TRUE)/data@T * exp(runif(K))
 			pm <- min(max(pm, 0.1), 0.9)
-			pm <- array(pm, dim = c(1, K))
+			pm <- matrix(pm, nrow = 1, ncol = K)
 		}
-		model@par <- list(p = pm, n = model@par$n)
+		model@par <- list(p = pm)
 	}
 
 	## univariate normal or student mixtures ##
@@ -143,11 +144,11 @@
 		if(start.mu) {
 			if(K == 1) {
 				pm <- mean(datam, na.rm = TRUE) 
-				pm <- array(pm, dim = c(1, K))
+				pm <- matrix(pm, nrow = 1, ncol = K)
 			}
 			else { ## K > 1
 				pm <- mean(datam, na.rm = TRUE) + sd(datam, na.rm = TRUE) * runif(K)
-				pm <- array(pm, dim = c(1, K))
+				pm <- matrix(pm, nrow = 1, ncol = K)
 			}
 			if(start.sigma) {
 				model@par <- list(mu = pm)
@@ -160,7 +161,7 @@
 		if(start.sigma) {
 		
 			pm <- sd(datam, na.rm = TRUE)
-			pm <- array(pm, dim = c(1, K))
+			pm <- matrix(pm, nrow = 1, ncol = K)
 			model@par <- list(model@par, sigma = pm)
 		}
 	}
@@ -219,7 +220,7 @@
 	## poisson mixtures ##
 	if(dist == "poisson" || dist == "exponential") {
 		if(!has.S && K > 1) { ## could possibly produce empty components 
-			data@S <- kmeans(datam^.5, centers = K, nstart = K)$cluster
+			data@S <- matrix(kmeans(datam^.5, centers = K, nstart = K)$cluster)
 		}
 	}
 
@@ -228,7 +229,7 @@
 		if(!has.S && K > 1) {
 			if((max(datam) - min(datam)) > 2 * K) {
 				## use k-means to determine a starting classification
-				data@S <- kmeans(datam^.5, cemters = K, nstart = K)$cluster
+				data@S <- kmeans(datam^.5, centers = K, nstart = K)$cluster
 			}
 			else {
 				## random classification
@@ -319,5 +320,7 @@
 		}
 	
 	}
+	olist <- list(data = data, model = model, mcmc = mcmc)
+	return(olist)
 }
 

@@ -7,13 +7,13 @@ setClass("mcmc",
 	storepost = "logical",
 	ranperm = "logical"),
 	validity = function(object) {
-		if(object@burnin < 0)
+		if(object@burnin < as.integer(0))
 			return("[Error] Number of Burn-In draws 'burnin' is negative.")
-		if(object@M < 0)
+		if(object@M < as.integer(0))
 			return("[Error] Number of draws 'M' is negative.")
-		if(object@M == 0)
+		if(object@M == as.integer(0))
 			return("[Error] Number of draws 'M' is zero.")
-		if(object@storeS < 0)
+		if(object@storeS < as.integer(0))
 			return("[Error] Number of draws of S to store 'storeS' is negative.")
 		## else: OK
 		TRUE
@@ -22,12 +22,23 @@ setClass("mcmc",
 "mcmc" <- function(burnin. = 0, M. = 5000, startpar. = FALSE, storeS. = 1000, storepost. = TRUE,
 			ranperm. = TRUE) {
 		
-		mcmc <- new("mcmc", burnin = burnin., M = M., startpar = startpar., storeS = storeS.,
-				storepost = storepost., ranperm = ranperm.)
+		mcmc <- new("mcmc", burnin = as.integer(burnin.), M = as.integer(M.), startpar = startpar., 
+				storeS = as.integer(storeS.), storepost = storepost., ranperm = ranperm.)
 
 		return(mcmc)
 }
 
+setMethod("show", "mcmc", function(object) {
+					cat("Object 'mcmc'\n")
+					cat("	type		:", paste(class(object)), "\n")
+					cat("	burnin		:", object@burnin, "\n")
+					cat("	M		:", object@M, "\n")
+					cat("	startpar	:", object@startpar, "\n")
+					cat("	storeS		:", object@storeS, "\n")
+					cat("	storepost	:", object@storepost, "\n")
+					cat("	ranperm		:", object@ranperm, "\n")
+				}
+)
 ## Getters ##
 setGeneric("getBurnin", function(.Object) standardGeneric("getBurnin"))
 setMethod("getBurnin", "mcmc", function(.Object) {

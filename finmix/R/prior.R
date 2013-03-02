@@ -42,7 +42,7 @@ setClass("prior",
 			}
 			else {
 				## check if object is valid ##
-				if(!(class(vararvgin == "prior"))) 
+				if(!(class(varargin) == "prior")) 
 					return("[Error] 'varargin' must be of class 'prior'.")
 				validObject(varargin)
 				hier <- varargin@hier
@@ -92,7 +92,7 @@ setClass("prior",
 			type <- "condconjugate"
 			a0 <- 0.1
 			be <- mean(datam) * a0
-			par <- list(a <- array(a0, dim = c(1, K)), 
+			par <- list(a = array(a0, dim = c(1, K)), 
 				b = array(be, dim = c(1, K))) 
 		}
 		## normal or student-t mixtures ##
@@ -130,7 +130,7 @@ setClass("prior",
 				max <- apply(datam, 2, max, na.rm = TRUE)
 				min <- apply(datam, 2, min, na.rm = TRUE)
 				mean <- (max + min) * 0.5
-				cov <- (max - min)^2
+				cov <- diag((max - min)^2)
 			}
 			else {
 				## row vectors: dimension 1 x r
@@ -275,9 +275,9 @@ setClass("prior",
 			df.b0 <- 2
 			df.mean <- 10
 			df.d <- (df.mean - df.trans) * (df.b0 - 1)	
-			df <- list(type = df.type, trans = df.trans, a0 = df.a0, b0 = d)
-			par <- c(par, df)
-			
+			df <- list(type = df.type, trans = df.trans, a0 = df.a0, b0 = df.b0, d = df.d)
+			par <- list(par, df = df)
+
 		} 
 
 		## prior weights ##
@@ -296,12 +296,12 @@ setClass("prior",
 	
 setMethod("show", "prior", function(object) {
 					cat("Object 'prior'\n")
-					cat("	Class		: ", class(object), "\n")
-					cat("	Hier		: ", getHier(object), "\n")
-					cat("	Type		: ", getType(object), "\n")
-					cat("	Par		:  List of ", length(names(getPar(object))), "\n")
+					cat("	type		:", class(object), "\n")
+					cat("	hier		:", getHier(object), "\n")
+					cat("	type (prior)	:", getType(object), "\n")
+					cat("	par		: List of ", length(names(getPar(object))), "\n")
 					if(!all(is.na(object@weight))) {
-						cat("	Weight		:  [", format(getWeight(object)[1,], trim = TRUE),"]\n")
+						cat("	weight		:", paste(dim(object@weight), collapse = "x"),"\n")
 					}
 				}
 )

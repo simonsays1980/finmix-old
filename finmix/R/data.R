@@ -1,6 +1,7 @@
 setClass("data", 
 	representation (
 		y = "matrix",
+		N = "numeric",
 		r = "numeric",
 		S = "matrix",
 		bycolumn = "logical",
@@ -27,12 +28,37 @@ setClass("data",
 )
 
 ## Constructor for the data class ##
-"data" <- function(y. = matrix(), r. = 1, S. = matrix(), bycolumn. = TRUE, name. = character(), 
+"data" <- function(y. = matrix(), N., r., S. = matrix(), bycolumn. = TRUE, name. = character(), 
 			type. = "continuous", sim. = FALSE, exp. = matrix(), T. = matrix()) {
 		storage.mode(T.) <- "integer"
 		storage.mode(exp.) <- "integer"
+		
+		has.data <- !all(is.na(y.))
+		if(missing(N.)) {
+			if(bycolumn. && has.data) {
+				N. <- nrow(y.)
+			}
+			if(!bycolumn. && has.data) {
+				N. <- col(y.)
+			}
+			else {
+				N. <- 1
+			}
+		}
+		if(missing(r.)) {
+			if(bycolumn. && has.data) {
+                                r. <- ncol(y.)
+                        }
+                        if(!bycolumn. && has.data) {
+                                r. <- nrow(y.)
+                        }
+                        else {
+                                r. <- 1
+                        }
+		}
 
-		data <- new("data", y = y., r = r., S = S., bycolumn = bycolumn., name = name., type = type.
+		
+		data <- new("data", y = y., N = N., r = r., S = S., bycolumn = bycolumn., name = name., type = type.
 				, sim = sim., exp = exp., T = T.)
 		
 		return(data)
@@ -205,24 +231,24 @@ setMethod("plot", "data", function(x, ..., deparse.level=1) {
 					name <- ifelse(length(object@name) == 0, "", object@name)
 					
 					cat("Data object '", name, "'\n")
-					cat("	Type		:", class(object), "\n")
-					cat("	Data		:", paste(dim(object@y), collapse="x"), "\n")
+					cat("	type		:", class(object), "\n")
+					cat("	y		:", paste(dim(object@y), collapse="x"), "\n")
+					cat("	N		:", object@N, "\n")
+					cat("	r 		:", object@r, "\n")
 					if(has.S) {
 						classification <- paste(dim(object@S), collapse="x")
-						cat("	Classifications	:", classification, "\n")
+						cat("	S		:", classification, "\n")
 					}
-					order <- ifelse(object@bycolumn, "by column", "by row")
-					cat("	Order		:", order, "\n")
-					cat("	Datatype	:", object@type, "\n")
-					cat("	Simulated	:", object@sim, "\n")
-					cat("	R (features)	:", object@r, "\n")
+					cat("	bycolumn	:", object@bycolumn, "\n")
+					cat("	type (data)	:", object@type, "\n")
+					cat("	sim		:", object@sim, "\n")
 					if(has.exp) {
 						exposures <- paste(dim(object@exp), collapse="x")
-						cat("	Exposures	:", exposures, "\n")
+						cat("	exp		:", exposures, "\n")
 					}
 					if(has.T) {
 						repetitions <- paste(dim(object@T), collapse="x")
-						cat("	Repetitions	:", repetitions, "\n")
+						cat("	T		:", repetitions, "\n")
 					}
 				}
 
@@ -233,7 +259,14 @@ setGeneric("getY", function(.Object) standardGeneric("getY"))
 setMethod("getY", "data", function(.Object) {
 				return(.Object@y)
 			}
-) 
+)
+ 
+setGeneric("getN", function(.Object) standardGeneric("getN"))
+setMethod("getN", "data", function(.Object) {
+				return(.Object@N)
+			}
+)
+
 ## Already set as generic in 'model.R' ##
 setMethod("getR", "data", function(.Object) {
 				return(.Object@r)
@@ -289,15 +322,26 @@ setReplaceMethod("setY", "data", function(.Object, value) {
 						.Object@y <- value
 					}
 					if(.Object@bycolumn){
+						.Object@N <- nrow(value)
 						.Object@r <- ncol(value)
 					}
 					else {
+						.Object@N <- ncol(value)
 						.Object@r <- nrow(value)
 					}
 					validObject(.Object)
 					return(.Object)
 				}
 )
+
+setGeneric("setN<-", function(.Object, value) standardGeneric("setN<-"))
+setReplaceMethod("setN", "data", function(.Object, value) {
+					.Object@N <- value
+					validObject(.Object)
+					return(.Object)
+				}
+)
+
 ## Already set as generic in 'model.R' ##
 setReplaceMethod("setR", "data", function(.Object, value) {
 					.Object@r <- value
