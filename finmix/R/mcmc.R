@@ -74,14 +74,14 @@ setMethod("getRanperm", "mcmc", function(.Object) {
 ## Setters ##
 setGeneric("setBurnin<-", function(.Object, value) standardGeneric("setBurnin<-"))
 setReplaceMethod("setBurnin", "mcmc", function(.Object, value) {
-						.Object@burnin <- value
+						.Object@burnin <- as.integer(value)
 						validObject(.Object)
 						return(.Object)
 					}
 )
 setGeneric("setM<-", function(.Object, value) standardGeneric("setM<-"))
 setReplaceMethod("setM", "mcmc", function(.Object, value) {
-						.Object@M <- value
+						.Object@M <- as.integer(value)
 						validObject(.Object)
 						return(.Object)
 					}
@@ -95,7 +95,7 @@ setReplaceMethod("setStartpar", "mcmc", function(.Object, value) {
 )
 setGeneric("setStoreS<-", function(.Object, value) standardGeneric("setStoreS<-"))
 setReplaceMethod("setStoreS", "mcmc", function(.Object, value) {
-						.Object@storeS <- value
+						.Object@storeS <- as.integer(value)
 						validObject(.Object)
 						return(.Object)
 					}

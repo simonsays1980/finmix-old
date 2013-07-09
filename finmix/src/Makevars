@@ -1,8 +1,12 @@
 ## Use the R_HOME indirection to support installations of multiple R version
 PKG_LIBS = `$(R_HOME)/bin/Rscript -e "Rcpp:::LdFlags()"` $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
-PKG_CPPFLAGS = -g -O1 -Wall -pedantic
+PKG_CPPFLAGS = -g -O0 -Wall -pedantic 
+PKG_CXXFLAGS= -g -W -O0 -Wall -pedantic -std=c++0x
 
-OBJECTS = FinmixModel.o FinmixPrior.o FinmixMCMC.o mcmc_poisson.o
+OBJECTS = FinmixData.o FinmixModel.o FinmixPrior.o FinmixMCMC.o \
+	PriorPoissonFix.o ParPoissonFix.o LogPoissonFix.o ParOutPoisson.o \
+	PostOutPoissonFix.o PriorPoissonInd.o LogPoissonInd.o ParPoissonInd.o \
+	PostOutPoissonInd.o mcmc_poisson.o
 
 all: before ${SHLIB} after
 

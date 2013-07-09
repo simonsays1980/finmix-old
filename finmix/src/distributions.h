@@ -5,12 +5,15 @@
  * package: finmix
  * created: 02/01/2013
  */
+#ifndef DISTRIBUTIONS_H
+#define DISTRIBUTIONS_H
 
 #include <RcppArmadillo.h>
 #include <algorithm>		// for use of C++ Standard Library math functions
 #include <R.h>
 #include <Rmath.h>              // for use of R internal C functions
 
+inline
 arma::rowvec rdirichlet (const arma::rowvec& dpar) {
 	/**
 	 * vector is object of type Col as column-wise
@@ -19,22 +22,21 @@ arma::rowvec rdirichlet (const arma::rowvec& dpar) {
 	const unsigned int K = dpar.n_elem;
 	arma::rowvec par_out(K);
 	double sum = 0.0;
-	
 	GetRNGstate();
 
 	for(unsigned int k = 0; k < K; ++k) {
 		par_out(k) = R::rgamma(dpar(k), 1);
 		sum += par_out(k); 
 	}
-	
-	PutRNGstate();
-		
+
+	PutRNGstate();	
 	par_out = par_out/sum;
 
 	return par_out;
 }
 
-arma::rowvec rgammaprod (const arma::vec& par_a, const arma::vec& par_b) {
+inline
+arma::rowvec rgammaprod (const arma::rowvec& par_a, const arma::rowvec& par_b) {
 	/** 
 	 * vector is object of type Col as column-wise 
 	 * orientation is usual in armadillo 
@@ -54,3 +56,4 @@ arma::rowvec rgammaprod (const arma::vec& par_a, const arma::vec& par_b) {
 
 	return par_out;
 }
+#endif

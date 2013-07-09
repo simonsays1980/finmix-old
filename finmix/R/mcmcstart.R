@@ -9,6 +9,7 @@
 	}
 	dist <- model@dist
 	K <- model@K
+	N <- NROW(data@y)
 	
 	## check if data object contains data ##
 	has.data <- !all(is.na(data@y))
@@ -18,15 +19,41 @@
 			datam <- data@y
 			r <- data@r
 			if(has.exposures) {
-				exp <- data@exp
+				if(nrow(data@exp) != N && nrow(data@exp) != 1) {
+					return("[Error] number of exposures
+'exp' in 'data' does not match number of observations in 'y'.")
+				}
+				else if(nrow(data@exp) == N) {
+					exp <- data@exp
+				}
+				else {
+					exp <- matrix(data@exp[1, 1], nrow = N,
+						ncol = 1)
+				}
+			}
+			else {
+				exp <- matrix(1, nrow = N, ncol = 1)
 			}
 		}
 		else {
 			datam <- t(data@y)
 			r <- data@r
 			if(has.exposures) {
-				exp <- t(data@exp)
+				if(ncol(data@exp) != N && ncol(data@exp) != 1) {
+					return("[Error] number of exposures in
+'exp' in 'data' does not match number of observations in 'y'.")
+				}
+				else if (ncol(data@exp) == N) { 
+					exp <- t(data@exp)
+				}
+				else {
+					exp <- matrix(data@exp[1, 1], nrow = N,
+						ncol = 1)
+				}
 			}	
+			else {
+				exp <- matrix(1, nrow = N, ncol = 1)
+			}
 		}
 	}
 	else {
@@ -65,7 +92,7 @@
 	
 	## poisson mixtures ##
 	if(dist == "poisson") {
-		if(!has.par) {
+		if(mcmc@startpar && !has.par) {
 			if(has.exposures) {
 				if(K == 1) { ## WARNING: exposures are N x 1!! Change here something in the code
 					pm <- max(mean(datam/exp, na.rm = TRUE), 0.1)
@@ -73,7 +100,7 @@
 				}
 				else { ## K > 1
 					pm <- (mean(datam/exp, na.rm = TRUE)) * exp(runif(K))
-					pm <- apply(pm, 2, max, 0.1)
+					pm <- pmax(pm, 0.1)
 					pm <- array(pm, dim = c(1, K)) 
 				}
 				model@par <- list(lambda = pm)
@@ -96,120 +123,128 @@
 
 	## exponential mixtures ##
 	else if(dist == "exponential") {
-		if(K == 1) {
-			pm <- 1/mean(datam, na.rm = TRUE)
-			pm <- matrix(pm, nrow = 1, ncol = K)
-		}	
-		else { ## K > 1
-			pm <- matrix(exp(runif(K))/mean(datam, na.rm = TRUE), nrow = 1, ncol = K)
+		if(mcmc@startpar && !has.par) {
+			if(K == 1) {
+				pm <- 1/mean(datam, na.rm = TRUE)
+				pm <- matrix(pm, nrow = 1, ncol = K)
+			}		
+			else { ## K > 1
+				pm <- matrix(exp(runif(K))/mean(datam, na.rm = TRUE), nrow = 1, ncol = K)
+			}
+			model@par <- list(lambda = pm)
 		}
-		model@par <- list(lambda = pm)
 	}
 	
 	## binomial mixtures ##
 	else if(dist == "binomial") {
-		if(K == 1) {
-			pm <- mean(datam, na.rm = TRUE)/model@par$n
-			pm <- min(max(pm, 0.1),0.9)
-			pm <- matrix(pm, nrow = 1, ncol = K)
+		if(mcmc@startpart && !has.par) {
+			if(K == 1) {
+				pm <- mean(datam, na.rm = TRUE)/model@par$n
+				pm <- min(max(pm, 0.1),0.9)
+				pm <- matrix(pm, nrow = 1, ncol = K)
+			}
+			else { ## K > 1
+				pm <- mean(datam, na.rm = TRUE)/data@T * exp(runif(K))
+				pm <- min(max(pm, 0.1), 0.9)
+				pm <- matrix(pm, nrow = 1, ncol = K)
+			}
+			model@par <- list(p = pm)
 		}
-		else { ## K > 1
-			pm <- mean(datam, na.rm = TRUE)/data@T * exp(runif(K))
-			pm <- min(max(pm, 0.1), 0.9)
-			pm <- matrix(pm, nrow = 1, ncol = K)
-		}
-		model@par <- list(p = pm)
 	}
 
 	## univariate normal or student mixtures ##
 	else if(dist == "normal" || dist == "student") {
-		start.mu <- FALSE
-		start.sigma <- FALSE
+		if(mcmc@startpar) {
+			start.mu <- FALSE
+			start.sigma <- FALSE
 		
-		if(!has.par) {
-			start.mu <- TRUE
-			start.sigma <- TRUE
-		}
-		else { ## has already parameters 
-			has.mu <- "mu" %in% names(model@par)
-			has.sigma <- "sigma" %in% names(model@par)
-			if(!has.mu) {
+			if(!has.par) {
 				start.mu <- TRUE
-			}
-			if(!has.sigma) {
 				start.sigma <- TRUE
 			}
-		}
+			else { ## has already parameters 
+				has.mu <- "mu" %in% names(model@par)
+				has.sigma <- "sigma" %in% names(model@par)
+				if(!has.mu) {
+					start.mu <- TRUE
+				}
+				if(!has.sigma) {
+					start.sigma <- TRUE
+				}
+			}
 		
-		if(start.mu) {
-			if(K == 1) {
-				pm <- mean(datam, na.rm = TRUE) 
-				pm <- matrix(pm, nrow = 1, ncol = K)
+			if(start.mu) {
+				if(K == 1) {
+					pm <- mean(datam, na.rm = TRUE) 
+					pm <- matrix(pm, nrow = 1, ncol = K)
+				}
+				else { ## K > 1
+					pm <- mean(datam, na.rm = TRUE) + sd(datam, na.rm = TRUE) * runif(K)
+					pm <- matrix(pm, nrow = 1, ncol = K)
+				}
+				if(start.sigma) {
+					model@par <- list(mu = pm)
+				}
+				else {
+					model@par <- list(mu = pm, model@par)
+				}
 			}
-			else { ## K > 1
-				pm <- mean(datam, na.rm = TRUE) + sd(datam, na.rm = TRUE) * runif(K)
-				pm <- matrix(pm, nrow = 1, ncol = K)
-			}
+			
 			if(start.sigma) {
-				model@par <- list(mu = pm)
+			
+				pm <- sd(datam, na.rm = TRUE)
+				pm <- matrix(pm, nrow = 1, ncol = K)
+				model@par <- list(model@par, sigma = pm)
 			}
-			else {
-				model@par <- list(mu = pm, model@par)
-			}
-		}
-		
-		if(start.sigma) {
-		
-			pm <- sd(datam, na.rm = TRUE)
-			pm <- matrix(pm, nrow = 1, ncol = K)
-			model@par <- list(model@par, sigma = pm)
 		}
 	}
 
 	## multivariate normal mixtures ##
 	else if(dist == "normult") {
-		start.mu <- FALSE
-		start.sigma <- FALSE
+		if(mcmc@startpar) {
+			start.mu <- FALSE
+			start.sigma <- FALSE
 		
-		if(!has.par) {
-			start.mu <- TRUE
-			start.sigma <- TRUE
-		}
-		else {
-			has.mu <- "mu" %in% names(model@par)
-			has.sigma <- "sigma" %in% names(model@par)
-			if(!has.mu) {
+			if(!has.par) {
 				start.mu <- TRUE
-			}
-			if(!has.sigma) {
 				start.sigma <- TRUE
 			}
-		}
-		
-		cov.m <- cov(datam)
-
-		if(start.mu) {
-			if(K == 1) {
-				pm.mu <- apply(datam, 2, mean, na.rm = TRUE)
-				pm.mu <- array(t(pm.mu), dim = c(1, K))
+			else {
+				has.mu <- "mu" %in% names(model@par)
+				has.sigma <- "sigma" %in% names(model@par)
+				if(!has.mu) {
+					start.mu <- TRUE
+				}
+				if(!has.sigma) {
+					start.sigma <- TRUE
+				}
 			}
-			else { ## K > 1
-				mean <- apply(datam, 2, mean, na.rm = TRUE)
-				pm.mu <- matrix(0, nrow = r, ncol = K)
-				for(i in 1:K) {
-					pm.mu[,i] = matrix(mean) + chol(cov.m) %*% matrix(runif(K))
+			
+			cov.m <- cov(datam)
+	
+			if(start.mu) {
+				if(K == 1) {
+					pm.mu <- apply(datam, 2, mean, na.rm = TRUE)
+					pm.mu <- array(t(pm.mu), dim = c(1, K))
+				}
+				else { ## K > 1
+					mean <- apply(datam, 2, mean, na.rm = TRUE)
+					pm.mu <- matrix(0, nrow = r, ncol = K)
+					for(i in 1:K) {
+						pm.mu[,i] = matrix(mean) + chol(cov.m) %*% matrix(runif(K))
+					}
+				}
+				if(start.sigma) {
+					model@par <- list(mu = pm.mu)
+				}
+				else {
+					model@par <- list(mu = pm.mu, model@par)
 				}
 			}
 			if(start.sigma) {
-				model@par <- list(mu = pm.mu)
+				pm.sigma <- array(cov.m, dim = c(r, r, K))
+				model@par <- list(model@par, sigma = pm.sigma)
 			}
-			else {
-				model@par <- list(mu = pm.mu, model@par)
-			}
-		}
-		if(start.sigma) {
-			pm.sigma <- array(cov.m, dim = c(r, r, K))
-			model@par <- list(model@par, sigma = pm.sigma)
 		}
 	}	
 
@@ -219,14 +254,14 @@
 
 	## poisson mixtures ##
 	if(dist == "poisson" || dist == "exponential") {
-		if(!has.S && K > 1) { ## could possibly produce empty components 
+		if(!mcmc@startpar && !has.S && K > 1) { ## could possibly produce empty components 
 			data@S <- matrix(kmeans(datam^.5, centers = K, nstart = K)$cluster)
 		}
 	}
 
 	## binomial mixtures ##
 	else if(dist == "binomial") {
-		if(!has.S && K > 1) {
+		if(!mcmc@startpar && !has.S && K > 1) {
 			if((max(datam) - min(datam)) > 2 * K) {
 				## use k-means to determine a starting classification
 				data@S <- kmeans(datam^.5, centers = K, nstart = K)$cluster
@@ -240,82 +275,86 @@
 
 	## univariate normal or student mixtures ##
 	else if(dist == "normal" || dist == "student") {
-		start.mu <- TRUE
+		if(!mcmc@startpar) {
+			start.mu <- TRUE
 	
-		## check if model has parameter mu specified ##
-		if(has.par) {
-			has.mu <- "mu" %in% names(model@par)
-			if(has.mu) {
-				start.mu <- FALSE
+			## check if model has parameter mu specified ##
+			if(has.par) {
+				has.mu <- "mu" %in% names(model@par)
+				if(has.mu) {
+					start.mu <- FALSE
+				}
 			}
-		}
-	
-		if(start.mu && K == 1) {
-			pm.mu <- mean(datam, na.rm = TRUE)
-			pm.mu <- array(na.rm, dim = c(1, K))
-			model@par <- list(mu = pm.mu)
-		}
-	
-		else if(has.S && K > 1 && start.mu) {
-			if(data@bycolumn) {
-				classm <- data@S
+		
+			if(start.mu && K == 1) {
+				pm.mu <- mean(datam, na.rm = TRUE)
+				pm.mu <- array(na.rm, dim = c(1, K))
+				model@par <- list(mu = pm.mu)
 			}
-			else {
-				classm <- t(data@S)
+		
+			else if(has.S && K > 1 && start.mu) {
+				if(data@bycolumn) {
+					classm <- data@S
+				}
+				else {
+					classm <- t(data@S)
+				}
+				pm.mu <- array(0, dim = c(1, K))
+				for(i in 1:K) {
+					pm.mu[i] <- mean(datam[classm == i], na.rm = TRUE) 
+				} 
+				
 			}
-			pm.mu <- array(0, dim = c(1, K))
-			for(i in 1:K) {
-				pm.mu[i] <- mean(datam[classm == i], na.rm = TRUE) 
-			} 
-			
-		}
-	
-		else if(!has.S && K > 1) {
-			k.means <- kmeans(datam^.5, centers = K, nstart = K)$cluster
-			data@S <- k.means$cluster
-			if(start.mu) {
-				pm.mu <- k.means$centers
-				model@par <- list(mu = array(pm.mu, dim = c(1, K)))
+		
+			else if(!has.S && K > 1) {
+				k.means <- kmeans(datam^.5, centers = K, nstart = K)$cluster
+				data@S <- k.means$cluster
+				if(start.mu) {
+					pm.mu <- k.means$centers
+					model@par <- list(mu = array(pm.mu, dim = c(1, K)))
+				}
 			}
 		}
 	}
 	
 	## multivariate normal or student-t mixtures ##
 	else if(dist == "normult" || dist == "studmult") {
-		start.mu <- TRUE
-
-		if(has.par) {
-			has.mu <- "mu" %in% names(model@par)
-			if(!has.mu) {
-				start.mu <- FALSE
-			}
-		}	
-		if(start.mu && K == 1) {
-			pm.mu <- apply(datam, 2, mean, na.rm = TRUE)
-			pm.mu <- array(na.rm, dim = c(r, K))
-			model@par <- list(mu = pm.mu)
-		}
+		if(!mcmc@startpar) {
+			start.mu <- TRUE
 	
-		else if(has.S && K > 1 && start.mu) {
-			if(data@bycolumn) {
-				classm <- data@S
+			if(has.par) {
+				has.mu <- "mu" %in% names(model@par)
+				if(!has.mu) {
+					start.mu <- FALSE
+				}
+			}	
+			if(start.mu && K == 1) {
+				pm.mu <- apply(datam, 2, mean, na.rm = TRUE)
+				pm.mu <- array(na.rm, dim = c(r, K))
+				model@par <- list(mu = pm.mu)
 			}
-			else {
-				classm <- t(data@S)
+		
+			else if(has.S && K > 1 && start.mu) {
+				if(data@bycolumn) {
+					classm <- data@S
+				}
+				else {
+					classm <- t(data@S)
+				}
+				pm.mu <- array(0, dim = c(r, K))
+				for(i in 1:K) {
+					pm.mu[i] <- array(apply(datam[classm == i], 2, mean, na.rm = TRUE), dim = c(3, 1)) 
+				} 
+				
 			}
-			pm.mu <- array(0, dim = c(r, K))
-			for(i in 1:K) {
-				pm.mu[i] <- array(apply(datam[classm == i], 2, mean, na.rm = TRUE), dim = c(3, 1)) 
-			} 
-			
-		}
-	
-		else if(!has.S && K > 1) {
-			k.means <- kmeans(datam^.5, centers = K, nstart = K)$cluster
-			data@S <- k.means$cluster
-			if(start.mu) {
-				pm.mu <- k.means$centers
-				model@par <- list(mu = array(t(pm.mu), dim = c(r, K)))
+		
+			else if(!has.S && K > 1) {
+				k.means <- kmeans(datam^.5, centers = K, nstart = K)$cluster
+				data@S <- k.means$cluster
+				if(start.mu) {
+					pm.mu <- k.means$centers
+					model@par <- list(mu = array(t(pm.mu), dim = c(r, K)))
+				}
 			}
 		}
 	

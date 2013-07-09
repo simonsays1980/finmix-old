@@ -1,0 +1,114 @@
+RUNIT TEST PROTOCOL -- Tue Jul  9 11:51:28 2013 
+*********************************************** 
+Number of test functions: 87 
+Number of errors: 0 
+Number of failures: 0 
+
+ 
+1 Test Suite : 
+finmix unit testing - 87 test functions, 0 errors, 0 failures
+
+
+
+Details 
+*************************** 
+Test Suite: finmix unit testing 
+Test function regexp: ^test.+ 
+Test file regexp: ^runit.+\.[rR]$ 
+Involved directory: 
+/Users/simonzehnder/finmixcopy/finmix/tests/../inst/unitTests 
+--------------------------- 
+Test file: /Users/simonzehnder/finmixcopy/finmix/tests/../inst/unitTests/runit.mixturemcmc.poisson.R 
+test.FIX.1: (31 checks) ... OK (0.02 seconds)
+test.FIX.2: (32 checks) ... OK (0.01 seconds)
+test.FIX.3: (33 checks) ... OK (0.01 seconds)
+test.FIX.HIER.1: (36 checks) ... OK (0.01 seconds)
+test.FIX.HIER.2: (37 checks) ... OK (0.01 seconds)
+test.FIX.HIER.3: (38 checks) ... OK (0.01 seconds)
+test.FIX.HIER.POST.1: (48 checks) ... OK (0.01 seconds)
+test.FIX.HIER.POST.2: (53 checks) ... OK (0.01 seconds)
+test.FIX.HIER.POST.3: (58 checks) ... OK (0.01 seconds)
+test.FIX.POST.1: (43 checks) ... OK (0.01 seconds)
+test.FIX.POST.2: (48 checks) ... OK (0.01 seconds)
+test.FIX.POST.3: (53 checks) ... OK (0.01 seconds)
+test.IND.1: (31 checks) ... OK (0.01 seconds)
+test.IND.2: (60 checks) ... OK (0.01 seconds)
+test.IND.3: (65 checks) ... OK (0.02 seconds)
+test.IND.HIER.1: (36 checks) ... OK (0.01 seconds)
+test.IND.HIER.2: (65 checks) ... OK (0.01 seconds)
+test.IND.HIER.3: (65 checks) ... OK (0.01 seconds)
+test.IND.HIER.POST.1: (49 checks) ... OK (0.01 seconds)
+test.IND.HIER.POST.2: (88 checks) ... OK (0.02 seconds)
+test.IND.HIER.POST.3: (88 checks) ... OK (0.01 seconds)
+test.IND.POST.1: (43 checks) ... OK (0.01 seconds)
+test.IND.POST.2: (83 checks) ... OK (0.02 seconds)
+test.IND.POST.3: (83 checks) ... OK (0.01 seconds)
+--------------------------- 
+Test file: /Users/simonzehnder/finmixcopy/finmix/tests/../inst/unitTests/runit.mixturemcmc.poisson.ranperm.R 
+test.FIX.HIER.POST.RANPERM.1: (48 checks) ... OK (0.01 seconds)
+test.FIX.HIER.POST.RANPERM.2: (53 checks) ... OK (0.01 seconds)
+test.FIX.HIER.POST.RANPERM.3: (58 checks) ... OK (0.01 seconds)
+test.FIX.HIER.RANPERM.1: (36 checks) ... OK (0.01 seconds)
+test.FIX.HIER.RANPERM.2: (37 checks) ... OK (0.01 seconds)
+test.FIX.HIER.RANPERM.3: (38 checks) ... OK (0.01 seconds)
+test.FIX.POST.RANPERM.1: (43 checks) ... OK (0.01 seconds)
+test.FIX.POST.RANPERM.2: (48 checks) ... OK (0.01 seconds)
+test.FIX.POST.RANPERM.3: (53 checks) ... OK (0.01 seconds)
+test.FIX.RANPERM.1: (31 checks) ... OK (0.01 seconds)
+test.FIX.RANPERM.2: (32 checks) ... OK (0.01 seconds)
+test.FIX.RANPERM.3: (33 checks) ... OK (0.01 seconds)
+test.IND.HIER.POST.RANPERM.1: (49 checks) ... OK (0.01 seconds)
+test.IND.HIER.POST.RANPERM.2: (88 checks) ... OK (0.01 seconds)
+test.IND.HIER.POST.RANPERM.3: (88 checks) ... OK (0.02 seconds)
+test.IND.HIER.RANPERM.1: (36 checks) ... OK (0.01 seconds)
+test.IND.HIER.RANPERM.2: (65 checks) ... OK (0.02 seconds)
+test.IND.HIER.RANPERM.3: (65 checks) ... OK (0.02 seconds)
+test.IND.POST.RANPERM.1: (43 checks) ... OK (0.01 seconds)
+test.IND.POST.RANPERM.2: (83 checks) ... OK (0.02 seconds)
+test.IND.POST.RANPERM.3: (83 checks) ... OK (0.01 seconds)
+test.IND.RANPERM.1: (31 checks) ... OK (0.01 seconds)
+test.IND.RANPERM.2: (60 checks) ... OK (0.01 seconds)
+test.IND.RANPERM.3: (65 checks) ... OK (0.01 seconds)
+--------------------------- 
+Test file: /Users/simonzehnder/finmixcopy/finmix/tests/../inst/unitTests/runit.mixturemcmc.startpar.poisson.R 
+test.FIX.HIER.POST.STARTPAR.1: (48 checks) ... OK (0.01 seconds)
+test.FIX.HIER.POST.STARTPAR.2: (53 checks) ... OK (0.01 seconds)
+test.FIX.HIER.POST.STARTPAR.3: (58 checks) ... OK (0.01 seconds)
+test.FIX.POST.STARTPAR.1: (43 checks) ... OK (0.01 seconds)
+test.FIX.POST.STARTPAR.2: (48 checks) ... OK (0.01 seconds)
+test.FIX.POST.STARTPAR.3: (53 checks) ... OK (0.01 seconds)
+test.FIX.STARTPAR.1: (31 checks) ... OK (0.01 seconds)
+test.FIX.STARTPAR.2: (32 checks) ... OK (0.01 seconds)
+test.FIX.STARTPAR.3: (33 checks) ... OK (0.01 seconds)
+test.IND.HIER.POST.STARTPAR.1: (49 checks) ... OK (0.01 seconds)
+test.IND.HIER.POST.STARTPAR.2: (88 checks) ... OK (0.02 seconds)
+test.IND.HIER.POST.STARTPAR.3: (88 checks) ... OK (0.02 seconds)
+test.IND.HIER.STARTPAR.1: (36 checks) ... OK (0.01 seconds)
+test.IND.HIER.STARTPAR.2: (65 checks) ... OK (0.01 seconds)
+test.IND.HIER.STARTPAR.3: (65 checks) ... OK (0.01 seconds)
+test.IND.POST.1: (43 checks) ... OK (0.01 seconds)
+test.IND.POST.STARTPAR.2: (83 checks) ... OK (0.02 seconds)
+test.IND.POST.STARTPAR.3: (83 checks) ... OK (0.02 seconds)
+test.IND.STARTPAR.1: (31 checks) ... OK (0.01 seconds)
+test.IND.STARTPAR.2: (60 checks) ... OK (0.02 seconds)
+test.IND.STARTPAR.3: (65 checks) ... OK (0.02 seconds)
+--------------------------- 
+Test file: /Users/simonzehnder/finmixcopy/finmix/tests/../inst/unitTests/runit.mixturemcmc.startpar.poisson.ranperm.R 
+test.FIX.HIER.POST.STARTPAR.RANPERM.1: (48 checks) ... OK (0.01 seconds)
+test.FIX.HIER.POST.STARTPAR.RANPERM.2: (53 checks) ... OK (0.01 seconds)
+test.FIX.HIER.POST.STARTPAR.RANPERM.3: (58 checks) ... OK (0.01 seconds)
+test.FIX.POST.STARTPAR.RANPERM.1: (43 checks) ... OK (0.01 seconds)
+test.FIX.POST.STARTPAR.RANPERM.2: (48 checks) ... OK (0.01 seconds)
+test.FIX.POST.STARTPAR.RANPERM.3: (53 checks) ... OK (0.01 seconds)
+test.FIX.STARTPAR.RANPERM.1: (31 checks) ... OK (0.01 seconds)
+test.FIX.STARTPAR.RANPERM.2: (32 checks) ... OK (0.01 seconds)
+test.FIX.STARTPAR.RANPERM.3: (33 checks) ... OK (0.01 seconds)
+test.IND.HIER.POST.STARTPAR.RANPERM.1: (49 checks) ... OK (0.01 seconds)
+test.IND.HIER.POST.STARTPAR.RANPERM.2: (88 checks) ... OK (0.02 seconds)
+test.IND.HIER.POST.STARTPAR.RANPERM.3: (88 checks) ... OK (0.02 seconds)
+test.IND.POST.1: (43 checks) ... OK (0.01 seconds)
+test.IND.POST.STARTPAR.RANPERM.2: (83 checks) ... OK (0.02 seconds)
+test.IND.POST.STARTPAR.RANPERM.3: (83 checks) ... OK (0.02 seconds)
+test.IND.STARTPAR.RANPERM.1: (36 checks) ... OK (0.01 seconds)
+test.IND.STARTPAR.RANPERM.2: (65 checks) ... OK (0.02 seconds)
+test.IND.STARTPAR.RANPERM.3: (65 checks) ... OK (0.02 seconds)

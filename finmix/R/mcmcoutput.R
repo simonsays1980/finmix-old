@@ -8,9 +8,11 @@ setClass("mcmcoutput",
 	hyper = "list",
 	log = "list",
 	entropy = "array",
+	ST = "array",
 	S = "array",
 	NK = "array",
 	post = "list",
+	clust = "array",
 	model = "model",
 	prior = "prior"),
 	validity = function(object) {
@@ -179,7 +181,61 @@ setClass("mcmcoutput",
 			
 		######################### MCMC SAMPLING #############################
 		if(model@dist == "poisson") {
-			.Call("mcmc_poisson_cc", data, model, prior, mcmc, PACKAGE = "finmix")
+			M <- mcmc@M
+			weights <- array(0, dim = c(M, K))
+			pars <- list(lambda = array(0, dim = c(M, K)))
+			if(prior@hier) {
+				hypers <- list(b = array(0, dim = c(M, 1)))
+			}
+			else {
+				hypers <- list(b = array(0, dim = c(1,1)))
+			}
+			log.mixlik <- array(0, dim = c(M, 1))
+			log.mixprior <- array(0, dim = c(M, 1))
+			if(!model@indicfix) {
+				log.cdpost <- array(0, dim = c(M, 1))
+				logs <- list(mixlik = log.mixlik, mixprior = log.mixprior, cdpost = log.cdpost)
+			}
+			else {
+				logs <- list(mixlik = log.mixlik, mixprior = log.mixprior)
+			}
+			entropies <- array(0, dim = c(M, 1))
+			if(!model@indicfix) {
+				STm <- array(0, dim = c(M, 1))
+				Sm <- array(integer(), dim = c(N, mcmc@storeS)) 
+			} 
+			else {
+				STm <- array(0, dim = c(1, 1))
+				Sm <- array(integer(), dim = c(1, 1))
+			}
+			NKs <- array(0, dim = c(M, K))
+			if(mcmc@storepost) {
+				postweights <- array(0, dim = c(M, K))
+				posta <- array(0, dim = c(M, K))
+				postb <- array(0, dim = c(M, K))
+				postpars <- list(a = posta, b = postb)
+				post <- list(par = postpars, weight = postweights)
+			}
+			else{
+				postweights <- array(0, dim = c(1, K))
+				posta <- array(0, dim = c(1, K))
+				postb <- array(0, dim = c(1, K))
+				postpars <- list(a = posta, b = postb)
+				post <- list(par = postpars, weight = postweights)
+			}
+			if(!model@indicfix) {
+				clustm <- array(0, dim = c(N, 1))
+			}
+			else {
+				clustm <- array(0, dim = c(N, 1))
+			}
+			
+			mcmcout <- new("mcmcoutput", name = data@name, M = mcmc@M, weight = weights, par = pars,
+					ranperm = mcmc@ranperm, hyper = hypers, log = logs, entropy = entropies, 
+					ST = STm, S = Sm, NK = NKs, post = post, model = model, prior = prior,
+					clust = clustm)
+			.Call("mcmc_poisson_cc", data, model, prior, mcmc, mcmcout, PACKAGE = "finmix")
+			return(mcmcout)
 		}	
 	}
 	
@@ -225,6 +281,11 @@ setMethod("getEntropy", "mcmcoutput", function(.Object) {
 						return(.Object@entropy)
 					}
 )
+setGeneric("getST", function(.Object) standardGeneric("getST"))
+setMethod("getST", "mcmcoutput", function(.Object) {
+						return(.Object@ST)
+					}
+)
 ## Generic set in 'data' class ##
 setMethod("getS", "mcmcoutput", function(.Object) {
 					return(.Object@S)
@@ -238,6 +299,11 @@ setMethod("getNK", "mcmcoutput", function(.Object) {
 setGeneric("getPost", function(.Object) standardGeneric("getPost"))
 setMethod("getPost", "mcmcoutput", function(.Object) {
 						return(.Object@post)
+					}
+)
+setGeneric("getClust", function(.Object) standardGeneric("getClust"))
+setMethod("getClust", "mcmcoutput", function(.Object) {
+						return(.Object@clust)
 					}
 )
 setGeneric("getModel", function(.Object) standardGeneric("getModel"))

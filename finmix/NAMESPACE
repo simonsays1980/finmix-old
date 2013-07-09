@@ -18,7 +18,8 @@ export( ## user-defined constructors
         "dataclass",
         "groupmoments",
         "sdatamoments",
-        "datamoments"
+        "datamoments",
+	"mixturemcmc"
 )
 exportClasses( ## all classes
         "model",

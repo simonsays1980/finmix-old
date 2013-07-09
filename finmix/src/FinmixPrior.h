@@ -10,24 +10,22 @@
  * package: finmix (1.0.0)
  * created: 19 Feb. 2013
  */
+#ifndef FINMIXPRIOR_H
+#define FINMIXPRIOR_H
 
 #include <RcppArmadillo.h>
-// [[Rcpp::depends(RcppArmadillo)]]
-
 #include <string>
 
 class FinmixPrior {
 	
 	public:
-		Rcpp::List hyperParList;
-		arma::rowvec weightV;
+		Rcpp::List par;
+		arma::rowvec weight;
 		
-		std::string priorType;
+		std::string type;
 		bool hier;
 	
 		/* ctor */ 
-		FinmixPrior(const Rcpp::S4& classS4);	
-		/* dtor */
-		~FinmixPrior();
+		FinmixPrior(const Rcpp::S4& classS4);
 };
-
+#endif

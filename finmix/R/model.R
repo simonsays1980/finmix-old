@@ -21,6 +21,8 @@ setClass("model",
 					return("[Error] Number of components 'K' must be a positive integer.")
 				if(object@indicmod != "multinomial")
 					return("[Error] Distribution of the indicator model 'indicmod' must be Multinomial.")
+				if(object@K != ncol(object@weight))
+					return("[Error] Dimension of weight does not match number of components.")
 				# else: OK ##
 
 				TRUE
@@ -375,6 +377,8 @@ setReplaceMethod("setR", "model", function(.Object, value){
 setGeneric("setK<-", function(.Object, value) standardGeneric("setK<-"))
 setReplaceMethod("setK", "model", function(.Object, value) {
 						.Object@K <- value
+						.Object@weight <- matrix(1/value, 
+							nrow = 1, ncol = value)
 						validObject(.Object)
 						return(.Object)
 					}

@@ -10,15 +10,16 @@
  * package: finmix (1.0.0)
  * created: 19 Feb. 2013
  */
+#ifndef FINMIXMCMC_H
+#define FINMIXMCMC_H
 
 #include <RcppArmadillo.h>
-// [[Rcpp::depends(RcppArmadillo)]]
 
 class FinmixMCMC {
 	
 	public:
 		unsigned int burnIn;
-		unsigned int m;
+		unsigned int M;
 		bool startPar;
 		unsigned int storeS;
 		bool storePost;
@@ -29,4 +30,4 @@ class FinmixMCMC {
 		/* dtor */
 		~FinmixMCMC();
 };
-
+#endif

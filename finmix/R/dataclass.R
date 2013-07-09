@@ -14,8 +14,23 @@ setClass("dataclass",
 
 "dataclass" <- function(data, model, simS = FALSE) {
 
+		has.data <- !all(is.na(data@y))
+		if(!has.data) {
+			cat("[Error] dataclass needs observations 'y' in 'data' object to proceed.\n")
+			return(FALSE)
+		}
 		if(model@indicfix) {
 			cat("[Error] dataclass is not supposed to give back any values if allocations are given.\n")
+			return(FALSE)
+		}
+		has.par <- !all(is.na(model@par))		
+		if(!has.par) {
+			cat("[Error] dataclass needs component parameters in 'model' object to proceed.\n")
+			return(FALSE)
+		}
+		has.weight <- !all(is.na(model@weight)) 
+		if (!has.weight) {
+			cat("[Error] dataclass needs weight parameters in 'model' object to proceed.\n")
 			return(FALSE)
 		}
 		## 'simS' for simulating S ##
@@ -191,7 +206,7 @@ setClass("dataclass",
 			if(simS) {
 				dataclass = new("dataclass", logpy = lik.list$llh, prob = p, mixlik = mixlik,
 						entropy = entropy, loglikcd = matrix(), postS = postS)
-				l <- list(dataclass = dataclass, S = S)
+				l <- list(dataclass = dataclass, S = as.integer(S))
 				return(l)
 			}
 			dataclass <- new("dataclass", logpy = lik.list$llh, prob = p, mixlik = mixlik, 

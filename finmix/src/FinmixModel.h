@@ -10,27 +10,26 @@
  * package: finmix (1.0.0)
  * created: 19 Feb. 2013
  */
+#ifndef FINMIXMODEL_H
+#define FINMIXMODEL_H
 
 #include <RcppArmadillo.h>
-// [[Rcpp::depends(RcppArmadillo)]]
-
 #include <string>
 
 class FinmixModel {
 	
 	public:
-		Rcpp::List parList;
-		arma::rowvec weightV;
-		arma::uvec tV;
+		Rcpp::List par;
+		arma::rowvec weight;
+		arma::ivec T;
 	
-		std::string dataType;
 		bool indicFix; 
-		unsigned int k;
+		unsigned int K;
 		unsigned int r;
 	
-		/* constructor */ 
+		/* ctor */ 
 		FinmixModel(const Rcpp::S4& classS4);	
 		/* dtor */
 		~FinmixModel();
 };
-
+#endif

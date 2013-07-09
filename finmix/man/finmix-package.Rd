@@ -14,8 +14,8 @@ More about what it does (maybe more than one line)
 \tabular{ll}{
 Package: \tab finmix\cr
 Type: \tab Package\cr
-Version: \tab 1.0\cr
-Date: \tab 2013-02-21\cr
+Version: \tab 0.1\cr
+Date: \tab 2013-07-05\cr
 License: \tab What license is it under?\cr
 }
 ~~ An overview of how to use the package, including the most important ~~
@@ -38,5 +38,4 @@ Maintainer: Who to complain to <yourfault@somewhere.net>
 ~~ \code{\link[<pkg>:<pkg>-package]{<pkg>}} ~~
 }
 \examples{
-~~ simple examples of the most important functions ~~
 }

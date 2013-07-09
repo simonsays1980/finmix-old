@@ -15,9 +15,9 @@ setClass("data",
 				type.choices <- c("continuous", "discrete")
 				has.T <- !all(is.na(object@T))
 				has.Exp <- !all(is.na(object@exp))
-				if(has.T && any(object@T) < 0) 
+				if(has.T && any(object@T < 0)) 
 					return("[Error] Repetitions 'T' smaller zero.")
-				if(has.Exp && any(object@exp) < 0) 
+				if(has.Exp && any(object@exp < 0)) 
 					return("[Error] Exposures 'exp' smaller zero.")
 				if(!(object@type %in% type.choices)) 
 					return("[Error] Unknown data 'type'. 'type' has to be 'continuous' or 'discrete'.")
@@ -231,15 +231,15 @@ setMethod("plot", "data", function(x, ..., deparse.level=1) {
 					name <- ifelse(length(object@name) == 0, "", object@name)
 					
 					cat("Data object '", name, "'\n")
-					cat("	type		:", class(object), "\n")
+					cat("	class		:", class(object), "\n")
 					cat("	y		:", paste(dim(object@y), collapse="x"), "\n")
+					cat("	bycolumn	:", object@bycolumn, "\n")
 					cat("	N		:", object@N, "\n")
 					cat("	r 		:", object@r, "\n")
 					if(has.S) {
 						classification <- paste(dim(object@S), collapse="x")
 						cat("	S		:", classification, "\n")
 					}
-					cat("	bycolumn	:", object@bycolumn, "\n")
 					cat("	type (data)	:", object@type, "\n")
 					cat("	sim		:", object@sim, "\n")
 					if(has.exp) {
@@ -315,19 +315,19 @@ setMethod("getT", "data", function(.Object) {
 ## Explicit usual R setter ##
 setGeneric("setY<-", function(.Object, value) standardGeneric("setY<-"))
 setReplaceMethod("setY", "data", function(.Object, value) {
-					if(.Object@bycolumn && nrow(value) == 1) {
+					if(.Object@bycolumn && NROW(value) == 1) {
 						.Object@y <- t(value)
 					}
 					else {
 						.Object@y <- value
 					}
 					if(.Object@bycolumn){
-						.Object@N <- nrow(value)
-						.Object@r <- ncol(value)
+						.Object@N <- NROW(value)
+						.Object@r <- NCOL(value)
 					}
 					else {
-						.Object@N <- ncol(value)
-						.Object@r <- nrow(value)
+						.Object@N <- NCOL(value)
+						.Object@r <- NROW(value)
 					}
 					validObject(.Object)
 					return(.Object)

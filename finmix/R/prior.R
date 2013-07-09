@@ -1,9 +1,9 @@
 setClass("prior",
 	representation(
-	weight = "matrix",
-	par = "list",
-	type = "character",
-	hier = "logical"
+	weight 	= "matrix",
+	par 	= "list",
+	type 	= "character",
+	hier 	= "logical"
 	),
 	validity = function(object) {
 			type.choices <- c("condconjugate", "independent")
