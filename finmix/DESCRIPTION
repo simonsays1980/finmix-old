@@ -12,7 +12,8 @@ Depends: Rcpp (>= 0.10.2), RcppArmadillo (>= 0.3.6.2), graphics,
 Imports: graphics, mnormt (>= 1.4-5)
 Suggests: RUnit
 LinkingTo: Rcpp, RcppArmadillo
-Collate: 
+Collate:
+	graphic_func.R 
 	distributions.R
         model.R
         mixturemoments.R

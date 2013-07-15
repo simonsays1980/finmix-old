@@ -5,7 +5,7 @@
 #include "ParPoissonFix.h"
 #include "PriorPoissonInd.h"
 
-class ParPoissonInd : public ParPoissonFix {
+class ParPoissonInd : virtual public ParPoissonFix {
 	public:
 		arma::rowvec weight;
 		

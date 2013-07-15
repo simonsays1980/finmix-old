@@ -8,7 +8,6 @@
 #define DATACLASS_H
 
 #include <RcppArmadillo.h>
-//#include "liklist.h"    // structure liklist
 #include "likelihood.h" // methods for calculating likelihoods
 
 /* structure to contain:
@@ -59,7 +58,6 @@ classification (const arma::ivec &S, const liklist &lik,
 	p_m.each_col() /= sump_v;	                  				// classification probability matrix
 					          					// N x K matrix
 	dataC.prob = p_m;
-	
 	/* simulate only if true mixture */
 	if(K > 1) {
 		/* simulate classifications from probability matrix p */
@@ -71,7 +69,6 @@ classification (const arma::ivec &S, const liklist &lik,
 		PutRNGstate();
 		arma::mat rndM = arma::repmat(rnd, 1, K);  				// N x K matrix
 		arma::mat cumSP = arma::cumsum(p_m, 1);      				// cumulate along rows, N x K matrix
-
 		arma::umat ind = (cumSP > rndM);
 		rndM = arma::conv_to<arma::mat>::from(ind);    				// logical N x K matrix
 		newS = arma::conv_to<arma::ivec>::from(arma::sum(rndM, 1));        	// new classifications

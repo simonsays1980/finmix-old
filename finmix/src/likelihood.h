@@ -88,7 +88,7 @@ likelihood_poisson (const arma::mat &Y, arma::mat lambda)
 	return l_list;
 }
 
-inline double 
+inline double  
 likelihood_gamma (const arma::rowvec& Y, const double& shape,
 	const double& rate) 
 {
@@ -97,6 +97,21 @@ likelihood_gamma (const arma::rowvec& Y, const double& shape,
 	for(unsigned int i = 0; i < N; ++i) {
 		lik += shape * std::log(rate) - R::lgammafn(shape)
 			- rate * Y(i) + (shape - 1) * std::log(Y(i)); 
+	}
+	return lik;
+}
+
+inline double 
+likelihood_ggamma(const arma::rowvec& lambda, 
+	const arma::rowvec& shape, const double& rate,
+	const arma::rowvec& loc)
+{
+	const unsigned int K = lambda.n_elem;
+	double lik = 0.0;
+	for(unsigned int k = 0; k < K; ++k) {
+		lik += shape(k) * std::log(rate) - R::lgammafn(shape(k))
+			- rate * (lambda(k) - loc(k)) 
+			+ (shape(k) - 1) * std::log(lambda(k) - loc(k));  
 	}
 	return lik;
 }

@@ -33,7 +33,7 @@
 	else { ## data has no observations
 		return("[Error] Observations in 'y' of 'data' object are obligatory for MCMC sampling.")
 	}
-	if(model@dist == "poisson") {
+	if(model@dist == "poisson" || model@dist == "cond.poisson") {
 		has.exposures <- !all(is.na(data@exp))
 		if(has.exposures) {
 			if(data@bycolumn) {
@@ -154,7 +154,23 @@
 			}
 		} ## end norstudmult
 	
-	} ## end norstud 
+	} ## end norstud
+	if(model@dist == "cond.poisson") {
+		if(!("coef" %in% names(prior@par))) {
+			stop("Element 'coef' in slot 'par' of 'prior' is missing. A conditional Poisson mixture needs a coefficient matrix.")
+		}
+		else {
+			coef <- prior@par$coef
+			if(!is.matrix(coef) && !is.array(coef))
+				stop("Element 'coef' in slot 'par' of 'prior' must be of type 'matrix' or 'array'.")
+			if(nrow(coef) != ncol(coef)) 
+				stop("ELement 'coef' in slot 'par' of 'prior' must be a quadratic matrix.")
+			if(nrow(coef) != K)
+				stop("Dimension of element 'coef' in slot 'par' of 'prior' must correspond to the number of components 'K' in 'model'.")
+			if(!(all(diag(coef) == 1)))
+				stop("Coefficients on the diagnoal of element 'coef' in slot 'par' of 'prior' must be equal to one.")
+		}
+	} 
 			
 	######################### MCMC SAMPLING #############################
 	if(model@dist == "poisson") {
@@ -284,5 +300,137 @@
 			} ## end hier
 		} ## end no indicfix		
 	} ## end model poisson
+	
+	if(model@dist == "cond.poisson") {
+		## base slots inherited to every derived class ##
+		M 		<- as.integer(mcmc@M)
+		ranperm 	<- mcmc@ranperm
+		pars 		<- list(lambda = array(numeric(), dim = c(M, K)))
+		log.mixlik 	<- array(numeric(), dim = c(M, 1))
+		log.mixprior 	<- array(numeric(), dim = c(M, 1))
+		## model with fixed indicators ##
+		if(model@indicfix || K == 1) {
+			logs 	<- list(mixlik = log.mixlik, mixprior = log.mixprior)
+			## model with simple prior ##
+			if (!prior@hier) {
+				## model output with NO posterior parameters stored ##
+				if(!mcmc@storepost) {
+					mcmcout 	<- new("mcmcoutputfix", M = M, ranperm = ranperm,
+								par = pars, log = logs, model = model, 
+								prior = prior)
+					.Call("mcmc_condpoisson_cc", data, model, prior, mcmc, mcmcout, PACKAGE = "finmix")
+					return(mcmcout)
+				}
+				## model output with posterior parameters stored ##
+				else {
+					post.a 		<- array(numeric(), dim = c(M, K))
+					post.b 		<- array(numeric(), dim = c(M, K))
+					post.cond	<- array(numeric(), dim	= c(M, K))
+					post.par 	<- list(a = post.a, b = post.b, cond = post.cond)
+					posts  		<- list(par = post.par)
+					mcmcout 	<- new("mcmcoutputfixpost", M = M, ranperm = ranperm,
+								par = pars, log = logs, post = posts,
+								model = model, prior = prior)
+					.Call("mcmc_condpoisson_cc", data, model, prior, mcmc, mcmcout, PACKAGE = "finmix")
+					return(mcmcout)
+				}
+			} ## end no hier
+			## model with hierarchical prior ##
+			else {
+				hypers <- list(b = array(numeric(), dim = c(M, 1)))
+				## model output with NO posterior parameters stored ##
+				if(!mcmc@storepost) {
+					mcmcout 	<- new("mcmcoutputfixhier", M = M, ranperm = ranperm,
+								par = pars, log = logs, hyper = hypers,
+								model = model, prior = prior)
+					.Call("mcmc_condpoisson_cc", data, model, prior, mcmc, mcmcout, PACKAGE = "finmix")
+					return(mcmcout)
+			
+				}
+				## model output with posterior parameters stored ##
+				else {
+					post.a 		<- array(numeric(), dim = c(M, K))
+					post.b 		<- array(numeric(), dim = c(M, K))
+					post.cond 	<- array(numeric(), dim	= c(M, K))
+					post.par 	<- list(a = post.a, b = post.b, cond = post.cond)
+					posts  		<- list(par = post.par)
+					mcmcout 	<- new("mcmcoutputfixhierpost", M = M, ranperm = ranperm,
+								par = pars, log = logs, hyper = hypers, post = posts,
+								model = model, prior = prior)
+					.Call("mcmc_condpoisson_cc", data, model, prior, mcmc, mcmcout, PACKAGE = "finmix")
+					return(mcmcout)
+				}
+			} ## end hier 
+		} ## end indicfix ##
+		## model with simulated indicators ##
+		else if(!model@indicfix) {			
+			log.cdpost 	<- array(numeric(), dim = c(M, 1))
+			logs 		<- list(mixlik = log.mixlik, mixprior = log.mixprior, cdpost = log.cdpost)
+			weights 	<- array(numeric(), dim = c(M, K))
+			entropies 	<- array(numeric(), dim = c(M, 1))
+			STm 		<- array(integer(), dim = c(M, 1))
+			Sm 		<- array(integer(), dim = c(N, mcmc@storeS))
+			NKm		<- array(integer(), dim = c(M, K))
+			clustm 		<- array(integer(), dim = c(N, 1))
+			if(mcmc@startpar) {
+				Sm[,1] <- as.integer(dataclass$S)
+			}
+			## model with simple prior ##
+			if(!prior@hier) {
+				## model output with NO posterior parameters stored ##
+				if(!mcmc@storepost) {
+					mcmcout		<- new("mcmcoutputbase", M = M, ranperm = ranperm,
+								par = pars, log = logs, weight = weights, entropy = entropies,
+								ST = STm, S = Sm, NK = NKm, clust = clustm, model = model,
+								prior = prior)
+					.Call("mcmc_condpoisson_cc", data, model, prior, mcmc, mcmcout, PACKAGE = "finmix")
+					return(mcmcout)
+				}
+				## model output with posterior parameters stored ##
+				else {
+					post.weight 	<- array(numeric(), dim = c(M, K))
+					post.a 		<- array(numeric(), dim = c(M, K))
+					post.b 		<- array(numeric(), dim = c(M, K))
+					post.cond 	<- array(numeric(), dim = c(M, K))
+					post.par 	<- list(a = post.a, b = post.b, cond = post.cond)
+					posts  		<- list(par = post.par, weight = post.weight)
+					mcmcout 	<- new("mcmcoutputpost", M = M, ranperm = ranperm,
+								par = pars, log = logs, weight = weights, entropy = entropies,
+								ST = STm, S = Sm, NK = NKm, clust = clustm, post = posts,
+								model = model, prior = prior)
+					.Call("mcmc_condpoisson_cc", data, model, prior, mcmc, mcmcout, PACKAGE = "finmix")
+					return(mcmcout)
+				}
+			} ## end no hier 
+			## model with hierarchical prior ## 
+			else {
+				hypers 	<- list(b = array(numeric(), dim = c(M, 1)))			
+				## model output with NO posterior parameters stored ##
+				if(!mcmc@storepost) {
+					mcmcout	 	<- new("mcmcoutputhier", M = M, ranperm = ranperm, 
+								par = pars, log = logs, weight = weights, entropy = entropies,
+								ST = STm, S = Sm, NK = NKm, clust = clustm, hyper = hypers,
+								model = model, prior = prior)
+					.Call("mcmc_condpoisson_cc", data, model, prior, mcmc, mcmcout, PACKAGE = "finmix")
+					return(mcmcout)
+				}
+			## model output with posterior parameters stored ##
+				else {
+					post.weight 	<- array(numeric(), dim = c(M, K))
+					post.a 		<- array(numeric(), dim = c(M, K))
+					post.b 		<- array(numeric(), dim = c(M, K))
+					post.cond	<- array(numeric(), dim = c(M, K))
+					post.par 	<- list(a = post.a, b = post.b, cond = post.cond)
+					posts  		<- list(par = post.par, weight = post.weight)
+					mcmcout 	<- new("mcmcoutputhierpost", M = M, ranperm = ranperm,
+								par = pars, log = logs, weight = weights, entropy = entropies,
+								ST = STm, S = Sm, NK = NKm, clust = clustm, hyper = hypers, post = posts,
+								model = model, prior = prior)		
+					.Call("mcmc_condpoisson_cc", data, model, prior, mcmc, mcmcout, PACKAGE = "finmix")
+					return(mcmcout)
+				}
+			} ## end hier
+		} ## end no indicfix		
+	} ## end model cond.poisson
 } ## end mixturemcmc
 

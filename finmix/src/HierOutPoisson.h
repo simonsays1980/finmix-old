@@ -14,6 +14,7 @@ class HierOutPoisson {
 				const PriorParType&);
 }; 
 
+inline
 HierOutPoisson::HierOutPoisson (const Rcpp::List& list) 
 {
 	Rcpp::NumericVector tmpB((SEXP) list["b"]);
@@ -22,6 +23,7 @@ HierOutPoisson::HierOutPoisson (const Rcpp::List& list)
 }
 
 template <typename PriorParType>
+inline
 void HierOutPoisson::store (const unsigned int& m,
 				const PriorParType& hyperPar) 
 {

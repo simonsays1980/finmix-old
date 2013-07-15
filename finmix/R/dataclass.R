@@ -91,7 +91,7 @@ setClass("dataclass",
 		}
 	
 		## poisson mixtures ##
-		else if(dist == "poisson") {
+		else if(dist == "poisson" || dist == "cond.poisson") {
 			if(has.exposures) { ## should give a N x K 'matrix' object
 				mu <- t(apply(exp, 1, "*", model@par$lambda))
 			}	

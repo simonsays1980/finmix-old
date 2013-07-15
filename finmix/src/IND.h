@@ -94,7 +94,7 @@ template <typename Super>
 void IND <Super>::Output::store (const unsigned int& m,
 	Node& node)
 {
-	Super::Output::store(m,node);;
+	Super::Output::store(m,node);
 	if(m >= node.BURNIN) {
 		const unsigned int index = m - node.BURNIN;
 		(*weight).row(index) = node.par.weight;
@@ -102,7 +102,7 @@ void IND <Super>::Output::store (const unsigned int& m,
 		(*entropy)(index) = node.log.entropy;
 		(*ST)(index) = node.S(node.N - 1);
 		if(index >= node.M - node.STORES) {
-			if(node.STARTPAR && index != node.M - node.BURNIN - 1) {
+			if(node.STARTPAR && index != node.M - 1) {
 				(*S).col(index - (node.M - node.STORES) + 1) = node.S;
 			}
 			if (!node.STARTPAR){

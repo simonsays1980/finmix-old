@@ -6,7 +6,10 @@ PKG_CXXFLAGS= -g -W -O0 -Wall -pedantic -std=c++0x
 OBJECTS = FinmixData.o FinmixModel.o FinmixPrior.o FinmixMCMC.o \
 	PriorPoissonFix.o ParPoissonFix.o LogPoissonFix.o ParOutPoisson.o \
 	PostOutPoissonFix.o PriorPoissonInd.o LogPoissonInd.o ParPoissonInd.o \
-	PostOutPoissonInd.o mcmc_poisson.o
+	PostOutPoissonInd.o mcmc_poisson.o \
+	PriorCondPoissonFix.o ParCondPoissonFix.o LogCondPoissonFix.o \
+	PostOutCondPoissonFix.o PriorCondPoissonInd.o ParCondPoissonInd.o \
+	LogCondPoissonInd.o PostOutCondPoissonInd.o mcmc_condpoisson.o
 
 all: before ${SHLIB} after
 

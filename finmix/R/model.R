@@ -11,8 +11,10 @@ setClass("model",
 		.cache = "environment"
 	),
 	validity = function(object) {
-				choices <- c("normal", "normult", "exponential", "student", "studmult", "poisson", "binomial")
-				univ.choices <-  c("normal", "exponential", "student", "poisson", "binomial")	
+				choices <- c("normal", "normult", "exponential", "student", 
+					"studmult", "poisson", "cond.poisson", "binomial")
+				univ.choices <-  c("normal", "exponential", "student", 
+					"poisson", "cond.poisson", "binomial")	
 				multiv.choices <- c("normult", "studmult")
 				indicmod.choices <- c("multinomial")
 				if(!(object@dist %in% choices)) 
@@ -196,7 +198,7 @@ setMethod("plot", "model", function(x, ..., dis.grid = 1:10, persp.grid.x = seq(
 							return("'plot()' is not implemented for model of dimension > 5. Use 'mixturemar()' to create margin models and then use 'plot' to show marginal distributions.")
 	
 					}
-					else if(.Object@dist == "poisson") {
+					else if(.Object@dist == "poisson" || .Object@dist == "cond.poisson") {
 						main <- paste("Poisson Mixture K=", .Object@K, sep="")
 						fun <- function(y) {
 							fun.value <- 0

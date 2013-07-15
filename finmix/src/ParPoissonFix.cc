@@ -10,9 +10,6 @@ ParPoissonFix::ParPoissonFix (const bool& STARTPAR,
 	}
 } 
 
-/*ParPoissonFix::ParPoissonFix(const FinmixModel& model) : 
-	lambda(Rcpp::as<arma::rowvec>((SEXP) model.par["lambda"])){}
-*/ 
 void ParPoissonFix::update (const PriorPoissonFix& hyperPar) 
 {
 	lambda = rgammaprod(hyperPar.aPost, hyperPar.bPost);

@@ -14,11 +14,8 @@
 #include <Rmath.h>              // for use of R internal C functions
 
 inline
-arma::rowvec rdirichlet (const arma::rowvec& dpar) {
-	/**
-	 * vector is object of type Col as column-wise
-	 * orientation is usual in armadillo 
-	 */
+arma::rowvec rdirichlet (const arma::rowvec& dpar) 
+{
 	const unsigned int K = dpar.n_elem;
 	arma::rowvec par_out(K);
 	double sum = 0.0;
@@ -36,11 +33,9 @@ arma::rowvec rdirichlet (const arma::rowvec& dpar) {
 }
 
 inline
-arma::rowvec rgammaprod (const arma::rowvec& par_a, const arma::rowvec& par_b) {
-	/** 
-	 * vector is object of type Col as column-wise 
-	 * orientation is usual in armadillo 
-	 */
+arma::rowvec rgammaprod (const arma::rowvec& par_a, 
+	const arma::rowvec& par_b) 
+{	
 	const unsigned int K = par_a.n_elem;
 	arma::rowvec par_out(K);
 
@@ -53,6 +48,21 @@ arma::rowvec rgammaprod (const arma::rowvec& par_a, const arma::rowvec& par_b) {
 	}
 
 	PutRNGstate();
+
+	return par_out;
+}
+
+inline 
+double rggamma (const double& shape, const double& rate, 
+	const double& loc) 
+{
+	double par_out = 0.0;
+	GetRNGstate();
+	par_out = R::rgamma(shape, 1);
+	PutRNGstate();
+	par_out = std::max(par_out, 1e-10);
+	par_out = par_out/rate;
+	par_out += loc;
 
 	return par_out;
 }

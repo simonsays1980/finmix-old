@@ -91,10 +91,10 @@
 	## starting values for finite mixtures ## 
 	
 	## poisson mixtures ##
-	if(dist == "poisson") {
+	if(dist == "poisson" || dist == "cond.poisson") {
 		if(mcmc@startpar && !has.par) {
 			if(has.exposures) {
-				if(K == 1) { ## WARNING: exposures are N x 1!! Change here something in the code
+				if(K == 1) { 
 					pm <- max(mean(datam/exp, na.rm = TRUE), 0.1)
 					pm <- array(pm, dim = c(1, K))
 				}

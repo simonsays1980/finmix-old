@@ -81,4 +81,41 @@ scale, 1);
 	}
 	return priormixlik;	
 }
+
+inline double 
+priormixlik_condpoisson (const arma::rowvec& lambda,
+	const arma::rowvec& prior_parA, const arma::rowvec& prior_parB,
+	const arma::rowvec& prior_cond, const bool& HIER, const double &g,
+	const double &G)
+{
+	unsigned int K = lambda.n_elem;
+	double priormixlik = 0.0;
+	if(!HIER) {
+		priormixlik = likelihood_ggamma(lambda, prior_parA, 
+			prior_parB(0), prior_cond);
+	} else {
+		double gN = g + K * prior_parA(0); 	// prior_parA must be the start value
+		double GN = G + arma::accu(lambda);
+		double b = gN/GN;
+		double scale = 1.0/b;
+		/* step 1: log likelihood of prior */
+		for(unsigned int k = 0; k < K; ++k) {
+			priormixlik += R::dgamma(lambda(k) - prior_cond(k), 
+				prior_parA(k), scale, 1);
+		}
+		/**
+		 * step 2: log likelihood of hyperprior with 
+		 * 	start values of hyper parameters.
+		 */
+		scale = 1.0/G;
+		priormixlik += R::dgamma(b, g, scale, 1);
+		/**
+		 * step 3: log likelihood of hyperprior with 
+		 * 	updated hyper parameters.
+		 */
+		scale = 1.0/GN;
+		priormixlik -= R::dgamma(b, gN, scale, 1);
+	}
+	return priormixlik;
+} 
 #endif

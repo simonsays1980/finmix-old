@@ -17,16 +17,29 @@ setClass("prior",
 "prior" <- function(weight = matrix(), par = list(), type = "independent", hier = TRUE) {
 			prior <- new("prior", weight = weight, par = par, type = type, hier = hier)
 			return(prior)
-		}
-"priordefine" <- function(data = data(), model = model(), varargin) {
-		model.choices <- c("normal", "normult", "exponential", "student", "studmult", "poisson", "binomial")
-		if(!(model@dist %in% model.choices))
-			return("[Error] The field 'dist' is obligatory'. It must be one of 'normal', 'normult', 'exponential', 'student', 'studmult', 'poisson' or 'binomial'.")
-		dist <- getDist(model)
-		K <- getK(model)
-		r <- getR(data)
-		hier <- TRUE
-		type <- "independent"
+}
+"priordefine" <- function(data = data(), model = model(), coef.mat, varargin = NULL) {
+	model.choices <- c("normal", "normult", "exponential", "student",
+		"studmult", "poisson", "cond.poisson", "binomial")
+	if(!(model@dist %in% model.choices))
+		return("[Error] The field 'dist' is obligatory'. It must be one of 'normal', 'normult', 'exponential', 'student', 'studmult', 'poisson', 'cond.poisson'  or 'binomial'.")
+	if(model@dist == "cond.poisson") {
+		if(!hasArg(coef.mat))
+			stop("For a conditional Poisson mixture a coefficient matrix 'coef.mat' has to be provided.") 
+		else if(hasArg(coef.mat) && !is.matrix(coef.mat) && !is.array(coef.mat))
+			stop("Argument 'coef.mat' must be of type 'matrix' or 'array'.")
+		else if(hasArg(coef.mat) && nrow(coef.mat) != ncol(coef.mat))
+			stop("Argument 'coef.mat' must be a quadratic 'matrix' or 'array'.")
+		else if(hasArg(coef.mat) && (nrow(coef.mat) != model@K || ncol(coef.mat) != model@K))
+			stop("Dimension of argument 'coef.mat' must correspond to number of components 'K' in 'model'.\n")
+		else if(!(all(diag(coef.mat) == 1)))
+			stop("Coefficients on the diagonal of 'coef.mat' must be equal to one.\n")
+	}
+	dist <- getDist(model)
+	K <- getK(model)
+	r <- getR(data)
+	hier <- TRUE
+	type <- "independent"
 		if(!data@bycolumn) {
 			datam <- t(data@y)
 		}
@@ -36,7 +49,7 @@ setClass("prior",
 		
 		## poisson mixture ##
 		if(dist == "poisson") {
-			if(nargs() == 2) {
+			if(is.null(varargin)) {
 				hier <- TRUE ## default prior is hierarchical
 				type <- "condconjugate"
 			}
@@ -76,6 +89,50 @@ setClass("prior",
 					b = array(be, dim = c(1, K)))
 			}
 		}
+		
+		## conditional poisson mixture ##
+		else if (dist == "cond.poisson") {
+			if (is.null(varargin)) {
+				hier <- TRUE ## default prior is hierarchical
+				type <- "condconjugate"
+			} else {
+				## check if object is valid ##
+				if (!(class(varargin) == "prior")) {
+					stop("'varargin' must be of class 'prior'.")
+				}
+				validObject(varargin)
+				hier <- varargin@hier
+				type <- varargin@hier 
+			}
+			if (type == "trunc.norm") {
+				s0 <- sd(datam)
+				par <- list(s = array(s0, dim = c(1,K)))
+			} else if (type == "condconjugate") {
+				mean <- mean(datam, na.rm = TRUE)
+				over <- var(datam, na.rm = TRUE) - mean
+				if (over > 0) {
+					a0 <- mean^2/over
+				} else {
+					a0 <- 10
+				}
+				if(hier) {
+					g0 <- 0.5
+					G0 <- mean * g0/a0
+					be <- g0/G0
+					par <- list(a = array(a0, dim = c(1, K)),
+						b = array(be, dim = c(1, K)),
+						g = g0, G = G0)
+					par$a <- par$a / 2^(rowSums(coef.mat) - 1)
+					par$coef <- coef.mat
+				} else {
+					be <- a0/mean
+					par <- list(a = array(a0, dim = c(1, K)),
+						b = array(be, dim = c(1, K)))
+					par$a <- par$a / 2^(rowSums(coef.mat) - 1)
+					par$coef <- coef.mat
+				}
+			} 
+		}
 		## binomial mixture ##
 		else if(dist == "binomial") {
 			type <- "condconjugate"
@@ -99,7 +156,7 @@ setClass("prior",
 		else {
 			## check if varargin is non-empty and prior object ##
 			## set hierarchical or non-hierarchical prior ##
-			if(nargs() == 2) { 
+			if(is.null(varargin)) { 
 				## default prior: independent hierarchical prior ##
 				hier <- TRUE
 				type <- "independent"

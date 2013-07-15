@@ -10,7 +10,6 @@ class ParPoissonFix {
 	public: 
 		arma::rowvec lambda;
 		
-//		ParPoissonFix (const FinmixModel&);
 		ParPoissonFix (const bool&, 
 				const FinmixModel&);
 		virtual ~ParPoissonFix () {}

@@ -52,7 +52,8 @@ void HIER <Super, HierOutType>::Output::store (const unsigned int& m,
 {
 	Super::Output::store(m, node);
 	if (m >= node.BURNIN) {
-		hyper.store(m, node.hyperPar);
+		const unsigned int index = m - node.BURNIN;
+		hyper.store(index, node.hyperPar);
 	}
 }
 

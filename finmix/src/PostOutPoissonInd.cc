@@ -2,7 +2,7 @@
 
 PostOutPoissonInd::PostOutPoissonInd (const Rcpp::List& list) :
 	PostOutPoissonFix(list) 
-{
+{	
 	Rcpp::NumericMatrix tmpWeight((SEXP) list["weight"]);
 	const unsigned int M = tmpWeight.nrow();
 	const unsigned int K = tmpWeight.ncol();

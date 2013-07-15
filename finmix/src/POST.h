@@ -52,7 +52,8 @@ void POST <Super, PostOutType>::Output::store (const unsigned int& m,
 {
 	Super::Output::store(m, node);
 	if(m >= node.BURNIN) {
-		post.store(m, node.hyperPar);
+		const unsigned int index = m - node.BURNIN;
+		post.store(index, node.hyperPar);
 	}
 }
 

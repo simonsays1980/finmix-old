@@ -13,14 +13,15 @@ export( ## user-defined constructors
         "prior",
         "priordefine",
         "mcmc",
-	"%=%",
+    	"%=%",
         "mcmcstart",
         "dataclass",
         "groupmoments",
         "sdatamoments",
         "datamoments",
-	"mixturemcmc"
+    	"mixturemcmc"
 )
+
 exportClasses( ## all classes
         "model",
         "modelmoments",
@@ -78,8 +79,8 @@ exportMethods( ## name of the generic, as with other methods
         ## 'data' class ##
         "getY",
         "setY<-",
-	"getN",
-	"setN<-",
+    	"getN",
+    	"setN<-",
         "getS",
         "setS<-",
         "getByColumn",
@@ -107,6 +108,28 @@ exportMethods( ## name of the generic, as with other methods
 
         ## 'cdatamoments' class ##
         "getSDataMoments",
-	"mixturemar"
+    	"mixturemar",
 
+        ## 'mcmc' class ##
+        "getBurnin",
+        "getM",
+        "getStartpar",
+        "getStoreS",
+        "getRanperm",
+
+        ## 'mcmcoutputfix' class ##
+        "getLog",
+        "getModel",
+        "getPrior",
+
+        ## 'mcmcouputfixhier' class ##
+        "getHyper",
+
+        ## 'mcmcoutputfixpost' class ##
+        "getPost",
+
+        ## 'mcmcoutputbase' class ##
+        "getEntropy",
+        "getST",
+        "getClust"
 )

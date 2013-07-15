@@ -6,8 +6,8 @@
  *
  */
 
-#ifndef MCMCPOISSON_CC
-#define MCMCPOISSON_CC
+#ifndef MCMCCONDPOISSON_CC
+#define MCMCCONDPOISSON_CC
 
 #include <RcppArmadillo.h>		// C++ linear algebra library
 #include "FinmixData.h"
@@ -20,16 +20,16 @@
 #include "IND.h"
 #include "HIER.h"
 #include "POST.h"
-#include "LogPoissonFix.h"
-#include "LogPoissonInd.h"
-#include "ParPoissonInd.h"
+#include "LogCondPoissonFix.h"
+#include "LogCondPoissonInd.h"
+#include "ParCondPoissonInd.h"
 #include "ParOutPoisson.h"
 #include "HierOutPoisson.h"
-#include "PostOutPoissonFix.h"
-#include "PostOutPoissonInd.h"
+#include "PostOutCondPoissonFix.h"
+#include "PostOutCondPoissonInd.h"
 
 
-RcppExport SEXP mcmc_poisson_cc(SEXP data_S4, SEXP model_S4, 
+RcppExport SEXP mcmc_condpoisson_cc(SEXP data_S4, SEXP model_S4, 
 	SEXP prior_S4, SEXP mcmc_S4, SEXP mcmcoutput_S4) 
 {
 	
@@ -44,68 +44,62 @@ RcppExport SEXP mcmc_poisson_cc(SEXP data_S4, SEXP model_S4,
 	FinmixPrior finPrior = FinmixPrior(priorS4O);
 	FinmixMCMC finMCMC = FinmixMCMC(mcmcS4O);
 
-	const bool INDICFIX = finModel.indicFix;
-	const bool HIER_IND = finPrior.hier;
-	const bool POST_IND = finMCMC.storePost;
-	const unsigned int BURNIN = finMCMC.burnIn;
+	const bool INDICFIX 		= finModel.indicFix;
+	const bool HIER_IND 		= finPrior.hier;
+	const bool POST_IND 		= finMCMC.storePost;
+	const unsigned int BURNIN 	= finMCMC.burnIn;
 	const unsigned int M 		= finMCMC.M;
 	const unsigned int K 		= finModel.K;
 	
 	BASE* ptr;
-	typedef FIX<PriorPoissonFix, ParPoissonFix, LogPoissonFix, 
-		ParOutPoisson> POISSONFIX;
-	typedef IND<FIX<PriorPoissonInd, ParPoissonInd, LogPoissonInd, 
-		ParOutPoisson> > POISSONIND;
+	typedef FIX<PriorCondPoissonFix, ParCondPoissonFix, 
+		LogCondPoissonFix, ParOutPoisson> CONDPOISSONFIX;
+	typedef IND<FIX<PriorCondPoissonInd, ParCondPoissonInd, 
+		LogCondPoissonInd, ParOutPoisson> > CONDPOISSONIND;
 	if (INDICFIX || K == 1) 
 	{ 
 		if (HIER_IND) {
 			if (POST_IND) {
-					ptr = new ADAPTER<POST<HIER<POISSONFIX,
-					HierOutPoisson>, PostOutPoissonFix> >
+					ptr = new ADAPTER<POST<HIER<CONDPOISSONFIX,
+					HierOutPoisson>, PostOutCondPoissonFix> >
 					(finData, finModel, finPrior, finMCMC,
 					mcmcOutputS4O);
 	
-			}
-			else {
-				ptr = new ADAPTER<HIER<POISSONFIX, HierOutPoisson> >
+			} else {
+				ptr = new ADAPTER<HIER<CONDPOISSONFIX, HierOutPoisson> >
 					(finData, finModel, finPrior, finMCMC, 
 					mcmcOutputS4O);
 			}
-		} 
-		else {
+		} else {
 			if (POST_IND) {
-				ptr = new ADAPTER<POST<POISSONFIX, PostOutPoissonFix> >
+				ptr = new ADAPTER<POST<CONDPOISSONFIX,
+						PostOutCondPoissonFix> >
 					(finData, finModel, finPrior, finMCMC, 
 					mcmcOutputS4O);
-			}
-			else {
-				ptr = new ADAPTER<POISSONFIX> (finData, finModel,
+			} else {
+				ptr = new ADAPTER<CONDPOISSONFIX> (finData, finModel,
 					finPrior, finMCMC, mcmcOutputS4O);
 			}
 		}
-	}
-	else {	
+	} else {	
 		if (HIER_IND) {
 			if (POST_IND) {
-				ptr = new ADAPTER<POST<HIER<POISSONIND,
-					HierOutPoisson>, PostOutPoissonInd> >
+				ptr = new ADAPTER<POST<HIER<CONDPOISSONIND,
+					HierOutPoisson>, PostOutCondPoissonInd> >
 					(finData, finModel, finPrior, finMCMC,
 					mcmcOutputS4O);
-			}
-			else {
-				ptr = new ADAPTER<HIER<POISSONIND, HierOutPoisson> >
+			} else {
+				ptr = new ADAPTER<HIER<CONDPOISSONIND, HierOutPoisson> >
 					(finData, finModel, finPrior, finMCMC,
 					mcmcOutputS4O);
 			} 
-		}
-		else {
+		} else {
 			if (POST_IND) {
-				ptr = new ADAPTER<POST<POISSONIND, PostOutPoissonInd> >
+				ptr = new ADAPTER<POST<CONDPOISSONIND, PostOutCondPoissonInd> >
 					(finData, finModel, finPrior, finMCMC,
 					mcmcOutputS4O);
-			}
-			else {
-				ptr = new ADAPTER<POISSONIND> (finData, finModel,
+			} else {
+				ptr = new ADAPTER<CONDPOISSONIND> (finData, finModel,
 					finPrior, finMCMC, mcmcOutputS4O);
 			}
 		}
