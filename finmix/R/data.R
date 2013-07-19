@@ -64,7 +64,8 @@ setClass("data",
 		return(data)
 }
 
-setMethod("plot", "data", function(x, ..., deparse.level=1) {
+setGeneric("plot", function(x, y, ...) standardGeneric("plot"))
+setMethod("plot", "data", function(x, y, ..., deparse.level=1) {
 				.Object <- x
 				lname <- length(.Object@name)
 				if(.Object@type == "continuous") {

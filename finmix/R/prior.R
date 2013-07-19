@@ -8,32 +8,44 @@ setClass("prior",
 	validity = function(object) {
 			type.choices <- c("condconjugate", "independent")
 			if(!(object@type %in% type.choices)) 
-				return("[Error] Unknown prior 'type'. 'type' must be 'independent' or 'condconjugate'.")
+				stop("Unknown prior 'type'. 'type' must be 'independent' 
+                     or 'condconjugate'.")
 			## else: OK
 			TRUE		
 	}
 )
 
-"prior" <- function(weight = matrix(), par = list(), type = "independent", hier = TRUE) {
-			prior <- new("prior", weight = weight, par = par, type = type, hier = hier)
+"prior" <- function(weight = matrix(), par = list(), type = "independent", 
+                    hier = TRUE) {
+			prior <- new("prior", weight = weight, par = par, type = type, 
+                         hier = hier)
 			return(prior)
 }
-"priordefine" <- function(data = data(), model = model(), coef.mat, varargin = NULL) {
+"priordefine" <- function(data = data(), model = model(), coef.mat = NULL, 
+                          varargin = NULL) {
 	model.choices <- c("normal", "normult", "exponential", "student",
 		"studmult", "poisson", "cond.poisson", "binomial")
-	if(!(model@dist %in% model.choices))
-		return("[Error] The field 'dist' is obligatory'. It must be one of 'normal', 'normult', 'exponential', 'student', 'studmult', 'poisson', 'cond.poisson'  or 'binomial'.")
-	if(model@dist == "cond.poisson") {
-		if(!hasArg(coef.mat))
-			stop("For a conditional Poisson mixture a coefficient matrix 'coef.mat' has to be provided.") 
-		else if(hasArg(coef.mat) && !is.matrix(coef.mat) && !is.array(coef.mat))
-			stop("Argument 'coef.mat' must be of type 'matrix' or 'array'.")
-		else if(hasArg(coef.mat) && nrow(coef.mat) != ncol(coef.mat))
-			stop("Argument 'coef.mat' must be a quadratic 'matrix' or 'array'.")
-		else if(hasArg(coef.mat) && (nrow(coef.mat) != model@K || ncol(coef.mat) != model@K))
-			stop("Dimension of argument 'coef.mat' must correspond to number of components 'K' in 'model'.\n")
-		else if(!(all(diag(coef.mat) == 1)))
-			stop("Coefficients on the diagonal of 'coef.mat' must be equal to one.\n")
+	if (!(model@dist %in% model.choices))
+		stop("The field 'dist' is obligatory'. It must be one of 'normal', 
+               'normult', 'exponential', 'student', 'studmult', 'poisson', 
+               'cond.poisson'  or 'binomial'.")
+	if (model@dist == "cond.poisson") {
+		if (is.null(coef.mat)) {
+			stop("For a conditional Poisson mixture a coefficient matrix 
+                 'coef.mat' has to be provided.") 
+        } else if (!is.null(coef.mat)) {
+            if (!is.matrix(coef.mat) && !is.array(coef.mat)) {
+    			stop("Argument 'coef.mat' must be of type 'matrix' or 'array'.")
+            } else if (nrow(coef.mat) != ncol(coef.mat)) {
+    			stop("Argument 'coef.mat' must be a quadratic 'matrix' or 'array'.")
+            } else if (nrow(coef.mat) != model@K || ncol(coef.mat) != model@K) {
+    			stop("Dimension of argument 'coef.mat' must correspond to number 
+                     of components 'K' in 'model'.\n")
+            } else if (!(all(diag(coef.mat) == 1))) {
+    			stop("Coefficients on the diagonal of 'coef.mat' must be equal 
+                     to one.\n")
+            }
+        }
 	}
 	dist <- getDist(model)
 	K <- getK(model)
@@ -55,8 +67,9 @@ setClass("prior",
 			}
 			else {
 				## check if object is valid ##
-				if(!(class(varargin) == "prior")) 
-					return("[Error] 'varargin' must be of class 'prior'.")
+				if(!(class(varargin) == "prior")) { 
+					stop("'varargin' must be of class 'prior'.")
+                }
 				validObject(varargin)
 				hier <- varargin@hier
 				type <- "condconjugate"
@@ -96,6 +109,7 @@ setClass("prior",
 				hier <- TRUE ## default prior is hierarchical
 				type <- "condconjugate"
 			} else {
+
 				## check if object is valid ##
 				if (!(class(varargin) == "prior")) {
 					stop("'varargin' must be of class 'prior'.")

@@ -13,32 +13,30 @@ setClass("mcmcoutputbase",
 	}
 )
 
-setMethod("show", "mcmcoutputbase", function(object) {
-	cat("Object 'mcmcoutputbase\n")
-	cat("	class		:", class(object), "\n")
-	cat("	M		:", object@M, "\n")
-	cat("	ranperm		:", object@ranperm, "\n")
-	cat("	par		: List of ", 
-		length(object@par), "\n")
-	cat("	weight		:", paste(dim(object@weight), 
-		collapse = "x"), "\n")
-	cat("	log		: List of ",
-		length(object@par), "\n")
-	cat("	entropy:	:", paste(dim(object@entropy),
-		collapse = "x"), "\n")
-	cat("	ST		:", paste(dim(object@ST),
-		collapse = "x"), "\n")
-	cat("	S		:", paste(dim(object@S),
-		collapse = "x"), "\n")
-	cat("	NK		:", paste(dim(object@NK),
-		collapse = "x"), "\n")
-	cat("	clust		:", paste(dim(object@clust),
-		collapse = "x"), "\n")
-	cat("	model		: Object of class",
-		class(object@model), "\n")
-	cat("	prior		: Object of class",
-		class(object@prior), "\n")
-})
+setMethod("show", "mcmcoutputbase", 
+          function(object){
+              cat("Object 'mcmcoutput'\n")
+              cat("     class       :", class(object), "\n")
+              cat("     M           :", object@M, "\n")
+              cat("     ranperm     :", object@ranperm, "\n")
+              cat("     par         : List of ", 
+                  length(object@par), "\n")
+              cat("     log         : List of ", 
+                  length(object@log), "\n")
+              cat("     ST          : ", 
+                  paste(dim(object@ST), collapse = "x"), "\n")
+              cat("     S           : ", 
+                  paste(dim(object@S), collapse = "x"), "\n")
+              cat("     NK          : ",
+                  paste(dim(object@NK), collapse = "x"), "\n")
+              cat("     clust       : ",
+                  paste(dim(object@clust), collapse = "x"), "\n")
+              cat("     model       : Object of class", 
+                  class(object@model), "\n")
+              cat("     prior       : Object of class",
+                  class(object@prior), "\n")
+          }
+)
 
 setMethod("plot", signature(x = "mcmcoutputbase", 
 	y = "ANY"), function(x, yi = TRUE, ...) {
@@ -273,6 +271,49 @@ setMethod("plotHist", signature(x = "mcmcoutputbase", dev = "ANY"),
 	}
 	
 })
+
+## Generic defined in 'mcmcoutputfix.R' ##
+setMethod("subseq", signature(object = "mcmcoutputbase", 
+                              index = "logical"), 
+          function(object, index) {
+              M <- object@M
+
+              ## Call 'subseq()' method from 'mcmcoutputfix'
+              object <- callNextMethod(object, index)
+              
+              ## Change owned slots ##
+              object@log$cdpost <- object@log$cdpost[index]
+              object@weight <- object@weight[index, ]
+              object@entropy <- object@entropy[index]
+              object@ST     <- object@ST[index]
+              
+              ## Check which S stay ##
+              ms <- M - ncol(object@S)
+              index.S <- index[(ms + 1):M]
+              object@S <- object@S[,index.S]
+              
+              return(object)
+          }
+)
+
+## Generic defined in 'mcmcoutputfix.R' ##
+setMethod("swapElements", signature(object = "mcmcoutputbase", 
+                                    index = "integer"),
+          function(object, index) {
+              dist <- object@model@dist
+              ## Call method 'swapElements()' from 'mcmcoutputfix' 
+              object <- callNextMethod(object, index)
+              ## Rcpp::export 'swap_cc2()'
+              object@weight <- swap_cc2(object@weight, index)
+              ## Rcpp::export 'swapInd_cc()'
+              object@S <- swapInd_cc(object@S, index)
+              ## Rcpp::export 'swapST_cc()'
+              object@ST <- swapST_cc(object@ST, index)
+              ## Rcpp::export 'swap_cc2()'
+              object@NK <- swap_cc2(object@NK, index)
+              return(object)
+          }
+)
 
 setGeneric("getWeight", function(object) standardGeneric("getWeight"))
 setMethod("getWeight", "mcmcoutputbase", function(object) {

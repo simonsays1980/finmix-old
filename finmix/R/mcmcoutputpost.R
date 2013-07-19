@@ -271,6 +271,46 @@ setMethod("plotHist", signature(x = "mcmcoutputpost", dev = "ANY"),
 	
 })
 
+setMethod("subseq", signature(object = "mcmcoutputpost", 
+                              index = "logical"), 
+          function(object, index) {
+              ## Call 'subseq()' method from 'mcmcoutputfixpost'
+              ## class
+              object <- subseq(as(object, "mcmcoutputfixpost"), 
+                               index)
+              
+              ## Change owned slots ##
+              object@log$cdpost <- object@log$cdpost[index]
+              object@weight <- object@weight[index, ]
+              object@entropy <- object@entropy[index]
+              object@ST     <- object@ST[index]
+              
+              ## Check which S stay ##
+              ms <- M - ncol(object@S)
+              index.S <- index[(ms + 1):M]
+              object@S <- object@S[,index.S]
+              
+              return(object)
+          }
+)
+
+## Generic defined in 'mcmcoutputfix.R' ##
+setMethod("swapElements", signature(object = "mcmcoutputpost", 
+                                    index = "integer"),
+          function(object, index) {
+              dist <- object@model@dist
+              ## Call method 'swapElements()' from 'mcmcoutputbase' 
+              object <- callNextMethod(object, index)
+              if (dist == "poisson") {
+                  ## Rcpp::export 'swap_cc2()'
+                  object@post$a <- swap_cc2(object@post$a, 
+                                            index)
+                  object@post$b <- swap_cc2(object@post$b,
+                                            index)
+              }
+              return(object)
+          }
+)
 
 setMethod("getPost", "mcmcoutputpost", function(object) {
 						return(object@post)

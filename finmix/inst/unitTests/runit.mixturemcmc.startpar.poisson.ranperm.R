@@ -51,7 +51,7 @@ if(TRUE) {
 	setK(model) <- 1
         setIndicFix(model) <- TRUE
 	prior <- prior(hier = FALSE)
-        prior <- priordefine(data, model, prior)
+        prior <- priordefine(data, model, varargin = prior)
         mcmc <- .setUp.mcmc.startpar.ranperm()
 	(data ~ model ~ mcmc) %=% mcmcstart(data,model,mcmc)
         mcmcout <- mixturemcmc(data,model,prior,mcmc)
@@ -103,7 +103,7 @@ if(TRUE) {
         model <- .setUp.model.startpar.ranperm()
         setIndicFix(model) <- TRUE
 	prior <- prior(hier = FALSE)
-        prior <- priordefine(data, model, prior)
+        prior <- priordefine(data, model, varargin = prior)
         mcmc <- .setUp.mcmc.startpar.ranperm()
        	(data ~ model ~ mcmc) %=% mcmcstart(data,model,mcmc)
 	mcmcout <- mixturemcmc(data,model,prior,mcmc)
@@ -156,7 +156,7 @@ if(TRUE) {
 	setK(model) <- 3
         setIndicFix(model) <- TRUE
 	prior <- prior(hier = FALSE)
-        prior <- priordefine(data, model, prior)
+        prior <- priordefine(data, model, varargin = prior)
         mcmc <- .setUp.mcmc.startpar.ranperm()
  	(data ~ model ~ mcmc) %=% mcmcstart(data,model,mcmc)
        	mcmcout <- mixturemcmc(data,model,prior,mcmc)
@@ -384,7 +384,7 @@ if(TRUE) {
 	setK(model) <- 1
         setIndicFix(model) <- TRUE
 	prior <- prior(hier = FALSE)
-        prior <- priordefine(data, model, prior)
+        prior <- priordefine(data, model, varargin = prior)
         mcmc <- .setUp.mcmc.startpar.ranperm()
 	(data ~ model ~ mcmc) %=% mcmcstart(data,model,mcmc)
 	setStorepost(mcmc) <- TRUE
@@ -458,7 +458,7 @@ if(TRUE) {
         model <- .setUp.model.startpar.ranperm()
         setIndicFix(model) <- TRUE
 	prior <- prior(hier = FALSE)
-        prior <- priordefine(data, model, prior)
+        prior <- priordefine(data, model, varargin = prior)
         mcmc <- .setUp.mcmc.startpar.ranperm()
 	setStorepost(mcmc) <- TRUE
        	(data ~ model ~ mcmc) %=% mcmcstart(data,model,mcmc)
@@ -535,7 +535,7 @@ if(TRUE) {
 	setK(model) <- 3
         setIndicFix(model) <- TRUE
 	prior <- prior(hier = FALSE)
-        prior <- priordefine(data, model, prior)
+        prior <- priordefine(data, model, varargin = prior)
         mcmc <- .setUp.mcmc.startpar.ranperm()
 	setStorepost(mcmc) <- TRUE
  	(data ~ model ~ mcmc) %=% mcmcstart(data,model,mcmc)
@@ -852,7 +852,7 @@ if(TRUE) {
 	setK(model) <- 1
         setIndicFix(model) <- FALSE
 	prior <- prior(hier = FALSE)
-        prior <- priordefine(data, model, prior)
+        prior <- priordefine(data, model, varargin = prior)
         mcmc <- .setUp.mcmc.startpar.ranperm()
        	(data ~ model ~ mcmc) %=% mcmcstart(data,model,mcmc)
 	mcmcout <- mixturemcmc(data,model,prior,mcmc)
@@ -904,7 +904,7 @@ if(TRUE) {
         model <- .setUp.model.startpar.ranperm()
         setIndicFix(model) <- FALSE
 	prior <- prior(hier = FALSE)
-        prior <- priordefine(data, model, prior)
+        prior <- priordefine(data, model, varargin = prior)
         mcmc <- .setUp.mcmc.startpar.ranperm()
  	(data ~ model ~ mcmc) %=% mcmcstart(data,model,mcmc)
       	mcmcout <- mixturemcmc(data,model,prior,mcmc)
@@ -1005,7 +1005,7 @@ if(TRUE) {
 	setK(model) <- 3
         setIndicFix(model) <- FALSE
 	prior <- prior(hier = FALSE)
-        prior <- priordefine(data, model, prior)
+        prior <- priordefine(data, model, varargin = prior)
         mcmc <- .setUp.mcmc.startpar.ranperm()
        	(data ~ model ~ mcmc) %=% mcmcstart(data,model,mcmc)
 	mcmcout <- mixturemcmc(data,model,prior,mcmc)
@@ -1371,7 +1371,7 @@ if(TRUE) {
 	setK(model) <- 1
         setIndicFix(model) <- FALSE
 	prior <- prior(hier = FALSE)
-        prior <- priordefine(data, model, prior)
+        prior <- priordefine(data, model, varargin = prior)
         mcmc <- .setUp.mcmc.startpar.ranperm()
 	setStorepost(mcmc) <- TRUE
  	(data ~ model ~ mcmc) %=% mcmcstart(data,model,mcmc)
@@ -1444,7 +1444,7 @@ if(TRUE) {
         model <- .setUp.model.startpar.ranperm()
         setIndicFix(model) <- FALSE
 	prior <- prior(hier = FALSE)
-        prior <- priordefine(data, model, prior)
+        prior <- priordefine(data, model, varargin = prior)
         mcmc <- .setUp.mcmc.startpar.ranperm()
 	setStorepost(mcmc) <- TRUE
        	(data ~ model ~ mcmc) %=% mcmcstart(data,model,mcmc)
@@ -1573,7 +1573,7 @@ if(TRUE) {
         model <- .setUp.model.startpar.ranperm()
         setIndicFix(model) <- FALSE
 	prior <- prior(hier = FALSE)
-        prior <- priordefine(data, model, prior)
+        prior <- priordefine(data, model, varargin = prior)
         mcmc <- .setUp.mcmc.startpar.ranperm()
 	setStorepost(mcmc) <- TRUE
        	(data ~ model ~ mcmc) %=% mcmcstart(data,model,mcmc)

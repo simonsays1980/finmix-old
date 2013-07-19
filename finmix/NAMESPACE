@@ -1,7 +1,6 @@
 useDynLib(finmix)
 exportPattern("^[[:alpha:]]+")
 
-importFrom(graphics, plot)
 importFrom(graphics, barplot)
 importFrom(mnormt, dmnorm)
 importFrom(mnormt, dmt)
@@ -19,7 +18,10 @@ export( ## user-defined constructors
         "groupmoments",
         "sdatamoments",
         "datamoments",
-    	"mixturemcmc"
+    	"mixturemcmc",
+        "swap_cc2",         ## Rcpp::export
+        "swapInd_cc",       ## Rcpp::export
+        "swapST_cc"         ## Rcpp::export
 )
 
 exportClasses( ## all classes
@@ -57,7 +59,6 @@ exportMethods( ## name of the generic, as with other methods
         "getT",
         "setT<-",
         "plot",
-
         ## 'modelmoments' class ##
         "getMean",
         "getVar",
@@ -121,6 +122,8 @@ exportMethods( ## name of the generic, as with other methods
         "getLog",
         "getModel",
         "getPrior",
+        "subseq",
+        "swapElements",
 
         ## 'mcmcouputfixhier' class ##
         "getHyper",

@@ -12,20 +12,22 @@ setClass("mcmcoutputfix",
 	}
 )
 
-setMethod("show", "mcmcoutputfix", function(object) {
-	cat("Object 'mcmcoutputfix'\n")
-	cat("	class		:", class(object), "\n")	
-	cat("	M		:", object@M, "\n")
-	cat("	ranperm		:", object@ranperm, "\n")
-	cat("	par		: List of ", 
-		length(object@par), "\n")
-	cat("	log		: List of ", 
-		length(object@log), "\n")
-	cat("	model		: Object of class", 
-		class(object@model), "\n")
-	cat("	prior		: Object of class", 
-		class(object@prior), "\n")
-})
+setMethod("show", "mcmcoutputfix", 
+          function(object) {
+              cat("Object 'mcmcoutputfix'\n")
+              cat("     class       :", class(object), "\n")
+              cat("     M           :", object@M, "\n")
+              cat("     ranperm     :", object@ranperm, "\n")
+              cat("     par         : List of ", 
+                  length(object@par), "\n")
+              cat("     log         : List of ", 
+                  length(object@log), "\n")
+              cat("     model       : Object of class", 
+                  class(object@model), "\n")
+              cat("     prior       : Object of class",
+                  class(object@prior), "\n")
+          }
+)
 
 setMethod("plot", signature(x = "mcmcoutputfix", y = "missing"), 
 	function(x, y, dev = TRUE, ...) {
@@ -208,6 +210,37 @@ setMethod("plotHist", signature(x = "mcmcoutputfix", dev = "ANY"),
 	}
 	
 })
+
+setGeneric("subseq", function(object, index) standardGeneric("subseq"))
+setMethod("subseq", signature(object = "mcmcoutputfix", index = "logical"), 
+          function(object, index) {
+              dist <- object@model@dist
+              object@M <- sum(index)
+              ## log ##
+              object@log$mixlik <- object@log$mixlik[index]
+              object@log$mixprior <- object@log$mixprior[index]
+              ## par ##
+              if(dist == "poisson") {
+                  object@par$lambda <- object@par$lambda[index, ]
+              }
+              return(object)
+          }
+)
+
+setGeneric("swapElements", function(object, index) standardGeneric("swapElements"))
+setMethod("swapElements", signature(object = "mcmcoutputfix", index = "array"),
+          function(object, index) { ## TODO: check for integer and index 
+              dist <- object@model@dist
+              
+              if (dist == "poisson") {
+                  ## Rcpp::export 'swap_cc2'
+                  object@par$lambda <- swap_cc2(object@par$lambda, index)
+              }
+              return(object)
+          }
+) 
+              
+## Getters ##
 setGeneric("getM", function(object) standardGeneric("getM")) 
 setMethod("getM", "mcmcoutputfix", function(object) {
 						return(object@M)

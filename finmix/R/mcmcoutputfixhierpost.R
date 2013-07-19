@@ -227,4 +227,36 @@ setMethod("plotHist", signature(x = "mcmcoutputfixhierpost", dev = "ANY"),
 	
 })
 
+setMethod("subseq", signature(object = "mcmcoutputfixhier",
+                              index = "logical"), 
+          function(object, index) {
+              dist <- object@model@dist
+              ### Call only the 'subseq' method from the 
+              ## 'mcmcoutputfixhier' class
+              object <- subseq(as(object, "mcmcoutputfixhier"), index)
+              ## post ##
+              if (dist == "poisson") {
+                  object@post$a <- object@post$a[index, ]
+                  object@post$b <- object@post$b[index, ]
+              }
+          }
+)
+
+## Generic defined in 'mcmcoutputfix.R' ##
+setMethod("swapElements", signature(object = "mcmcoutputfixhierpost", 
+                                    index = "integer"),
+          function(object, index) {
+              dist <- object@model@dist
+              ## Call method 'swapElements()' from 'mcmcoutputfixhier' 
+              object <- swapElements(as(object, "mcmcoutfixhier"), index)
+
+              if (dist == "poisson") {
+                  ## Rcpp::export 'swap_cc2' 
+                  object@post$a <- swap_cc2(object@post$a, index)
+                  object@post$b <- swap_cc2(object@post$b, index)
+              }
+              return(object)
+          }
+)
+
 

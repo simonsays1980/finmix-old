@@ -13,6 +13,7 @@ Imports: graphics, mnormt (>= 1.4-5)
 Suggests: RUnit
 LinkingTo: Rcpp, RcppArmadillo
 Collate:
+    RcppExports.R
 	graphic_func.R 
 	distributions.R
         model.R
@@ -42,3 +43,6 @@ Collate:
 	mcmcoutputpost.R
 	mcmcoutputhierpost.R
 	mixturemcmc.R
+    mcmcpermfix.R
+    mcmcpermfixpost.R
+    mcmcpermind.R

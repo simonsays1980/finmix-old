@@ -1,7 +1,7 @@
 "mixturemcmc" <- function(data, model, prior, mcmc) {
 	## check if all arguments are provided ##
 	if(nargs() < 4) 
-		return("[Error] All arguments must be provided.")
+		stop("All arguments must be provided.")
 
 	## check data object ##
 	validObject(data)
@@ -31,14 +31,14 @@
 		N <- nrow(datam)
 	}
 	else { ## data has no observations
-		return("[Error] Observations in 'y' of 'data' object are obligatory for MCMC sampling.")
+		stop("Observations in 'y' of 'data' object are obligatory for MCMC sampling.")
 	}
 	if(model@dist == "poisson" || model@dist == "cond.poisson") {
 		has.exposures <- !all(is.na(data@exp))
 		if(has.exposures) {
 			if(data@bycolumn) {
 				if(nrow(data@exp) != N && nrow(data@exp) != 1) {
-					return("[Error] number of exposures 'exp' in 'data' does not match number of observations in 'y'.")
+					stop("Number of exposures 'exp' in 'data' does not match number of observations in 'y'.")
 				}
 				else if(nrow(data@exp) == N) {
 					data@exp <- data@exp
@@ -49,7 +49,7 @@
 			}
 			else { ## data stored by row
 				if(ncol(data@exp) != N && ncol(data@exp) != 1) {
-					return("[Error] number of exposures 'exp' in 'data' does not match number of observations in 'y'.")
+					stop("Number of exposures 'exp' in 'data' does not match number of observations in 'y'.")
 				}
 				else if(ncol(data@exp) == N) {
 					data@exp <- t(data@exp)
@@ -69,7 +69,7 @@
 		if(has.reps) {
 			if(bycolumn) {
 				if(nrow(data@T) != N && nrow(data@T) != 1)  {
-					return("[Error] number of repetitions 'T' in 'data' does not match number of observations in 'y'.")
+					stop("Number of repetitions 'T' in 'data' does not match number of observations in 'y'.")
 				}
 				else if(nrow(data@T) == N) {
 					T <- data@T
@@ -80,7 +80,7 @@
 			}
 			else { ## data stored by row 
 				if(ncol(data@T) != N && ncol(data@T) != 1) {
-					return("[Error] number of repetitions 'T' in 'data' does not match number of observations in 'y'.")
+					stop("Number of repetitions 'T' in 'data' does not match number of observations in 'y'.")
 				}
 				else if(ncol(data@T) == N) {
 					T <- t(data@T)
@@ -92,7 +92,7 @@
 		}
 		else { ## then check in model ##
 			if(nrow(model@T) != N && nrow(model@T) != 1) {
-				return("[Error] neither 'data' nor 'model' has correctly specified repetitions 'T'.")
+				stop("Neither 'data' nor 'model' has correctly specified repetitions 'T'.")
 			}	
 			else if(nrow(model@T) == N) {
 				T <- model@T
@@ -111,41 +111,42 @@
 	}
 	if (mcmc@startpar && !model@indicfix && K > 1) { ## i.e. it should be started by sampling allocations
 		if(length(model@par) == 0) 
-			return("[Error] for starting with sampling allocations 'model' must provide starting parameters.")
+			stop("For starting with sampling allocations 'model' must provide starting parameters.")
 		if(any(is.na(model@weight)) && model@indicmod == "multinomial") 
-			return("[Error] for starting with sampling allocations 'model' must provide starting weights.")
+			stop("For starting with sampling allocations 'model' must provide starting weights.")
 		dataclass <- dataclass(data, model, simS = TRUE)	
 	} 
 	if(!has.S && K > 1) 
-		return("[Error] for starting with sampling parameters 'data' must provide starting allocations.")			
+		stop("For starting with sampling parameters 'data' must provide starting allocations.")			
 	if(norstud) {
 		if(prior@type == "independent") { ## independent prior
 			## later regression model ##
 
 			## here only finite mixture ##
 			if(length(model@par) == 0) 
-				return("[Error] for an independent prior, starting values for the component means have to be provided.")
+				stop("For an independent prior, starting values for the component means have to be provided.")
 			has.mu <- "mu" %in% names(model@par)
 			if(!has.mu) 
-				return("[Error] for an independent prior, starting values for the component means have to be provided.")
+				stop("For an independent prior, starting values for the component means have to be provided.")
 		}
 		norstudmult <- (model@dist == "normult" || model@dist == "studmult")
 		has.logdet <- "logdet" %in% prior@par$sigma  
 		if(norstudmult && !has.logdet) {
 			has.C <- "C" %in% prior@par$sigma
 			if(!has.C) { 
-				return("[Error] for an independent prior entry 'C' in 'prior@par$sigma' has to be provided.")
+				stop("For an independent prior entry 'C' in 'prior@par$sigma' has to be provided.")
 			}
 			else { ## if C is there check if array of dimension (r x r x K) 
 				if(!is.array(C)) {
-					return("[Error] 'C' in 'prior@par$sigma' must be an array of dimension (r x r x K).")
+					stop("'C' in 'prior@par$sigma' must be an array of dimension (r x r x K).")
 				}
 				else {
 					## check dimensions ##
 					dims <- dim(prior@par$sigma$C)
 					has.dim <- (dims[1] == r && dims[2] == r && dims[3] == K)
-					if(!has.dim) 
-						return("[Error] 'C' in 'prior@par$sigma' must be an array of dimension (r x r x K).")
+					if(!has.dim) { 
+						stop("'C' in 'prior@par$sigma' must be an array of dimension (r x r x K).")
+                    }
 					logdetC <- array(0, dim = c(r,r,K))
 					for(k in 1:K) { ## TODO: check if Cs are given and check priordefine for thi
 						logdetC[,,k] <- log(det(prior@par$sigma$C[,,k]))
@@ -233,7 +234,7 @@
 			} ## end hier 
 		} ## end indicfix ##
 		## model with simulated indicators ##
-		else if(!model@indicfix) {			
+		else if(!model@indicfix && K > 1) {			
 			log.cdpost 	<- array(numeric(), dim = c(M, 1))
 			logs 		<- list(mixlik = log.mixlik, mixprior = log.mixprior, cdpost = log.cdpost)
 			weights 	<- array(numeric(), dim = c(M, K))

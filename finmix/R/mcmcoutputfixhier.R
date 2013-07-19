@@ -225,16 +225,33 @@ setMethod("plotHist", signature(x = "mcmcoutputfixhier", dev = "ANY"),
 	}
 	
 })
-setGeneric("getM", function(object) standardGeneric("getM")) 
-setMethod("getM", "mcmcoutputfix", function(object) {
-						return(object@M)
-					}
+
+## Generic defined int 'mcmcoutputfix.R' ##
+setMethod("subseq", signature(object = "mcmcoutputfixhier",
+                              index = "logical"), 
+          function(object, index) {
+              dist <- object@model@dist
+              
+              ## Call 'subseq()' from 'mcmcoutputfix'
+              callNextMethod(object, index)
+              
+              ## hyper ##
+              if (dist == "poisson") {
+                  object@hyper$b <- object@hyper$b[index]
+              }
+          }
 )
-setGeneric("getRanPerm", function(object) standardGeneric("getRanPerm"))
-setMethod("getRanPerm", "mcmcoutputfix", function(object) {
-							return(object@ranperm)
-						}
+
+## Generic defined in 'mcmcoutputfix.R' ##
+setMethod("swapElements", signature(object = "mcmcoutputfixhier", 
+                                    index = "integer"),
+          function(object, index) {
+              ## Call method 'swap()' from 'mcmcoutputfix' 
+              object <- callNextMethod(object, index)
+              return(object)
+          }
 )
+
 setGeneric("getHyper", function(object) standardGeneric("getHyper"))
 setMethod("getHyper", "mcmcoutputfixhier", function(object) {
 							return(object@hyper)

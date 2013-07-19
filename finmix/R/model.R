@@ -49,7 +49,7 @@ setMethod("initialize", "model", function(.Object, ..., .cache = new.env()){
 		return(model)
 }
 
-setMethod("plot", "model", function(x, ..., dis.grid = 1:10, persp.grid.x = seq(-10, 10, length = 40), 
+setMethod("plot", "model", function(x, y, ..., dis.grid = 1:10, persp.grid.x = seq(-10, 10, length = 40), 
 					persp.grid.y = seq(-10, 10, length = 40), theta = 0, phi = 15, deparse.level = 1) {
 					.Object <- x
 					if(.Object@dist == "normal") {
@@ -300,22 +300,22 @@ setMethod("mixturemar", "model", function(.Object, J) {
 ## Show ##
 setMethod("show", "model", function(object) {
 					cat("Object 'model'\n")
-					cat("	type	:", class(object), "\n")
-					cat("	dist 	:", object@dist, "\n")
-					cat("	r	:", object@r, "\n")
-					cat("	K	:", object@K, "\n")
-					cat("	weight	:", paste(dim(object@weight), collapse = "x"), "\n")
+					cat("	type	    :", class(object), "\n")
+					cat("	dist 	    :", object@dist, "\n")
+					cat("	r	        :", object@r, "\n")
+					cat("	K	        :", object@K, "\n")
+					cat("	weight	    :", paste(dim(object@weight), collapse = "x"), "\n")
 					if(!all(is.na(object@par))) {
-						cat("	par	: List of ", length(names(getPar(object))), "\n")
+						cat("	par	        : List of ", length(names(getPar(object))), "\n")
 					}	
-					cat("	indicmod:", object@indicmod,"\n")
-					cat("	indicfix:", object@indicfix, "\n")
+					cat("	indicmod    :", object@indicmod,"\n")
+					cat("	indicfix    :", object@indicfix, "\n")
 					if(object@dist == "binomial") {
 						if(length(T) > 1) {
-							cat("	T	:", paste(dim(object@T), collapse = "x"), "\n")
+							cat("	T	        :", paste(dim(object@T), collapse = "x"), "\n")
 						}
 						else { ## T is the same for all 
-							cat("	T	:", object@T, "\n")
+							cat("	T	        :", object@T, "\n")
 						}
 					}
 				}

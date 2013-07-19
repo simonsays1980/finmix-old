@@ -205,6 +205,40 @@ setMethod("plotHist", signature(x = "mcmcoutputfixpost", dev = "ANY"),
 	
 })
 
+## Generic defined in 'mcmcoutputfix.R' ##
+setMethod("subseq", signature(object = "mcmcoutputfixpost",
+                              index = "logical"), 
+          function(object, index) {
+              dist <- object@model@dist
+        
+              ## Call 'subseq()' from 'mcmcoutputfix'
+              callNextMethod(object, index)
+              
+              ## post ##
+              if (dist == "poisson") {
+                  object@post$a <- object@post$a[index, ]
+                  object@post$b <- object@post$b[index, ]
+              }
+          }
+)
+
+## Generic defined in 'mcmcoutputfix.R' ##
+setMethod("swapElements", signature(object = "mcmcoutputfixpost", 
+                                    index = "integer"),
+          function(object, index) {
+              dist <- object@model@dist
+              ## Call method 'swapiElements()' from 'mcmcoutputfix' 
+              object <- callNextMethod(object, index)
+
+              if (dist == "poisson") {
+                  ## Rcpp::export 'swap_cc2' 
+                  object@post$a <- swap_cc2(object@post$a, index)
+                  object@post$b <- swap_cc2(object@post$b, index)
+              }
+              return(object)
+          }
+)
+
 setGeneric("getPost", function(object) standardGeneric("getPost"))
 setMethod("getPost", "mcmcoutputfixpost", function(object) {
 							return(object@post)	
