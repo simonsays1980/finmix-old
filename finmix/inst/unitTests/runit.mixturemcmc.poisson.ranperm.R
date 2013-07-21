@@ -45,10 +45,11 @@ if(TRUE) {
 "test.FIX.RANPERM.1"  <- function() {
         ## Setting:
         ##      indicfix: TRUE
+        set.seed(0)
         data <- .setUp.data.ranperm(withInd = FALSE)
         model <- .setUp.model.ranperm()
 	setK(model) <- 1
-        setIndicFix(model) <- TRUE
+        setIndicfix(model) <- TRUE
 	prior <- prior(hier = FALSE)
         prior <- priordefine(data, model, varargin = prior)
         mcmc <- .setUp.mcmc.ranperm()
@@ -96,9 +97,10 @@ if(TRUE) {
 "test.FIX.RANPERM.2" <- function() {
         ## Setting:
         ##      indicfix: TRUE
+    set.seed(0)
         data <- .setUp.data.ranperm(withInd = TRUE)
         model <- .setUp.model.ranperm()
-        setIndicFix(model) <- TRUE
+        setIndicfix(model) <- TRUE
 	prior <- prior(hier = FALSE)
         prior <- priordefine(data, model, varargin = prior)
         mcmc <- .setUp.mcmc.ranperm()
@@ -146,10 +148,11 @@ if(TRUE) {
 "test.FIX.RANPERM.3" <- function() {
         ## Setting:
         ##      indicfix: TRUE
+    set.seed(0)
         data <- .setUp.data.ranperm(withInd = TRUE)
         model <- .setUp.model.ranperm()
 	setK(model) <- 3
-        setIndicFix(model) <- TRUE
+        setIndicfix(model) <- TRUE
 	prior <- prior(hier = FALSE)
         prior <- priordefine(data, model, varargin = prior)
         mcmc <- .setUp.mcmc.ranperm()
@@ -199,10 +202,11 @@ if(TRUE) {
 "test.FIX.HIER.RANPERM.1"  <- function() {
         ## Setting:
         ##      indicfix: TRUE
+    set.seed(0)
         data <- .setUp.data.ranperm(withInd = FALSE)
         model <- .setUp.model.ranperm()
 	setK(model) <- 1
-        setIndicFix(model) <- TRUE
+        setIndicfix(model) <- TRUE
         prior <- priordefine(data, model)
         mcmc <- .setUp.mcmc.ranperm()
         mcmcout <- mixturemcmc(data,model,prior,mcmc)
@@ -255,9 +259,10 @@ if(TRUE) {
 "test.FIX.HIER.RANPERM.2" <- function() {
         ## Setting:
         ##      indicfix: TRUE
+    set.seed(0)
         data <- .setUp.data.ranperm(withInd = TRUE)
         model <- .setUp.model.ranperm()
-        setIndicFix(model) <- TRUE
+        setIndicfix(model) <- TRUE
         prior <- priordefine(data, model)
         mcmc <- .setUp.mcmc.ranperm()
         mcmcout <- mixturemcmc(data,model,prior,mcmc)
@@ -310,10 +315,11 @@ if(TRUE) {
 "test.FIX.HIER.RANPERM.3" <- function() {
         ## Setting:
         ##      indicfix: TRUE
+    set.seed(0)
         data <- .setUp.data.ranperm(withInd = TRUE)
         model <- .setUp.model.ranperm()
 	setK(model) <- 3
-        setIndicFix(model) <- TRUE
+        setIndicfix(model) <- TRUE
         prior <- priordefine(data, model)
         mcmc <- .setUp.mcmc.ranperm()
         mcmcout <- mixturemcmc(data,model,prior,mcmc)
@@ -366,10 +372,11 @@ if(TRUE) {
 "test.FIX.POST.RANPERM.1"  <- function() {
         ## Setting:
         ##      indicfix: TRUE
+    set.seed(0)
         data <- .setUp.data.ranperm(withInd = FALSE)
         model <- .setUp.model.ranperm()
 	setK(model) <- 1
-        setIndicFix(model) <- TRUE
+        setIndicfix(model) <- TRUE
 	prior <- prior(hier = FALSE)
         prior <- priordefine(data, model, varargin = prior)
         mcmc <- .setUp.mcmc.ranperm()
@@ -439,9 +446,10 @@ if(TRUE) {
 "test.FIX.POST.RANPERM.2" <- function() {
         ## Setting:
         ##      indicfix: TRUE
+    set.seed(0)
         data <- .setUp.data.ranperm(withInd = TRUE)
         model <- .setUp.model.ranperm()
-        setIndicFix(model) <- TRUE
+        setIndicfix(model) <- TRUE
 	prior <- prior(hier = FALSE)
         prior <- priordefine(data, model, varargin = prior)
         mcmc <- .setUp.mcmc.ranperm()
@@ -513,10 +521,11 @@ if(TRUE) {
 "test.FIX.POST.RANPERM.3" <- function() {
         ## Setting:
         ##      indicfix: TRUE
+    set.seed(0)
         data <- .setUp.data.ranperm(withInd = TRUE)
         model <- .setUp.model.ranperm()
 	setK(model) <- 3
-        setIndicFix(model) <- TRUE
+        setIndicfix(model) <- TRUE
 	prior <- prior(hier = FALSE)
         prior <- priordefine(data, model, varargin = prior)
         mcmc <- .setUp.mcmc.ranperm()
@@ -588,10 +597,11 @@ if(TRUE) {
 "test.FIX.HIER.POST.RANPERM.1"  <- function() {
         ## Setting:
         ##      indicfix: TRUE
+    set.seed(0)
         data <- .setUp.data.ranperm(withInd = FALSE)
         model <- .setUp.model.ranperm()
 	setK(model) <- 1
-        setIndicFix(model) <- TRUE
+        setIndicfix(model) <- TRUE
         prior <- priordefine(data, model)
         mcmc <- .setUp.mcmc.ranperm()
 	setStorepost(mcmc) <- TRUE
@@ -666,9 +676,10 @@ if(TRUE) {
 "test.FIX.HIER.POST.RANPERM.2" <- function() {
         ## Setting:
         ##      indicfix: TRUE
+    set.seed(0)
         data <- .setUp.data.ranperm(withInd = TRUE)
         model <- .setUp.model.ranperm()
-        setIndicFix(model) <- TRUE
+        setIndicfix(model) <- TRUE
         prior <- priordefine(data, model)
         mcmc <- .setUp.mcmc.ranperm()
 	setStorepost(mcmc) <- TRUE
@@ -743,10 +754,11 @@ if(TRUE) {
 "test.FIX.HIER.POST.RANPERM.3" <- function() {
         ## Setting:
         ##      indicfix: TRUE
+    set.seed(0)
         data <- .setUp.data.ranperm(withInd = TRUE)
         model <- .setUp.model.ranperm()
 	setK(model) <- 3
-        setIndicFix(model) <- TRUE
+        setIndicfix(model) <- TRUE
         prior <- priordefine(data, model)
         mcmc <- .setUp.mcmc.ranperm()
 	setStorepost(mcmc) <- TRUE
@@ -822,10 +834,11 @@ if(TRUE) {
 "test.IND.RANPERM.1"  <- function() {
         ## Setting:
         ##      indicfix: FALSE
+    set.seed(0)
         data <- .setUp.data.ranperm(withInd = FALSE)
         model <- .setUp.model.ranperm()
 	setK(model) <- 1
-        setIndicFix(model) <- FALSE
+        setIndicfix(model) <- FALSE
 	prior <- prior(hier = FALSE)
         prior <- priordefine(data, model, varargin = prior)
         mcmc <- .setUp.mcmc.ranperm()
@@ -873,9 +886,10 @@ if(TRUE) {
 "test.IND.RANPERM.2" <- function() {
         ## Setting:
         ##      indicfix: FALSE
+    set.seed(0)
         data <- .setUp.data.ranperm(withInd = TRUE)
         model <- .setUp.model.ranperm()
-        setIndicFix(model) <- FALSE
+        setIndicfix(model) <- FALSE
 	prior <- prior(hier = FALSE)
         prior <- priordefine(data, model, varargin = prior)
         mcmc <- .setUp.mcmc.ranperm()
@@ -968,10 +982,11 @@ if(TRUE) {
 "test.IND.RANPERM.3" <- function() {
         ## Setting:
         ##      indicfix: FALSE
+    set.seed(0)
         data <- .setUp.data.ranperm(withInd = TRUE)
         model <- .setUp.model.ranperm()
 	setK(model) <- 3
-        setIndicFix(model) <- FALSE
+        setIndicfix(model) <- FALSE
 	prior <- prior(hier = FALSE)
         prior <- priordefine(data, model, varargin = prior)
         mcmc <- .setUp.mcmc.ranperm()
@@ -1064,10 +1079,11 @@ if(TRUE) {
 "test.IND.HIER.RANPERM.1"  <- function() {
         ## Setting:
         ##      indicfix: FALSE
+    set.seed(0)
         data <- .setUp.data.ranperm(withInd = TRUE)
         model <- .setUp.model.ranperm()
 	setK(model) <- 1
-        setIndicFix(model) <- FALSE
+        setIndicfix(model) <- FALSE
         prior <- priordefine(data, model)
         mcmc <- .setUp.mcmc.ranperm()
         mcmcout <- mixturemcmc(data,model,prior,mcmc)
@@ -1120,9 +1136,10 @@ if(TRUE) {
 "test.IND.HIER.RANPERM.2" <- function() {
         ## Setting:
         ##      indicfix: FALSE
+    set.seed(0)
         data <- .setUp.data.ranperm(withInd = TRUE)
         model <- .setUp.model.ranperm()
-        setIndicFix(model) <- FALSE
+        setIndicfix(model) <- FALSE
         prior <- priordefine(data, model)
         mcmc <- .setUp.mcmc.ranperm()
         mcmcout <- mixturemcmc(data,model,prior,mcmc)
@@ -1218,9 +1235,10 @@ if(TRUE) {
 "test.IND.HIER.RANPERM.3" <- function() {
         ## Setting:
         ##      indicfix: FALSE
+    set.seed(0)
         data <- .setUp.data.ranperm(withInd = TRUE)
         model <- .setUp.model.ranperm()
-        setIndicFix(model) <- FALSE
+        setIndicfix(model) <- FALSE
         prior <- priordefine(data, model)
         mcmc <- .setUp.mcmc.ranperm()
         mcmcout <- mixturemcmc(data,model,prior,mcmc)
@@ -1317,10 +1335,11 @@ if(TRUE) {
 "test.IND.POST.RANPERM.1"  <- function() {
         ## Setting:
         ##      indicfix: FALSE
+    set.seed(0)
         data <- .setUp.data.ranperm(withInd = FALSE)
         model <- .setUp.model.ranperm()
 	setK(model) <- 1
-        setIndicFix(model) <- FALSE
+        setIndicfix(model) <- FALSE
 	prior <- prior(hier = FALSE)
         prior <- priordefine(data, model, varargin = prior)
         mcmc <- .setUp.mcmc.ranperm()
@@ -1389,9 +1408,10 @@ if(TRUE) {
 "test.IND.POST.RANPERM.2" <- function() {
         ## Setting:
         ##      indicfix: FALSE
+    set.seed(0)
         data <- .setUp.data.ranperm(withInd = TRUE)
         model <- .setUp.model.ranperm()
-        setIndicFix(model) <- FALSE
+        setIndicfix(model) <- FALSE
 	prior <- prior(hier = FALSE)
         prior <- priordefine(data, model, varargin = prior)
         mcmc <- .setUp.mcmc.ranperm()
@@ -1513,9 +1533,10 @@ if(TRUE) {
 "test.IND.POST.RANPERM.3" <- function() {
         ## Setting:
         ##      indicfix: FALSE
+    set.seed(0)
         data <- .setUp.data.ranperm(withInd = TRUE)
         model <- .setUp.model.ranperm()
-        setIndicFix(model) <- FALSE
+        setIndicfix(model) <- FALSE
 	prior <- prior(hier = FALSE)
         prior <- priordefine(data, model, varargin = prior)
         mcmc <- .setUp.mcmc.ranperm()
@@ -1637,10 +1658,11 @@ if(TRUE) {
 "test.IND.HIER.POST.RANPERM.1"  <- function() {
         ## Setting:
         ##      indicfix: FALSE
+    set.seed(0)
         data <- .setUp.data.ranperm(withInd = FALSE)
         model <- .setUp.model.ranperm()
 	setK(model) <- 1
-        setIndicFix(model) <- FALSE
+        setIndicfix(model) <- FALSE
         prior <- priordefine(data, model)
         mcmc <- .setUp.mcmc.ranperm()
 	setStorepost(mcmc) <- TRUE
@@ -1715,9 +1737,10 @@ if(TRUE) {
 "test.IND.HIER.POST.RANPERM.2" <- function() {
         ## Setting:
         ##      indicfix: FALSE
+    set.seed(0)
         data <- .setUp.data.ranperm(withInd = TRUE)
         model <- .setUp.model.ranperm()
-        setIndicFix(model) <- FALSE
+        setIndicfix(model) <- FALSE
         prior <- priordefine(data, model)
         mcmc <- .setUp.mcmc.ranperm()
 	setStorepost(mcmc) <- TRUE
@@ -1844,9 +1867,10 @@ if(TRUE) {
 "test.IND.HIER.POST.RANPERM.3" <- function() {
         ## Setting:
         ##      indicfix: FALSE
+    set.seed(0)
         data <- .setUp.data.ranperm(withInd = TRUE)
         model <- .setUp.model.ranperm()
-        setIndicFix(model) <- FALSE
+        setIndicfix(model) <- FALSE
         prior <- priordefine(data, model)
         mcmc <- .setUp.mcmc.ranperm()
 	setStorepost(mcmc) <- TRUE

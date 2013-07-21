@@ -19,7 +19,7 @@ export( ## user-defined constructors
         "sdatamoments",
         "datamoments",
     	"mixturemcmc",
-        "swap_cc2",         ## Rcpp::export
+        "swap_cc",         ## Rcpp::export
         "swapInd_cc",       ## Rcpp::export
         "swapST_cc"         ## Rcpp::export
 )
@@ -52,10 +52,10 @@ exportMethods( ## name of the generic, as with other methods
         "setWeight<-",
         "getPar",
         "setPar<-",
-        "getIndicMod",
-        "setIndicMod<-",
-        "getIndicFix",
-        "setIndicFix<-",
+        "getIndicmod",
+        "setIndicmod<-",
+        "getIndicfix",
+        "setIndicfix<-",
         "getT",
         "setT<-",
         "plot",

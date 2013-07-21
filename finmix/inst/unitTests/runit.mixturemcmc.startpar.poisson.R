@@ -49,7 +49,7 @@ if(TRUE) {
 	data <- .setUp.data.startpar(withInd = FALSE)
         model <- .setUp.model.startpar()
 	setK(model) <- 1
-        setIndicFix(model) <- TRUE
+        setIndicfix(model) <- TRUE
 	prior <- prior(hier = FALSE)
         prior <- priordefine(data, model, varargin = prior)
         mcmc <- .setUp.mcmc.startpar()
@@ -101,7 +101,7 @@ if(TRUE) {
        	set.seed(0)       
 	data <- .setUp.data.startpar(withInd = TRUE)
         model <- .setUp.model.startpar()
-        setIndicFix(model) <- TRUE
+        setIndicfix(model) <- TRUE
 	prior <- prior(hier = FALSE)
         prior <- priordefine(data, model, varargin = prior)
         mcmc <- .setUp.mcmc.startpar()
@@ -154,7 +154,7 @@ if(TRUE) {
 	data <- .setUp.data.startpar(withInd = TRUE)
         model <- .setUp.model.startpar()
 	setK(model) <- 3
-        setIndicFix(model) <- TRUE
+        setIndicfix(model) <- TRUE
 	prior <- prior(hier = FALSE)
         prior <- priordefine(data, model, varargin = prior)
         mcmc <- .setUp.mcmc.startpar()
@@ -209,7 +209,7 @@ if(TRUE) {
 	data <- .setUp.data.startpar(withInd = FALSE)
         model <- .setUp.model.startpar()
 	setK(model) <- 1
-        setIndicFix(model) <- TRUE
+        setIndicfix(model) <- TRUE
         prior <- priordefine(data, model)
         mcmc <- .setUp.mcmc.startpar()
        	(data ~ model ~ mcmc) %=% mcmcstart(data,model,mcmc)
@@ -266,7 +266,7 @@ if(TRUE) {
  	set.seed(0)       
       	data <- .setUp.data.startpar(withInd = TRUE)
         model <- .setUp.model.startpar()
-        setIndicFix(model) <- TRUE
+        setIndicfix(model) <- TRUE
         prior <- priordefine(data, model)
         mcmc <- .setUp.mcmc.startpar()
        	(data ~ model ~ mcmc) %=% mcmcstart(data,model,mcmc)
@@ -324,7 +324,7 @@ if(TRUE) {
         data <- .setUp.data.startpar(withInd = TRUE)
         model <- .setUp.model.startpar()
 	setK(model) <- 3
-        setIndicFix(model) <- TRUE
+        setIndicfix(model) <- TRUE
         prior <- priordefine(data, model)
         mcmc <- .setUp.mcmc.startpar()
        	(data ~ model ~ mcmc) %=% mcmcstart(data,model,mcmc)
@@ -382,7 +382,7 @@ if(TRUE) {
         data <- .setUp.data.startpar(withInd = FALSE)
         model <- .setUp.model.startpar()
 	setK(model) <- 1
-        setIndicFix(model) <- TRUE
+        setIndicfix(model) <- TRUE
 	prior <- prior(hier = FALSE)
         prior <- priordefine(data, model, varargin = prior)
         mcmc <- .setUp.mcmc.startpar()
@@ -456,7 +456,7 @@ if(TRUE) {
        	set.seed(0)       
 	data <- .setUp.data.startpar(withInd = TRUE)
         model <- .setUp.model.startpar()
-        setIndicFix(model) <- TRUE
+        setIndicfix(model) <- TRUE
 	prior <- prior(hier = FALSE)
         prior <- priordefine(data, model, varargin = prior)
         mcmc <- .setUp.mcmc.startpar()
@@ -533,7 +533,7 @@ if(TRUE) {
 	data <- .setUp.data.startpar(withInd = TRUE)
         model <- .setUp.model.startpar()
 	setK(model) <- 3
-        setIndicFix(model) <- TRUE
+        setIndicfix(model) <- TRUE
 	prior <- prior(hier = FALSE)
         prior <- priordefine(data, model, varargin = prior)
         mcmc <- .setUp.mcmc.startpar()
@@ -610,7 +610,7 @@ if(TRUE) {
 	data <- .setUp.data.startpar(withInd = FALSE)
         model <- .setUp.model.startpar()
 	setK(model) <- 1
-        setIndicFix(model) <- TRUE
+        setIndicfix(model) <- TRUE
         prior <- priordefine(data, model)
         mcmc <- .setUp.mcmc.startpar()
 	setStorepost(mcmc) <- TRUE
@@ -689,7 +689,7 @@ if(TRUE) {
        	set.seed(0)       
 	data <- .setUp.data.startpar(withInd = TRUE)
         model <- .setUp.model.startpar()
-        setIndicFix(model) <- TRUE
+        setIndicfix(model) <- TRUE
         prior <- priordefine(data, model)
         mcmc <- .setUp.mcmc.startpar()
 	setStorepost(mcmc) <- TRUE
@@ -769,7 +769,7 @@ if(TRUE) {
 	data <- .setUp.data.startpar(withInd = TRUE)
         model <- .setUp.model.startpar()
 	setK(model) <- 3
-        setIndicFix(model) <- TRUE
+        setIndicfix(model) <- TRUE
         prior <- priordefine(data, model)
         mcmc <- .setUp.mcmc.startpar()
 	setStorepost(mcmc) <- TRUE
@@ -850,7 +850,7 @@ if(TRUE) {
 	data <- .setUp.data.startpar(withInd = FALSE)
         model <- .setUp.model.startpar()
 	setK(model) <- 1
-        setIndicFix(model) <- FALSE
+        setIndicfix(model) <- FALSE
 	prior <- prior(hier = FALSE)
         prior <- priordefine(data, model, varargin = prior)
         mcmc <- .setUp.mcmc.startpar()
@@ -902,7 +902,7 @@ if(TRUE) {
 	set.seed(0)
         data <- .setUp.data.startpar(withInd = TRUE)
         model <- .setUp.model.startpar()
-        setIndicFix(model) <- FALSE
+        setIndicfix(model) <- FALSE
 	prior <- prior(hier = FALSE)
         prior <- priordefine(data, model, varargin = prior)
         mcmc <- .setUp.mcmc.startpar()
@@ -1003,7 +1003,7 @@ if(TRUE) {
         data <- .setUp.data.startpar(withInd = TRUE)
         model <- .setUp.model.startpar()
 	setK(model) <- 3
-        setIndicFix(model) <- FALSE
+        setIndicfix(model) <- FALSE
 	prior <- prior(hier = FALSE)
         prior <- priordefine(data, model, varargin = prior)
         mcmc <- .setUp.mcmc.startpar()
@@ -1104,7 +1104,7 @@ if(TRUE) {
 	data <- .setUp.data.startpar(withInd = TRUE)
         model <- .setUp.model.startpar()
 	setK(model) <- 1
-        setIndicFix(model) <- FALSE
+        setIndicfix(model) <- FALSE
         prior <- priordefine(data, model)
         mcmc <- .setUp.mcmc.startpar()
        	(data ~ model ~ mcmc) %=% mcmcstart(data,model,mcmc)
@@ -1161,7 +1161,7 @@ if(TRUE) {
 	set.seed(0)       
 	data <- .setUp.data.startpar(withInd = TRUE)
         model <- .setUp.model.startpar()
-        setIndicFix(model) <- FALSE
+        setIndicfix(model) <- FALSE
         prior <- priordefine(data, model)
         mcmc <- .setUp.mcmc.startpar()
        	(data ~ model ~ mcmc) %=% mcmcstart(data,model,mcmc)
@@ -1264,7 +1264,7 @@ if(TRUE) {
        	set.seed(0)
 	data <- .setUp.data.startpar(withInd = TRUE)
         model <- .setUp.model.startpar()
-        setIndicFix(model) <- FALSE
+        setIndicfix(model) <- FALSE
         prior <- priordefine(data, model)
         mcmc <- .setUp.mcmc.startpar()
        	(data ~ model ~ mcmc) %=% mcmcstart(data,model,mcmc)
@@ -1369,7 +1369,7 @@ if(TRUE) {
 	data <- .setUp.data.startpar(withInd = FALSE)
         model <- .setUp.model.startpar()
 	setK(model) <- 1
-        setIndicFix(model) <- FALSE
+        setIndicfix(model) <- FALSE
 	prior <- prior(hier = FALSE)
         prior <- priordefine(data, model, varargin = prior)
         mcmc <- .setUp.mcmc.startpar()
@@ -1442,7 +1442,7 @@ if(TRUE) {
        	set.seed(0)       
 	data <- .setUp.data.startpar(withInd = TRUE)
         model <- .setUp.model.startpar()
-        setIndicFix(model) <- FALSE
+        setIndicfix(model) <- FALSE
 	prior <- prior(hier = FALSE)
         prior <- priordefine(data, model, varargin = prior)
         mcmc <- .setUp.mcmc.startpar()
@@ -1571,7 +1571,7 @@ if(TRUE) {
        	set.seed(0)       
 	data <- .setUp.data.startpar(withInd = TRUE)
         model <- .setUp.model.startpar()
-        setIndicFix(model) <- FALSE
+        setIndicfix(model) <- FALSE
 	prior <- prior(hier = FALSE)
         prior <- priordefine(data, model, varargin = prior)
         mcmc <- .setUp.mcmc.startpar()
@@ -1701,7 +1701,7 @@ if(TRUE) {
         data <- .setUp.data.startpar(withInd = FALSE)
         model <- .setUp.model.startpar()
 	setK(model) <- 1
-        setIndicFix(model) <- FALSE
+        setIndicfix(model) <- FALSE
         prior <- priordefine(data, model)
         mcmc <- .setUp.mcmc.startpar()
 	setStorepost(mcmc) <- TRUE
@@ -1780,7 +1780,7 @@ if(TRUE) {
         set.seed(0)
 	data <- .setUp.data.startpar(withInd = TRUE)
         model <- .setUp.model.startpar()
-        setIndicFix(model) <- FALSE
+        setIndicfix(model) <- FALSE
         prior <- priordefine(data, model)
         mcmc <- .setUp.mcmc.startpar()
 	setStorepost(mcmc) <- TRUE
@@ -1914,7 +1914,7 @@ if(TRUE) {
        	set.seed(0)       
 	data <- .setUp.data.startpar(withInd = TRUE)
         model <- .setUp.model.startpar()
-        setIndicFix(model) <- FALSE
+        setIndicfix(model) <- FALSE
         prior <- priordefine(data, model)
         mcmc <- .setUp.mcmc.startpar()
 	setStorepost(mcmc) <- TRUE

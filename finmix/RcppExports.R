@@ -5,10 +5,6 @@ swap_cc <- function(values, index) {
     .Call('finmix_swap_cc', PACKAGE = 'finmix', values, index)
 }
 
-swapInteger_cc <- function(values, index) {
-    .Call('finmix_swapInteger_cc', PACKAGE = 'finmix', values, index)
-}
-
 swapInd_cc <- function(values, index) {
     .Call('finmix_swapInd_cc', PACKAGE = 'finmix', values, index)
 }

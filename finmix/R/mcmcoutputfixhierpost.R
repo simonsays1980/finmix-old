@@ -230,6 +230,10 @@ setMethod("plotHist", signature(x = "mcmcoutputfixhierpost", dev = "ANY"),
 setMethod("subseq", signature(object = "mcmcoutputfixhier",
                               index = "logical"), 
           function(object, index) {
+              ## TODO: Check arguments via .validObject ##
+              if (dim(index)[1] != object@M) {
+                  stop("Argument 'index' has wrong dimension.")
+              }
               dist <- object@model@dist
               ### Call only the 'subseq' method from the 
               ## 'mcmcoutputfixhier' class
@@ -246,16 +250,24 @@ setMethod("subseq", signature(object = "mcmcoutputfixhier",
 setMethod("swapElements", signature(object = "mcmcoutputfixhierpost", 
                                     index = "integer"),
           function(object, index) {
-              dist <- object@model@dist
-              ## Call method 'swapElements()' from 'mcmcoutputfixhier' 
-              object <- swapElements(as(object, "mcmcoutfixhier"), index)
-
-              if (dist == "poisson") {
-                  ## Rcpp::export 'swap_cc2' 
-                  object@post$a <- swap_cc2(object@post$a, index)
-                  object@post$b <- swap_cc2(object@post$b, index)
+              ## Check arguments, TODO: .validObject ##
+              if (dim(index)[1] != object@M || dim(index)[1] != object@model@K) {
+                  stop("Argument 'index' has wrong dimension.")
               }
-              return(object)
+              if (object@model@K == 1) {
+                  return(object)
+              } else {
+                  dist <- object@model@dist
+                  ## Call method 'swapElements()' from 'mcmcoutputfixhier' 
+                  object <- swapElements(as(object, "mcmcoutfixhier"), index)
+    
+                  if (dist == "poisson") {
+                      ## Rcpp::export 'swap_cc' 
+                      object@post$a <- swap_cc(object@post$a, index)
+                      object@post$b <- swap_cc(object@post$b, index)
+                  }
+                  return(object)
+              }
           }
 )
 

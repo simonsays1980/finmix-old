@@ -212,8 +212,15 @@ setMethod("plotHist", signature(x = "mcmcoutputfix", dev = "ANY"),
 })
 
 setGeneric("subseq", function(object, index) standardGeneric("subseq"))
-setMethod("subseq", signature(object = "mcmcoutputfix", index = "logical"), 
+setMethod("subseq", signature(object = "mcmcoutputfix", index = "array"), 
           function(object, index) {
+              ## TODO: Check arguments via .validObject ##
+              if (dim(index)[1] != object@M) {
+                  stop("Argument 'index' has wrong dimension.")
+              }
+              if (typeof(index) != "logical") {
+                  stop("Argument 'index' must be of type 'logical'.")
+              }
               dist <- object@model@dist
               object@M <- sum(index)
               ## log ##
@@ -221,7 +228,12 @@ setMethod("subseq", signature(object = "mcmcoutputfix", index = "logical"),
               object@log$mixprior <- object@log$mixprior[index]
               ## par ##
               if(dist == "poisson") {
-                  object@par$lambda <- object@par$lambda[index, ]
+                  if(object@model@K == 1) {
+                      object@par$lambda <- matrix(object@par$lambda[index], 
+                                                  nrow = object@M, ncol = 1)
+                  } else {
+                      object@par$lambda <- object@par$lambda[index,]
+                  }
               }
               return(object)
           }
@@ -230,13 +242,28 @@ setMethod("subseq", signature(object = "mcmcoutputfix", index = "logical"),
 setGeneric("swapElements", function(object, index) standardGeneric("swapElements"))
 setMethod("swapElements", signature(object = "mcmcoutputfix", index = "array"),
           function(object, index) { ## TODO: check for integer and index 
-              dist <- object@model@dist
-              
-              if (dist == "poisson") {
-                  ## Rcpp::export 'swap_cc2'
-                  object@par$lambda <- swap_cc2(object@par$lambda, index)
+              ## Check arguments, TODO: .validObject ##
+              if (dim(index)[1] != object@M || dim(index)[2] != object@model@K) {
+                  stop("Argument 'index' has wrong dimension.")
               }
-              return(object)
+              if (typeof(index) != "integer") {
+                  stop("Argument 'index' must be of type 'integer'.")
+              }
+              if (!all(index > 0)) {
+                  stop("Elements in argument 'index' must be greater 0.")
+              }
+              if(object@model@K == 1) {
+                  cat("mcmcoutputfix: K = 1\n")
+                  return(object)
+              } else {
+                  dist <- object@model@dist
+                    cat("mcmcoutputfix: K > 1\n")             
+                  if (dist == "poisson") {
+                      ## Rcpp::export 'swap_cc'
+                      object@par$lambda <- swap_cc(object@par$lambda, index)
+                  }
+                  return(object)
+              }
           }
 ) 
               

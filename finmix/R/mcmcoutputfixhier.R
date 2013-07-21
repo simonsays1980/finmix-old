@@ -228,17 +228,26 @@ setMethod("plotHist", signature(x = "mcmcoutputfixhier", dev = "ANY"),
 
 ## Generic defined int 'mcmcoutputfix.R' ##
 setMethod("subseq", signature(object = "mcmcoutputfixhier",
-                              index = "logical"), 
+                              index = "array"), 
           function(object, index) {
+              ## TODO: Check arguments via .validObject ##
+              if (dim(index)[1] != object@M) {
+                  stop("Argument 'index' has wrong dimension.")
+              }
+              if (typeof(index) != "logical") {
+                  stop("Argument 'index' must be of type 'logical'.")
+              }
               dist <- object@model@dist
               
               ## Call 'subseq()' from 'mcmcoutputfix'
-              callNextMethod(object, index)
+              object <- callNextMethod(object, index)
               
               ## hyper ##
               if (dist == "poisson") {
-                  object@hyper$b <- object@hyper$b[index]
+                  object@hyper$b <- matrix(object@hyper$b[index], 
+                                           nrow = object@M, ncol = 1)
               }
+              return(object)
           }
 )
 
@@ -246,9 +255,23 @@ setMethod("subseq", signature(object = "mcmcoutputfixhier",
 setMethod("swapElements", signature(object = "mcmcoutputfixhier", 
                                     index = "integer"),
           function(object, index) {
-              ## Call method 'swap()' from 'mcmcoutputfix' 
-              object <- callNextMethod(object, index)
-              return(object)
+              ## Check arguments, TODO: .validObject ##
+              if (dim(index)[1] != object@M || dim(index)[2] != object@model@K) {
+                  stop("Argument 'index' has wrong dimension.")
+              }
+              if (typeof(index) != "integer") {
+                  stop("Argument 'index' must be of type 'integer'")
+              }
+              if (!all(index > 0)) {
+                  stop("ELements in argument 'index' must be greater 0.")
+              }
+              if (object@model@K == 1) {
+                  return(object)
+              } else {
+                  ## Call method 'swap()' from 'mcmcoutputfix' 
+                  object <- callNextMethod(object, index)
+                  return(object)
+              }
           }
 )
 

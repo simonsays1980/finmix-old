@@ -46,3 +46,8 @@ Collate:
     mcmcpermfix.R
     mcmcpermfixpost.R
     mcmcpermind.R
+    mcmcpermindpost.R
+    mcmcpermute.R
+    mcmcestfix.R
+    mcmcestind.R
+    mcmcestimate.R

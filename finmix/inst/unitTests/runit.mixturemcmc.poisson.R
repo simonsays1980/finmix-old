@@ -49,13 +49,12 @@ if(TRUE) {
     data <- .setUp.data(withInd = FALSE)
     model <- .setUp.model()
 	setK(model) <- 1
-    setIndicFix(model) <- TRUE
+    setIndicfix(model) <- TRUE
 	prior <- prior(hier = FALSE)
     prior <- priordefine(data, model, varargin = prior)
     mcmc <- .setUp.mcmc()
     mcmcout <- mixturemcmc(data,model,prior,mcmc)
     ## Test cases ##
-    print(class(mcmcout))
     checkTrue(identical(class(mcmcout)[1], "mcmcoutputfix"), "check1")
     checkTrue(mcmcout@ranperm == FALSE, "check2")
     checkEquals(mcmcout@M, mcmc@M)
@@ -101,7 +100,7 @@ if(TRUE) {
        	set.seed(0)       
 	data <- .setUp.data(withInd = TRUE)
         model <- .setUp.model()
-        setIndicFix(model) <- TRUE
+        setIndicfix(model) <- TRUE
 	prior <- prior(hier = FALSE)
         prior <- priordefine(data, model, varargin = prior)
         mcmc <- .setUp.mcmc()
@@ -153,7 +152,7 @@ if(TRUE) {
 	data <- .setUp.data(withInd = TRUE)
         model <- .setUp.model()
 	setK(model) <- 3
-        setIndicFix(model) <- TRUE
+        setIndicfix(model) <- TRUE
 	prior <- prior(hier = FALSE)
         prior <- priordefine(data, model, varargin = prior)
         mcmc <- .setUp.mcmc()
@@ -207,7 +206,7 @@ if(TRUE) {
 	data <- .setUp.data(withInd = FALSE)
         model <- .setUp.model()
 	setK(model) <- 1
-        setIndicFix(model) <- TRUE
+        setIndicfix(model) <- TRUE
         prior <- priordefine(data, model)
         mcmc <- .setUp.mcmc()
         mcmcout <- mixturemcmc(data,model,prior,mcmc)
@@ -263,7 +262,7 @@ if(TRUE) {
  	set.seed(0)       
         data <- .setUp.data(withInd = TRUE)
         model <- .setUp.model()
-        setIndicFix(model) <- TRUE
+        setIndicfix(model) <- TRUE
         prior <- priordefine(data, model)
         mcmc <- .setUp.mcmc()
         mcmcout <- mixturemcmc(data,model,prior,mcmc)
@@ -320,7 +319,7 @@ if(TRUE) {
 	data <- .setUp.data(withInd = TRUE)
         model <- .setUp.model()
 	setK(model) <- 3
-        setIndicFix(model) <- TRUE
+        setIndicfix(model) <- TRUE
         prior <- priordefine(data, model)
         mcmc <- .setUp.mcmc()
         mcmcout <- mixturemcmc(data,model,prior,mcmc)
@@ -377,7 +376,7 @@ if(TRUE) {
 	data <- .setUp.data(withInd = FALSE)
         model <- .setUp.model()
 	setK(model) <- 1
-        setIndicFix(model) <- TRUE
+        setIndicfix(model) <- TRUE
 	prior <- prior(hier = FALSE)
         prior <- priordefine(data, model, varargin = prior)
         mcmc <- .setUp.mcmc()
@@ -450,7 +449,7 @@ if(TRUE) {
        	set.seed(0)       
 	data <- .setUp.data(withInd = TRUE)
         model <- .setUp.model()
-        setIndicFix(model) <- TRUE
+        setIndicfix(model) <- TRUE
 	prior <- prior(hier = FALSE)
         prior <- priordefine(data, model, varargin = prior)
         mcmc <- .setUp.mcmc()
@@ -526,7 +525,7 @@ if(TRUE) {
 	data <- .setUp.data(withInd = TRUE)
         model <- .setUp.model()
 	setK(model) <- 3
-        setIndicFix(model) <- TRUE
+        setIndicfix(model) <- TRUE
 	prior <- prior(hier = FALSE)
         prior <- priordefine(data, model, varargin = prior)
         mcmc <- .setUp.mcmc()
@@ -602,7 +601,7 @@ if(TRUE) {
 	data <- .setUp.data(withInd = FALSE)
         model <- .setUp.model()
 	setK(model) <- 1
-        setIndicFix(model) <- TRUE
+        setIndicfix(model) <- TRUE
         prior <- priordefine(data, model)
         mcmc <- .setUp.mcmc()
 	setStorepost(mcmc) <- TRUE
@@ -680,7 +679,7 @@ if(TRUE) {
        	set.seed(0)       
 	data <- .setUp.data(withInd = TRUE)
         model <- .setUp.model()
-        setIndicFix(model) <- TRUE
+        setIndicfix(model) <- TRUE
         prior <- priordefine(data, model)
         mcmc <- .setUp.mcmc()
 	setStorepost(mcmc) <- TRUE
@@ -759,7 +758,7 @@ if(TRUE) {
 	data <- .setUp.data(withInd = TRUE)
         model <- .setUp.model()
 	setK(model) <- 3
-        setIndicFix(model) <- TRUE
+        setIndicfix(model) <- TRUE
         prior <- priordefine(data, model)
         mcmc <- .setUp.mcmc()
 	setStorepost(mcmc) <- TRUE
@@ -839,7 +838,7 @@ if(TRUE) {
 	data <- .setUp.data(withInd = FALSE)
         model <- .setUp.model()
 	setK(model) <- 1
-        setIndicFix(model) <- FALSE
+        setIndicfix(model) <- FALSE
 	prior <- prior(hier = FALSE)
         prior <- priordefine(data, model, varargin = prior)
         mcmc <- .setUp.mcmc()
@@ -890,7 +889,7 @@ if(TRUE) {
        	set.seed(0)       
 	data <- .setUp.data(withInd = TRUE)
         model <- .setUp.model()
-        setIndicFix(model) <- FALSE
+        setIndicfix(model) <- FALSE
 	prior <- prior(hier = FALSE)
         prior <- priordefine(data, model, varargin = prior)
         mcmc <- .setUp.mcmc()
@@ -987,7 +986,7 @@ if(TRUE) {
 	data <- .setUp.data(withInd = TRUE)
         model <- .setUp.model()
 	setK(model) <- 3
-        setIndicFix(model) <- FALSE
+        setIndicfix(model) <- FALSE
 	prior <- prior(hier = FALSE)
         prior <- priordefine(data, model, varargin = prior)
         mcmc <- .setUp.mcmc()
@@ -1084,7 +1083,7 @@ if(TRUE) {
         data <- .setUp.data(withInd = TRUE)
         model <- .setUp.model()
 	setK(model) <- 1
-        setIndicFix(model) <- FALSE
+        setIndicfix(model) <- FALSE
         prior <- priordefine(data, model)
         mcmc <- .setUp.mcmc()
         mcmcout <- mixturemcmc(data,model,prior,mcmc)
@@ -1140,7 +1139,7 @@ if(TRUE) {
        	set.seed(0)       
 	data <- .setUp.data(withInd = TRUE)
         model <- .setUp.model()
-        setIndicFix(model) <- FALSE
+        setIndicfix(model) <- FALSE
         prior <- priordefine(data, model)
         mcmc <- .setUp.mcmc()
         mcmcout <- mixturemcmc(data,model,prior,mcmc)
@@ -1239,7 +1238,7 @@ if(TRUE) {
        	set.seed(0)       
 	data <- .setUp.data(withInd = TRUE)
         model <- .setUp.model()
-        setIndicFix(model) <- FALSE
+        setIndicfix(model) <- FALSE
         prior <- priordefine(data, model)
         mcmc <- .setUp.mcmc()
         mcmcout <- mixturemcmc(data,model,prior,mcmc)
@@ -1340,7 +1339,7 @@ if(TRUE) {
 	data <- .setUp.data(withInd = FALSE)
         model <- .setUp.model()
 	setK(model) <- 1
-        setIndicFix(model) <- FALSE
+        setIndicfix(model) <- FALSE
 	prior <- prior(hier = FALSE)
         prior <- priordefine(data, model, varargin = prior)
         mcmc <- .setUp.mcmc()
@@ -1412,7 +1411,7 @@ if(TRUE) {
  	set.seed(0)       
       	data <- .setUp.data(withInd = TRUE)
         model <- .setUp.model()
-        setIndicFix(model) <- FALSE
+        setIndicfix(model) <- FALSE
 	prior <- prior(hier = FALSE)
         prior <- priordefine(data, model, varargin = prior)
         mcmc <- .setUp.mcmc()
@@ -1537,7 +1536,7 @@ if(TRUE) {
        	set.seed(0)       
 	data <- .setUp.data(withInd = TRUE)
         model <- .setUp.model()
-        setIndicFix(model) <- FALSE
+        setIndicfix(model) <- FALSE
 	prior <- prior(hier = FALSE)
         prior <- priordefine(data, model, varargin = prior)
         mcmc <- .setUp.mcmc()
@@ -1663,7 +1662,7 @@ if(TRUE) {
 	data <- .setUp.data(withInd = FALSE)
         model <- .setUp.model()
 	setK(model) <- 1
-        setIndicFix(model) <- FALSE
+        setIndicfix(model) <- FALSE
         prior <- priordefine(data, model)
         mcmc <- .setUp.mcmc()
 	setStorepost(mcmc) <- TRUE
@@ -1741,7 +1740,7 @@ if(TRUE) {
        	set.seed(0)       
 	data <- .setUp.data(withInd = TRUE)
         model <- .setUp.model()
-        setIndicFix(model) <- FALSE
+        setIndicfix(model) <- FALSE
         prior <- priordefine(data, model)
         mcmc <- .setUp.mcmc()
 	setStorepost(mcmc) <- TRUE
@@ -1871,7 +1870,7 @@ if(TRUE) {
        	set.seed(0)       
 	data <- .setUp.data(withInd = TRUE)
         model <- .setUp.model()
-        setIndicFix(model) <- FALSE
+        setIndicfix(model) <- FALSE
         prior <- priordefine(data, model)
         mcmc <- .setUp.mcmc()
 	setStorepost(mcmc) <- TRUE

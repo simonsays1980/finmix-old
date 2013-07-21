@@ -1,8 +1,8 @@
 setClass("model",
 	representation(
 		dist="character",
-		r = "numeric",
-		K = "numeric",
+		r = "integer",
+		K = "integer",
 		weight = "matrix",
 		par = "list",
 		indicmod = "character",
@@ -38,15 +38,15 @@ setMethod("initialize", "model", function(.Object, ..., .cache = new.env()){
 )
 
 ## Constructor for class 'model' ##
-"model" <- function(dist. = "normal", r. = 1, K. = 1, weight. = matrix(), par. = list(), indicmod. = "multinomial", 
-			indicfix. = FALSE, T. = matrix(1)) {
-
-				if(K. > 1 && all(is.na(weight.))) {
-					weight. <- matrix(1/K., nrow = 1, ncol = K.)
-				}
-				model <- new("model", dist = dist., r = r., K = K., weight = weight., par = par., 
-					indicmod = indicmod.,indicfix = indicfix., T = T.)
-		return(model)
+"model" <- function(dist. = "normal", r. = as.integer(1), K. = as.integer(1), weight. = matrix(), 
+                    par. = list(), indicmod. = "multinomial", 
+           			indicfix. = FALSE, T. = matrix(1)) {
+    if(K. > 1 && all(is.na(weight.))) {
+	    weight. <- matrix(1/K., nrow = 1, ncol = K.)
+	}
+	model <- new("model", dist = dist., r = as.integer(r.), K = as.integer(K.), weight = weight., par = par., 
+				indicmod = indicmod.,indicfix = indicfix., T = T.)
+    return(model)
 }
 
 setMethod("plot", "model", function(x, y, ..., dis.grid = 1:10, persp.grid.x = seq(-10, 10, length = 40), 
@@ -331,9 +331,9 @@ setMethod("getR", "model", function(.Object) {
 					return(.Object@r)
 				}
 )
-setGeneric("getK", function(.Object) standardGeneric("getK"))
-setMethod("getK", "model", function(.Object) {
-					return(.Object@K)
+setGeneric("getK", function(object) standardGeneric("getK"))
+setMethod("getK", "model", function(object) {
+					return(object@K)
 				}
 )
 setGeneric("getWeight", function(.Object) standardGeneric("getWeight"))
@@ -346,13 +346,13 @@ setMethod("getPar", "model", function(.Object) {
 					return(.Object@par)
 				}
 )
-setGeneric("getIndicMod", function(.Object) standardGeneric("getIndicMod"))
-setMethod("getIndicMod", "model", function(.Object) {
-						return(.Object@indicmod)					
+setGeneric("getIndicmod", function(object) standardGeneric("getIndicmod"))
+setMethod("getIndicmod", "model", function(object) {
+						return(object@indicmod)					
 					}
 )
-setGeneric("getIndicFix", function(.Object) standardGeneric("getIndicFix"))
-setMethod("getIndicFix", "model", function(.Object) {
+setGeneric("getIndicfix", function(.Object) standardGeneric("getIndicfix"))
+setMethod("getIndicfix", "model", function(.Object) {
 						return(.Object@indicfix)
 					}
 )
@@ -371,14 +371,14 @@ setReplaceMethod("setDist", "model", function(.Object, value) {
 )
 setGeneric("setR<-", function(.Object, value) standardGeneric("setR<-"))
 setReplaceMethod("setR", "model", function(.Object, value){
-						.Object@r <- value
+						.Object@r <- as.integer(value)
 						validObject(.Object)
 						return(.Object)
 					}
 )
 setGeneric("setK<-", function(.Object, value) standardGeneric("setK<-"))
 setReplaceMethod("setK", "model", function(.Object, value) {
-						.Object@K <- value
+						.Object@K <- as.integer(value)
 						.Object@weight <- matrix(1/value, 
 							nrow = 1, ncol = value)
 						validObject(.Object)
@@ -399,15 +399,15 @@ setReplaceMethod("setPar", "model", function(.Object, value) {
 						return(.Object)
 					}
 )
-setGeneric("setIndicMod<-", function(.Object, value) standardGeneric("setIndicMod<-"))
-setReplaceMethod("setIndicMod", "model", function(.Object, value) {
+setGeneric("setIndicmod<-", function(.Object, value) standardGeneric("setIndicmod<-"))
+setReplaceMethod("setIndicmod", "model", function(.Object, value) {
 					.Object@indicmod <- value
 					validObject(.Object)
 					return(.Object)
 				}
 )
-setGeneric("setIndicFix<-", function(.Object, value) standardGeneric("setIndicFix<-"))
-setReplaceMethod("setIndicFix", "model", function(.Object, value) {
+setGeneric("setIndicfix<-", function(.Object, value) standardGeneric("setIndicfix<-"))
+setReplaceMethod("setIndicfix", "model", function(.Object, value) {
 							.Object@indicfix <- value
 							validObject(.Object)
 							return(.Object)

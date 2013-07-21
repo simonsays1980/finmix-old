@@ -22,16 +22,16 @@ BEGIN_RCPP
     return __sexp_result;
 END_RCPP
 }
-// swap_cc2
-Rcpp::NumericMatrix swap_cc2(Rcpp::NumericMatrix values, Rcpp::IntegerMatrix index);
-RcppExport SEXP finmix_swap_cc2(SEXP valuesSEXP, SEXP indexSEXP) {
+// swapInteger_cc
+Rcpp::IntegerMatrix swapInteger_cc(Rcpp::IntegerMatrix values, Rcpp::IntegerMatrix index);
+RcppExport SEXP finmix_swapInteger_cc(SEXP valuesSEXP, SEXP indexSEXP) {
 BEGIN_RCPP
     SEXP __sexp_result;
     {
         Rcpp::RNGScope __rngScope;
-        Rcpp::NumericMatrix values = Rcpp::as<Rcpp::NumericMatrix >(valuesSEXP);
+        Rcpp::IntegerMatrix values = Rcpp::as<Rcpp::IntegerMatrix >(valuesSEXP);
         Rcpp::IntegerMatrix index = Rcpp::as<Rcpp::IntegerMatrix >(indexSEXP);
-        Rcpp::NumericMatrix __result = swap_cc2(values, index);
+        Rcpp::IntegerMatrix __result = swapInteger_cc(values, index);
         PROTECT(__sexp_result = Rcpp::wrap(__result));
     }
     UNPROTECT(1);

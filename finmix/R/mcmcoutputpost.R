@@ -37,6 +37,35 @@ setMethod("show", "mcmcoutputpost", function(object) {
 		class(object@prior), "\n")
 })
 
+setMethod("show", "mcmcoutputpost", 
+          function(object){
+              cat("Object 'mcmcoutput'\n")
+              cat("     class       :", class(object), "\n")
+              cat("     M           :", object@M, "\n")
+              cat("     ranperm     :", object@ranperm, "\n")
+              cat("     par         : List of ", 
+                  length(object@par), "\n")
+              cat("     weight      : ",
+                  paste(dim(object@weight), collapse = "x"), "\n")
+              cat("     log         : List of ", 
+                  length(object@log), "\n")
+              cat("     post        : List of ",
+                  length(object@post), "\n")
+              cat("     ST          : ", 
+                  paste(dim(object@ST), collapse = "x"), "\n")
+              cat("     S           : ", 
+                  paste(dim(object@S), collapse = "x"), "\n")
+              cat("     NK          : ",
+                  paste(dim(object@NK), collapse = "x"), "\n")
+              cat("     clust       : ",
+                  paste(dim(object@clust), collapse = "x"), "\n")
+              cat("     model       : Object of class", 
+                  class(object@model), "\n")
+              cat("     prior       : Object of class",
+                  class(object@prior), "\n")
+          }
+)
+
 setMethod("plot", signature(x = "mcmcoutputhier", 
 	y = "missing"), function(x, y, ...) {
 	if (x@model@dist == "poisson") {
@@ -274,6 +303,10 @@ setMethod("plotHist", signature(x = "mcmcoutputpost", dev = "ANY"),
 setMethod("subseq", signature(object = "mcmcoutputpost", 
                               index = "logical"), 
           function(object, index) {
+              ## TODO: Check arguments via .validObject ##
+              if (dim(index)[1] != object@M) {
+                  stop("Argument 'index' has wrong dimension.")
+              }
               ## Call 'subseq()' method from 'mcmcoutputfixpost'
               ## class
               object <- subseq(as(object, "mcmcoutputfixpost"), 
@@ -296,19 +329,27 @@ setMethod("subseq", signature(object = "mcmcoutputpost",
 
 ## Generic defined in 'mcmcoutputfix.R' ##
 setMethod("swapElements", signature(object = "mcmcoutputpost", 
-                                    index = "integer"),
+                                    index = "array"),
           function(object, index) {
-              dist <- object@model@dist
-              ## Call method 'swapElements()' from 'mcmcoutputbase' 
-              object <- callNextMethod(object, index)
-              if (dist == "poisson") {
-                  ## Rcpp::export 'swap_cc2()'
-                  object@post$a <- swap_cc2(object@post$a, 
-                                            index)
-                  object@post$b <- swap_cc2(object@post$b,
-                                            index)
+              ## Check arguments, TODO: .validObject ##
+              if (dim(index)[1] != object@M || dim(index)[2] != object@model@K) {
+                  stop("Argument 'index' has wrong dimension.")
               }
-              return(object)
+              if( object@model@K == 1) {
+                  return(object) 
+              } else {
+                  dist <- object@model@dist
+                  ## Call method 'swapElements()' from 'mcmcoutputbase' 
+                  object <- callNextMethod(object, index)
+                  if (dist == "poisson") {
+                      ## Rcpp::export 'swap_cc()'
+                      object@post$par$a <- swap_cc(object@post$par$a, 
+                                                index)
+                      object@post$par$b <- swap_cc(object@post$par$b,
+                                                index)
+                  }
+                  return(object)
+              }
           }
 )
 

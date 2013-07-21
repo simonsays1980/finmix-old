@@ -1,16 +1,15 @@
-setClass("mcmcoutputbase",
-	representation(
-		weight 	= "array",
-		entropy	= "array",
-		ST 	= "array",
-		S 	= "array",
-		NK 	= "array",
-		clust 	= "array"),
-	contains = c("mcmcoutputfix"),
-	validity = function(object) {
-		## else: OK
-		TRUE
-	}
+setClass("mcmcoutputbase", 
+         representation(weight 	= "array",
+		                entropy	= "array",
+                		ST 	    = "array",
+                		S 	    = "array",
+                		NK 	    = "array",
+                		clust 	= "array"),
+                    	contains = c("mcmcoutputfix"),
+       	 validity = function(object) {
+		    ## else: OK
+		    TRUE
+	     }
 )
 
 setMethod("show", "mcmcoutputbase", 
@@ -276,6 +275,10 @@ setMethod("plotHist", signature(x = "mcmcoutputbase", dev = "ANY"),
 setMethod("subseq", signature(object = "mcmcoutputbase", 
                               index = "logical"), 
           function(object, index) {
+              ## TODO: Check arguments via .validObject ##
+              if (dim(index)[1] != object@M) {
+                  stop("Argument 'index' has wrong dimension.")
+              }
               M <- object@M
 
               ## Call 'subseq()' method from 'mcmcoutputfix'
@@ -298,20 +301,31 @@ setMethod("subseq", signature(object = "mcmcoutputbase",
 
 ## Generic defined in 'mcmcoutputfix.R' ##
 setMethod("swapElements", signature(object = "mcmcoutputbase", 
-                                    index = "integer"),
+                                    index = "array"),
           function(object, index) {
-              dist <- object@model@dist
-              ## Call method 'swapElements()' from 'mcmcoutputfix' 
-              object <- callNextMethod(object, index)
-              ## Rcpp::export 'swap_cc2()'
-              object@weight <- swap_cc2(object@weight, index)
-              ## Rcpp::export 'swapInd_cc()'
-              object@S <- swapInd_cc(object@S, index)
-              ## Rcpp::export 'swapST_cc()'
-              object@ST <- swapST_cc(object@ST, index)
-              ## Rcpp::export 'swap_cc2()'
-              object@NK <- swap_cc2(object@NK, index)
-              return(object)
+              ## Check arguments, TODO: .validObject ##
+              if (dim(index)[1] != object@M || dim(index)[2] != object@model@K) {
+                  stop("Argument 'index' has wrong dimension.")
+              }
+              if (object@model@K == 1) {
+                  return(object)
+              } else {
+                  dist          <- object@model@dist
+                  ## Call method 'swapElements()' from 'mcmcoutputfix' 
+                  object        <- callNextMethod(object, index)
+                  ## Rcpp::export 'swap_cc()'
+                  object@weight <- swap_cc(object@weight, index)
+                  ## Rcpp::export 'swapInd_cc()'
+                  M             <- object@M
+                  storeS        <- ncol(object@S)
+                  index.S       <- index[(M - storeS + 1):M, ]
+                  object@S      <- swapInd_cc(object@S, index.S)
+                  ## Rcpp::export 'swapST_cc()'
+                  object@ST     <- swapST_cc(object@ST, index)
+                  ## Rcpp::export 'swap_cc()'
+                  object@NK     <- swapInteger_cc(object@NK, index)
+                  return(object)
+              }
           }
 )
 

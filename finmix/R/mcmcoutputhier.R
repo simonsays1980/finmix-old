@@ -8,34 +8,32 @@ setClass("mcmcoutputhier",
 	}
 )
 
-setMethod("show", "mcmcoutputhier", function(object) {
-	cat("Object 'mcmcoutputhier\n")
-	cat("	class		:", class(object), "\n")
-	cat("	M		:", object@M, "\n")
-	cat("	ranperm		:", object@ranperm, "\n")
-	cat("	par		: List of ", 
-		length(object@par), "\n")
-	cat("	weight		:", paste(dim(object@weight), 
-		collapse = "x"), "\n")
-	cat("	log		: List of ",
-		length(object@par), "\n")
-	cat("	hyper		: List of ", 
-		length(object@hyper), "\n")
-	cat("	entropy:	:", paste(dim(object@entropy),
-		collapse = "x"), "\n")
-	cat("	ST		:", paste(dim(object@ST),
-		collapse = "x"), "\n")
-	cat("	S		:", paste(dim(object@S),
-		collapse = "x"), "\n")
-	cat("	NK		:", paste(dim(object@NK),
-		collapse = "x"), "\n")
-	cat("	clust		:", paste(dim(object@clust),
-		collapse = "x"), "\n")
-	cat("	model		: Object of class",
-		class(object@model), "\n")
-	cat("	prior		: Object of class",
-		class(object@prior), "\n")
-})
+setMethod("show", "mcmcoutputhier", 
+          function(object){
+              cat("Object 'mcmcoutput'\n")
+              cat("     class       :", class(object), "\n")
+              cat("     M           :", object@M, "\n")
+              cat("     ranperm     :", object@ranperm, "\n")
+              cat("     par         : List of ", 
+                  length(object@par), "\n")
+              cat("     log         : List of ", 
+                  length(object@log), "\n")
+              cat("     hyper       : List of ",
+                  length(object@hyper), "\n")
+              cat("     ST          : ", 
+                  paste(dim(object@ST), collapse = "x"), "\n")
+              cat("     S           : ", 
+                  paste(dim(object@S), collapse = "x"), "\n")
+              cat("     NK          : ",
+                  paste(dim(object@NK), collapse = "x"), "\n")
+              cat("     clust       : ",
+                  paste(dim(object@clust), collapse = "x"), "\n")
+              cat("     model       : Object of class", 
+                  class(object@model), "\n")
+              cat("     prior       : Object of class",
+                  class(object@prior), "\n")
+          }
+)
 
 setMethod("plot", signature(x = "mcmcoutputhier", 
 	y = "missing"), function(x, y, ...) {
@@ -212,6 +210,10 @@ setMethod("plotHist", signature(x = "mcmcoutputbase", dev = "ANY"),
 setMethod("subseq", signature(object = "mcmcoutputhier", 
                               index = "logical"), 
           function(object, index) {
+              ## TODO: Check arguments via .validObject ##
+              if (dim(index)[1] != object@M) {
+                  stop("Argument 'index' has wrong dimension.")
+              }
               ## Call 'subseq()' method from 'mcmcoutputfixhier'
               ## class
               object <- subseq(as(object, "mcmcoutputfixhier"), 
@@ -236,14 +238,12 @@ setMethod("subseq", signature(object = "mcmcoutputhier",
 setMethod("swapElements", signature(object = "mcmcoutputhier", 
                                     index = "integer"),
           function(object, index) {
-              dist <- object@model@dist
+              ## Check arguments, TODO: .validObject ##
+              if (dim(index)[1] != object@M || dim(index)[1] != object@model@K) {
+                  stop("Argument 'index' has wrong dimension.")
+              }
               ## Call method 'swapElements()' from 'mcmcoutputbase' 
               object <- callNextMethod(object, index)
-              if (dist == "poisson") {
-                  ## Rcpp::export 'swap_cc2()'
-                  object@hyper$b <- swap_cc2(object@hyper$b, 
-                                             index)
-              }
               return(object)
           }
 )

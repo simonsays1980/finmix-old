@@ -209,6 +209,10 @@ setMethod("plotHist", signature(x = "mcmcoutputfixpost", dev = "ANY"),
 setMethod("subseq", signature(object = "mcmcoutputfixpost",
                               index = "logical"), 
           function(object, index) {
+              ## TODO: Check arguments via .validObject ##
+              if (dim(index)[1] != object@M) {
+                  stop("Argument 'index' has wrong dimension.")
+              }
               dist <- object@model@dist
         
               ## Call 'subseq()' from 'mcmcoutputfix'
@@ -224,18 +228,29 @@ setMethod("subseq", signature(object = "mcmcoutputfixpost",
 
 ## Generic defined in 'mcmcoutputfix.R' ##
 setMethod("swapElements", signature(object = "mcmcoutputfixpost", 
-                                    index = "integer"),
+                                    index = "array"),
           function(object, index) {
-              dist <- object@model@dist
-              ## Call method 'swapiElements()' from 'mcmcoutputfix' 
-              object <- callNextMethod(object, index)
-
-              if (dist == "poisson") {
-                  ## Rcpp::export 'swap_cc2' 
-                  object@post$a <- swap_cc2(object@post$a, index)
-                  object@post$b <- swap_cc2(object@post$b, index)
+              ## Check arguments, TODO: .validObject ##
+              if (dim(index)[1] != object@M || dim(index)[2] != object@model@K) {
+                  stop("Argument 'index' has wrong dimension.")
               }
-              return(object)
+              if (object@model@K == 1) {
+                  cat("mcmcoutputfixpost: K = 1\n")
+                  return(object)
+              } else {
+                  dist <- object@model@dist
+                  cat("mcmcoutputfixpost: K > 1\n")
+                  ## Call method 'swapiElements()' from 'mcmcoutputfix' 
+                  if (dist == "poisson") {
+                      ## Rcpp::export 'swap_cc' 
+                      cat("mcmcoutputfixpost: call swap_cc\n")
+                      object@post$par$a <- swap_cc(object@post$par$a, index)
+                      object@post$par$b <- swap_cc(object@post$par$b, index)
+                  }
+                  cat("mcmcoutputfixpost: callNextMethod\n")
+                   object <- callNextMethod()
+                 return(object)
+              }
           }
 )
 

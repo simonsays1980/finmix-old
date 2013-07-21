@@ -21,36 +21,36 @@ setClassUnion("mcmcoutput",
 		"mcmcoutputhierpost")
 )
 
-setMethod("show", "mcmcoutputhierpost", function(object) {
-	cat("Object 'mcmcoutputhierpost\n")
-	cat("	class		:", class(object), "\n")
-	cat("	M		:", object@M, "\n")
-	cat("	ranperm		:", object@ranperm, "\n")
-	cat("	par		: List of ", 
-		length(object@par), "\n")
-	cat("	weight		:", paste(dim(object@weight), 
-		collapse = "x"), "\n")
-	cat("	log		: List of ",
-		length(object@par), "\n")
-	cat("	hyper		: List of ", 
-		length(object@hyper), "\n")
-	cat("	post		: List of ",
-		length(object@post), "\n")
-	cat("	entropy:	:", paste(dim(object@entropy),
-		collapse = "x"), "\n")
-	cat("	ST		:", paste(dim(object@ST),
-		collapse = "x"), "\n")
-	cat("	S		:", paste(dim(object@S),
-		collapse = "x"), "\n")
-	cat("	NK		:", paste(dim(object@NK),
-		collapse = "x"), "\n")
-	cat("	clust		:", paste(dim(object@clust),
-		collapse = "x"), "\n")
-	cat("	model		: Object of class",
-		class(object@model), "\n")
-	cat("	prior		: Object of class",
-		class(object@prior), "\n")
-})
+setMethod("show", "mcmcoutputhierpost", 
+          function(object){
+              cat("Object 'mcmcoutput'\n")
+              cat("     class       :", class(object), "\n")
+              cat("     M           :", object@M, "\n")
+              cat("     ranperm     :", object@ranperm, "\n")
+              cat("     par         : List of ", 
+                  length(object@par), "\n")
+              cat("     weight      : ",
+                  paste(dim(object@weight), collapse = "x"), "\n")
+              cat("     log         : List of ", 
+                  length(object@log), "\n")
+              cat("     hyper       : List of ",
+                  length(object@hyper), "\n")
+              cat("     post        : List of ",
+                  length(object@post), "\n")
+              cat("     ST          : ", 
+                  paste(dim(object@ST), collapse = "x"), "\n")
+              cat("     S           : ", 
+                  paste(dim(object@S), collapse = "x"), "\n")
+              cat("     NK          : ",
+                  paste(dim(object@NK), collapse = "x"), "\n")
+              cat("     clust       : ",
+                  paste(dim(object@clust), collapse = "x"), "\n")
+              cat("     model       : Object of class", 
+                  class(object@model), "\n")
+              cat("     prior       : Object of class",
+                  class(object@prior), "\n")
+          }
+)
 
 setMethod("plot", signature(x = "mcmcoutputhier", 
 	y = "missing"), function(x, y, ...) {
@@ -227,6 +227,10 @@ setMethod("plotHist", signature(x = "mcmcoutputhierpost", dev = "ANY"),
 setMethod("subseq", signature(object = "mcmcoutputhierpost", 
                               index = "logical"), 
           function(object, index) {
+              ## TODO: Check arguments via .validObject ##
+              if (dim(index)[1] != object@M) {
+                  stop("Argument 'index' has wrong dimension.")
+              }
               ## Call 'subseq()' method from 'mcmcoutputfixhierpost'
               ## class
               object <- subseq(as(object, "mcmcoutputfixhierpost"),
@@ -251,15 +255,19 @@ setMethod("subseq", signature(object = "mcmcoutputhierpost",
 setMethod("swapElements", signature(object = "mcmcoutputpost", 
                                     index = "integer"),
           function(object, index) {
+              ## Check arguments, TODO: .validObject ##
+              if (dim(index)[1] != object@M || dim(index)[1] != object@model@K) {
+                  stop("Argument 'index' has wrong dimension.")
+              }
               dist <- object@model@dist
               ## Call method 'swapElements()' from 'mcmcoutputhier' 
               object <- swapElements(as(object, "mcmcoutputhier"), 
                                      index)
               if (dist == "poisson") {
-                  ## Rcpp::export 'swap_cc2()'
-                  object@post$a <- swap_cc2(object@post$a, 
+                  ## Rcpp::export 'swap_cc()'
+                  object@post$a <- swap_cc(object@post$a, 
                                             index)
-                  object@post$b <- swap_cc2(object@post$b,
+                  object@post$b <- swap_cc(object@post$b,
                                             index)
               }
               return(object)
