@@ -1,9 +1,10 @@
 setClass("mcmcoutputhierpost", 
-	contains = c("mcmcoutputhier", "mcmcoutputpost"),
-	validity = function(object) {
-			## else: OK
-			TRUE
-	}
+         representation(post = "list"),
+      	 contains = c("mcmcoutputhier"),
+	     validity = function(object) {
+			 ## else: OK
+			 TRUE
+	     }
 )
 
 ## Set 'mcmcoutput' to the virtual class inheriting 	##
@@ -225,49 +226,63 @@ setMethod("plotHist", signature(x = "mcmcoutputhierpost", dev = "ANY"),
 })
 
 setMethod("subseq", signature(object = "mcmcoutputhierpost", 
-                              index = "logical"), 
+                              index = "array"), 
           function(object, index) {
               ## TODO: Check arguments via .validObject ##
               if (dim(index)[1] != object@M) {
                   stop("Argument 'index' has wrong dimension.")
               }
+              if (typeof(index) != "logical") {
+                  stop("Argument 'index' must be of type 'logical'.")
+              }
               ## Call 'subseq()' method from 'mcmcoutputfixhierpost'
               ## class
-              object <- subseq(as(object, "mcmcoutputfixhierpost"),
-                               index)
-              
-              ## Change owned slots ##
-              object@log$cdpost <- object@log$cdpost[index]
-              object@weight <- object@weight[index, ]
-              object@entropy <- object@entropy[index]
-              object@ST     <- object@ST[index]
- 
-              ## Check which S stay ##
-              ms <- M - ncol(object@S)
-              index.S <- index[(ms + 1):M]
-              object@S <- object@S[,index.S]
-              
+              object    <- callNextMethod(object, index)
+              # Change owned slots #
+              dist      <- object@model@dist
+              K         <- object@model@K
+              if (dist == "poisson") {
+                  if (K == 1) {
+                      object@post$par$a     <- matrix(object@post$par$a[index],
+                                                      nrow = object@M, ncol = 1)
+                      object@post$par$b     <- matrix(object@post$par$a[index],
+                                                      nrow = object@M, ncol = 1)
+                  } else {
+                      object@post$par$a     <- object@post$par$a[index,]
+                      object@post$par$b     <- object@post$par$b[index,]
+                      object@post$weight    <- object@post$weight[index,]
+                  }
+              }
               return(object)
           }
 )
 
 ## Generic defined in 'mcmcoutputfix.R' ##
-setMethod("swapElements", signature(object = "mcmcoutputpost", 
-                                    index = "integer"),
+setMethod("swapElements", signature(object = "mcmcoutputhierpost", 
+                                    index = "array"),
           function(object, index) {
               ## Check arguments, TODO: .validObject ##
-              if (dim(index)[1] != object@M || dim(index)[1] != object@model@K) {
+              if (dim(index)[1] != object@M || dim(index)[2] != object@model@K) {
                   stop("Argument 'index' has wrong dimension.")
+              }
+              if (typeof(index) != "integer") {
+                  stop("Argument 'index' must be of type 'integer'.")
+              }
+              if (!all(index > 0) || !all(index <= object@model@K)) {
+                  stop("Elements of argument 'index' must be greater 0 
+                       and not exceed the number of its columns.")
+              }
+              if (object@model@K == 1) {
+                  return(object)
               }
               dist <- object@model@dist
               ## Call method 'swapElements()' from 'mcmcoutputhier' 
-              object <- swapElements(as(object, "mcmcoutputhier"), 
-                                     index)
+              object <- callNextMethod(object, index)
               if (dist == "poisson") {
                   ## Rcpp::export 'swap_cc()'
-                  object@post$a <- swap_cc(object@post$a, 
+                  object@post$par$a <- swap_cc(object@post$par$a, 
                                             index)
-                  object@post$b <- swap_cc(object@post$b,
+                  object@post$par$b <- swap_cc(object@post$par$b,
                                             index)
               }
               return(object)

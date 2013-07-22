@@ -207,22 +207,33 @@ setMethod("plotHist", signature(x = "mcmcoutputfixpost", dev = "ANY"),
 
 ## Generic defined in 'mcmcoutputfix.R' ##
 setMethod("subseq", signature(object = "mcmcoutputfixpost",
-                              index = "logical"), 
+                              index = "array"), 
           function(object, index) {
               ## TODO: Check arguments via .validObject ##
               if (dim(index)[1] != object@M) {
                   stop("Argument 'index' has wrong dimension.")
               }
+              if (typeof(index) != "logical") {
+                  stop("Argument 'index' must be of type 'logical'.")
+              } 
               dist <- object@model@dist
         
               ## Call 'subseq()' from 'mcmcoutputfix'
-              callNextMethod(object, index)
+              object <- callNextMethod(object, index)
               
               ## post ##
               if (dist == "poisson") {
-                  object@post$a <- object@post$a[index, ]
-                  object@post$b <- object@post$b[index, ]
+                  if (object@model@K == 1) {
+                      object@post$par$a <- matrix(object@post$par$a[index],
+                                                  nrow = object@M, ncol = 1)
+                      object@post$par$b <- matrix(object@post$par$b[index],
+                                                  nrow = object@M, ncol = 1)
+                  } else {
+                      object@post$par$a <- object@post$par$a[index, ]
+                      object@post$par$b <- object@post$par$b[index, ]
+                  }
               }
+              return(object)
           }
 )
 
@@ -233,6 +244,12 @@ setMethod("swapElements", signature(object = "mcmcoutputfixpost",
               ## Check arguments, TODO: .validObject ##
               if (dim(index)[1] != object@M || dim(index)[2] != object@model@K) {
                   stop("Argument 'index' has wrong dimension.")
+              }
+              if (typeof(index) != "integer") {
+                  stop("Argument 'index' must be of type 'integer'.")
+              }
+              if (!all(index > 0)) {
+                  stop("Elements of argument 'index' must be greater 0.")
               }
               if (object@model@K == 1) {
                   cat("mcmcoutputfixpost: K = 1\n")

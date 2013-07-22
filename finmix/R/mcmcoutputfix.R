@@ -224,8 +224,10 @@ setMethod("subseq", signature(object = "mcmcoutputfix", index = "array"),
               dist <- object@model@dist
               object@M <- sum(index)
               ## log ##
-              object@log$mixlik <- object@log$mixlik[index]
-              object@log$mixprior <- object@log$mixprior[index]
+              object@log$mixlik     <- matrix(object@log$mixlik[index],
+                                              nrow = object@M, ncol = 1)
+              object@log$mixprior   <- matrix(object@log$mixprior[index],
+                                              nrow = object@M, ncol = 1)
               ## par ##
               if(dist == "poisson") {
                   if(object@model@K == 1) {
@@ -249,8 +251,10 @@ setMethod("swapElements", signature(object = "mcmcoutputfix", index = "array"),
               if (typeof(index) != "integer") {
                   stop("Argument 'index' must be of type 'integer'.")
               }
-              if (!all(index > 0)) {
-                  stop("Elements in argument 'index' must be greater 0.")
+              cat(index)
+              if (!all(index > 0) || any(index > object@model@K)) {
+                  stop("Elements in argument 'index' must be greater 0 
+                       and must not exceed its number of columns.")
               }
               if(object@model@K == 1) {
                   cat("mcmcoutputfix: K = 1\n")

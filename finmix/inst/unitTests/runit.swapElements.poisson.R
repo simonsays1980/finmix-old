@@ -67,6 +67,28 @@ if(TRUE) {
     checkTrue(!any(values == values.perm), "check7")
 }
 
+"test.swapInteger_cc" <- function() {
+    set.seed(0)
+    values          <- matrix(as.integer(rpois(20, 2)), nrow = 10, ncol = 2) 
+    perm.index      <- matrix(as.integer(c(2,1)), nrow = 10, ncol = 2, byrow = TRUE)
+    values.perm     <- swapInteger_cc(values, perm.index) 
+    ## Test cases ##
+    checkEquals(nrow(values), nrow(values.perm))
+    checkEquals(ncol(values), ncol(values.perm))
+    checkTrue(!any(values == values.perm), "check3")
+    ## Test exception ##
+    perm.index      <- matrix(as.integer(c(2,1)), nrow = 1, ncol = 2, byrow = TRUE)
+    checkException(swapInteger_cc(values, perm.index), silent = TRUE)
+    ## --- Check for K = 3 --- ##
+    values          <- matrix(as.integer(rpois(30, 2)), nrow = 10, ncol = 3)
+    perm.index      <- matrix(as.integer(c(2, 3, 1)), nrow = 10, ncol = 3, byrow = TRUE)
+    values.perm     <- swapInteger_cc(values, perm.index)
+    ## Test cases ##
+    checkEquals(nrow(values), nrow(values.perm))
+    checkEquals(ncol(values), ncol(values.perm))
+    checkTrue(!all(values == values.perm), "check7")
+}
+
 "test.swapInd_cc" <- function() {
     set.seed(0) 
     indicator       <- matrix(sample(c(1,2), 10, replace = TRUE))
@@ -125,7 +147,7 @@ if(TRUE) {
       prior                 <- priordefine(data, model, varargin = prior)
       mcmc                  <- .setUp.mcmc()
       mcmcout               <- mixturemcmc(data, model, prior, mcmc)
-      perm.index            <- matrix(as.integer(2), nrow = 100, ncol = 1) 
+      perm.index            <- matrix(as.integer(1), nrow = 100, ncol = 1) 
       mcmcout.perm          <- swapElements(mcmcout, perm.index)
       ## Test cases ##
       checkEquals(nrow(mcmcout.perm@par$lambda), nrow(mcmcout@par$lambda))
@@ -175,7 +197,7 @@ if(TRUE) {
       mcmc                  <- .setUp.mcmc()
       setStorepost(mcmc)    <- TRUE
       mcmcout               <- mixturemcmc(data, model, prior, mcmc)
-      perm.index            <- matrix(as.integer(2), nrow = 100, ncol = 1)
+      perm.index            <- matrix(as.integer(1), nrow = 100, ncol = 1)
       mcmcout.perm          <- swapElements(mcmcout, perm.index)
       ## Test cases ##
       checkEquals(nrow(mcmcout.perm@par$lambda), nrow(mcmcout@par$lambda))
@@ -240,7 +262,7 @@ if(TRUE) {
       prior                 <- priordefine(data, model)
       mcmc                  <- .setUp.mcmc()
       mcmcout               <- mixturemcmc(data, model, prior, mcmc)
-      perm.index            <- matrix(as.integer(2), nrow = 100, ncol = 1)
+      perm.index            <- matrix(as.integer(1), nrow = 100, ncol = 1)
       mcmcout.perm          <- swapElements(mcmcout, perm.index)
       ## Test cases ##
       checkEquals(nrow(mcmcout.perm@par$lambda), nrow(mcmcout@par$lambda))
@@ -286,7 +308,7 @@ if(TRUE) {
       mcmc                  <- .setUp.mcmc()
       setStorepost(mcmc)    <- TRUE
       mcmcout               <- mixturemcmc(data, model, prior, mcmc)
-      perm.index            <- matrix(as.integer(2), nrow = 100, ncol = 1)
+      perm.index            <- matrix(as.integer(1), nrow = 100, ncol = 1)
       mcmcout.perm          <- swapElements(mcmcout, perm.index)
       ## Test cases ##
       checkEquals(nrow(mcmcout.perm@par$lambda), nrow(mcmcout@par$lambda))
@@ -369,6 +391,7 @@ if(TRUE) {
       checkTrue(any(mcmcout@NK != mcmcout.perm@NK), "check15")
 
       ## --- Check for K = 3 --- ##
+      set.seed(0)
       setK(model)   <- 3
       prior         <- prior(hier = FALSE)
       prior         <- priordefine(data, model, varargin = prior)
@@ -434,6 +457,7 @@ if(TRUE) {
       checkEquals(ncol(mcmcout.perm@NK), ncol(mcmcout@NK))
       checkTrue(any(mcmcout@NK != mcmcout.perm@NK), "check22")
       ## --- Check for K = 3 --- ##
+      set.seed(0)
       setK(model)   <- 3
       prior         <- prior(hier = FALSE)
       prior         <- priordefine(data, model, varargin = prior)
@@ -496,6 +520,7 @@ if(TRUE) {
       checkTrue(any(mcmcout@NK != mcmcout.perm@NK), "check15")
 
       ## --- Check for K = 3 --- ##
+      set.seed(0)
       setK(model)   <- 3
       prior         <- priordefine(data, model)
       mcmcout       <- mixturemcmc(data, model, prior, mcmc)
@@ -559,6 +584,7 @@ if(TRUE) {
       checkEquals(ncol(mcmcout.perm@NK), ncol(mcmcout@NK))
       checkTrue(any(mcmcout@NK != mcmcout.perm@NK), "check22")
       ## --- Check for K = 3 --- ##
+      set.seed(0)
       setK(model)   <- 3
       prior         <- priordefine(data, model)
       mcmcout       <- mixturemcmc(data, model, prior, mcmc)

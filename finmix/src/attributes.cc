@@ -30,16 +30,18 @@ Rcpp::NumericMatrix swap_cc(Rcpp::NumericMatrix values, Rcpp::IntegerMatrix inde
     arma::mat values_arma(values.begin(), M, K, false, true);
     arma::imat index_arma(index.begin(), M, K, false, true);
     arma::mat values_copy(M, K);
-    arma::imat compM = arma::ones<arma::imat>(M, K);
-    arma::umat ind(M, K);
-    arma::mat indDouble(M, K);
-    for(unsigned int k = 0; k < K; ++k) {
-        ind = (index_arma == (k + 1) * compM);
-        indDouble = arma::conv_to<arma::mat>::from(ind);
-        values_copy.col(k) = arma::sum(values_arma % indDouble, 1);
+    arma::umat index_umat = arma::conv_to<arma::umat>::from(index_arma) - 1;
+    arma::uvec row_index(1);
+    arma::urowvec swap_index(K);
+    for(unsigned int i = 0; i < M; ++i) {
+        row_index.at(0) = i;
+        swap_index = index_umat.row(i);
+        values_copy.row(i) = 
+            values_arma.submat(row_index, swap_index);
     }
     return Rcpp::wrap(values_copy);
 }
+
 
 // [[Rcpp::export]]
 
@@ -55,13 +57,14 @@ Rcpp::IntegerMatrix swapInteger_cc(Rcpp::IntegerMatrix values, Rcpp::IntegerMatr
     arma::imat values_arma(values.begin(), M, K, false, true);
     arma::imat index_arma(index.begin(), M, K, false, true);
     arma::imat values_copy(M, K);
-    arma::imat compM = arma::ones<arma::imat>(M, K);
-    arma::umat ind(M, K);
-    arma::imat indInteger(M, K);
-    for(unsigned int k = 0; k < K; ++k) {
-        ind = (index_arma == (k + 1) * compM);
-        indInteger = arma::conv_to<arma::imat>::from(ind);
-        values_copy.col(k) = arma::sum(values_arma % indInteger, 1);
+    arma::umat index_umat = arma::conv_to<arma::umat>::from(index_arma) - 1;
+    arma::uvec row_index(1);
+    arma::urowvec swap_index(K);
+    for(unsigned int i = 0; i < M; ++i) {
+        row_index.at(0) = i;
+        swap_index = index_umat.row(i);
+        values_copy.row(i) = 
+            values_arma.submat(row_index, swap_index);
     }
     return Rcpp::wrap(values_copy);
 }

@@ -1,25 +1,28 @@
 "mcmcpermute" <- function(mcmcout) {
     ## Check arguments ##
-    if (!is(mcmcout, c("mcmcoutput", "mcmcoutputperm"))) {
-        stop("Argument 'mcmcout' must be either of type
-             'mcmcoutput' or of type 'mcmcoutputperm'.")
+    if (!inherits(mcmcout, c("mcmcoutput", "mcmcoutputperm"))) {
+        stop("Argument 'mcmcout' must inherit either from class
+             'mcmcoutput' or from class 'mcmcoutputperm'.")
+    }
+    if (mcmcout@model@K == 1) {
+        return(mcmcout)
     }
     ## If object is of class 'mcmcoutputperm' coerce it 
     ## to an object of class 'mcmcoutput' 
-    if(is(mcmcout, "mcmcoutputperm")) {
-        if (is(mcmcout, "mcmcoutputpermfix")) {
+    if(inherits(mcmcout, "mcmcoutputperm")) {
+        if (inherits(mcmcout, "mcmcoutputpermfix")) {
             mcmcout <- as(mcmcout, "mcmcoutputfix")
-        } else if (is(mcmcout, "mcmcoutputpermfixhier")) {
+        } else if (inherits(mcmcout, "mcmcoutputpermfixhier")) {
             mcmcout <- as(mcmcout, "mcmcoutputfixhier") 
-        } else if(is(mcmcout, "mcmcoutputpermfixpost")) {
+        } else if(inherits(mcmcout, "mcmcoutputpermfixpost")) {
             mcmcout <- as(mcmcout, "mcmcoutputfixpost")
-        } else if (is(mcmcout, "mcmcoutputpermfixhierpost")) {
+        } else if (inherits(mcmcout, "mcmcoutputpermfixhierpost")) {
             mcmcout <- as(mcmcout, "mcmcoutputfixhierpost")
-        } else if (is(mcmcout, "mcmcoutputpermbase")) {
+        } else if (inherits(mcmcout, "mcmcoutputpermbase")) {
             mcmcout <- as(mcmcout, "mcmcoutputbase")
-        } else if (is(mcmcout, "mcmcoutputpermhier")) {
+        } else if (inherits(mcmcout, "mcmcoutputpermhier")) {
             mcmcout <- as(mcmcout, "mcmcoutputhier")
-        } else if (is(mcmcout, "mcmcoutputpermpost")) {
+        } else if (inherits(mcmcout, "mcmcoutputpermpost")) {
             mcmcout <- as(mcmcout, "mcmcoutputpost")
         } else {
             mcmcout <- as(mcmcout, "mcmcoutputhierpost")
@@ -39,7 +42,7 @@
     if (dist == "poisson") {
         clust.par       <- sqrt(mcmcout@par$lambda)
         clust.par       <- as.vector(clust.par)
-        clust.center    <- sqrt(map$lambda)
+        clust.center    <- sqrt(map$par$lambda)
     }
 
     ## Apply unsupervised k-means clustering to parameters
@@ -47,9 +50,9 @@
     perm.index      <- array(result.clust$clust, dim = c(M, K))
     comp.index      <- as.array(matrix(seq(1:K), nrow = M, ncol = K, 
                                        byrow = TRUE))
-    keep.index      <- (t(apply(perm.ind, 1, sort, FALSE)) 
+    keep.index      <- (t(apply(perm.index, 1, sort, FALSE)) 
                         == comp.index)
-    is.perm         <- apply(comp, 1, all)
+    is.perm         <- matrix(apply(comp.index, 1, all))
     nonperm         <- sum(!is.perm)
     
     if (nonperm < M) {

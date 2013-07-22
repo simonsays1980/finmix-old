@@ -301,28 +301,32 @@ setMethod("plotHist", signature(x = "mcmcoutputpost", dev = "ANY"),
 })
 
 setMethod("subseq", signature(object = "mcmcoutputpost", 
-                              index = "logical"), 
+                              index = "array"), 
           function(object, index) {
               ## TODO: Check arguments via .validObject ##
               if (dim(index)[1] != object@M) {
                   stop("Argument 'index' has wrong dimension.")
               }
+              if (typeof(index) != "logical") {
+                  stop("Argument 'index' must be of type 'logical'.")
+              }
               ## Call 'subseq()' method from 'mcmcoutputfixpost'
               ## class
-              object <- subseq(as(object, "mcmcoutputfixpost"), 
-                               index)
-              
+              object <- callNextMethod(object, index)              
               ## Change owned slots ##
-              object@log$cdpost <- object@log$cdpost[index]
-              object@weight <- object@weight[index, ]
-              object@entropy <- object@entropy[index]
-              object@ST     <- object@ST[index]
-              
-              ## Check which S stay ##
-              ms <- M - ncol(object@S)
-              index.S <- index[(ms + 1):M]
-              object@S <- object@S[,index.S]
-              
+              dist <- object@model@dist
+              if (dist == "poisson") {
+                  if (object@model@K == 1) {
+                      object@post$par$a <- matrix(object@post$par$a[index],
+                                                  nrow = object@M, ncol = 1)
+                      object@post$par$b <- matrix(object@post$par$b[index],
+                                                  nrow = object@M, ncol = 1)
+                  } else {
+                      object@post$par$a     <- object@post$par$a[index,]
+                      object@post$par$b     <- object@post$par$b[index,]
+                      object@post$weight    <- object@post$weight[index,]
+                  }
+              }
               return(object)
           }
 )
@@ -334,6 +338,13 @@ setMethod("swapElements", signature(object = "mcmcoutputpost",
               ## Check arguments, TODO: .validObject ##
               if (dim(index)[1] != object@M || dim(index)[2] != object@model@K) {
                   stop("Argument 'index' has wrong dimension.")
+              }
+              if (typeof(index) != "integer") {
+                  stop("argument 'index# must be of type 'integer'.")
+              }
+              if (!all(index > 0) || !all(index <= object@model@K)) {
+                  stop("Elements in argument 'index' must be greater 0 
+                       and must not exceed its number of columns.")
               }
               if( object@model@K == 1) {
                   return(object) 

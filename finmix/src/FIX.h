@@ -73,8 +73,8 @@ FIX <PriorType, ParType, LogType, ParOutType>::Node::Node (const FinmixData& dat
 		permIndex(model.K), compIndex2(model.K)
 {
         for(unsigned int k = 0; k < K; ++k) {
-		compIndex(k) = k;
-	}
+		    compIndex(k) = k;
+	    }
 }
 
 template <typename PriorType, typename ParType, typename LogType,
@@ -87,7 +87,7 @@ void FIX <PriorType, ParType, LogType, ParOutType>::Node::update ()
 	log.update(K, y, S, expos, par, hyperPar);
 	if(RANPERM && K > 1) {
 		permIndex 	= arma::shuffle(compIndex, 1);
-		compIndex2  	= (permIndex == compIndex);
+		compIndex2  = (permIndex == compIndex);
 		if(arma::sum(compIndex) != K) {
 			par.lambda(compIndex) = par.lambda(permIndex);
 		} 	

@@ -208,39 +208,41 @@ setMethod("plotHist", signature(x = "mcmcoutputbase", dev = "ANY"),
 })
 
 setMethod("subseq", signature(object = "mcmcoutputhier", 
-                              index = "logical"), 
+                              index = "array"), 
           function(object, index) {
               ## TODO: Check arguments via .validObject ##
               if (dim(index)[1] != object@M) {
                   stop("Argument 'index' has wrong dimension.")
               }
+              if (typeof(index) != "logical") {
+                  stop("Argument 'index' must be of type 'logical'.")
+              }
               ## Call 'subseq()' method from 'mcmcoutputfixhier'
               ## class
-              object <- subseq(as(object, "mcmcoutputfixhier"), 
-                               index)
-              
-              ## Change owned slots ##
-              object@log$cdpost <- object@log$cdpost[index]
-              object@weight <- object@weight[index, ]
-              object@entropy <- object@entropy[index]
-              object@ST     <- object@ST[index]
- 
-              ## Check which S stay ##
-              ms <- M - ncol(object@S)
-              index.S <- index[(ms + 1):M]
-              object@S <- object@S[,index.S]
-              
+              object <- callNextMethod(object, index)              
+              dist <- object@model@dist
+              if (dist == "poisson") {
+                  object@hyper$b <- matrix(object@hyper$b[index],
+                                           nrow = object@M, ncol = 1)
+              }
               return(object)
           }
 )
 
 ## Generic defined in 'mcmcoutputfix.R' ##
 setMethod("swapElements", signature(object = "mcmcoutputhier", 
-                                    index = "integer"),
+                                    index = "array"),
           function(object, index) {
               ## Check arguments, TODO: .validObject ##
-              if (dim(index)[1] != object@M || dim(index)[1] != object@model@K) {
+              if (dim(index)[1] != object@M || dim(index)[2] != object@model@K) {
                   stop("Argument 'index' has wrong dimension.")
+              }
+              if (typeof(index) != "integer") {
+                  stop("Argument 'index' must be of type 'integer'.")
+              }
+              if (!all(index > 0) || !all(index <= object@model@K)) {
+                  stop("Elements of argument 'index' must be greater 0
+                        and not exceeding its number of components.")
               }
               ## Call method 'swapElements()' from 'mcmcoutputbase' 
               object <- callNextMethod(object, index)

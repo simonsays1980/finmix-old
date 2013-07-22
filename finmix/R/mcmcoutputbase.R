@@ -273,28 +273,36 @@ setMethod("plotHist", signature(x = "mcmcoutputbase", dev = "ANY"),
 
 ## Generic defined in 'mcmcoutputfix.R' ##
 setMethod("subseq", signature(object = "mcmcoutputbase", 
-                              index = "logical"), 
+                              index = "array"), 
           function(object, index) {
               ## TODO: Check arguments via .validObject ##
               if (dim(index)[1] != object@M) {
                   stop("Argument 'index' has wrong dimension.")
               }
+              if (typeof(index) != "logical") {
+                  stop("Argument 'index' must be of type 'logical'.")
+              }
               M <- object@M
-
               ## Call 'subseq()' method from 'mcmcoutputfix'
               object <- callNextMethod(object, index)
-              
               ## Change owned slots ##
-              object@log$cdpost <- object@log$cdpost[index]
-              object@weight <- object@weight[index, ]
-              object@entropy <- object@entropy[index]
-              object@ST     <- object@ST[index]
-              
+              object@log$cdpost     <- matrix(object@log$cdpost[index],
+                                              nrow = object@M, ncol = 1)
+              object@weight         <- object@weight[index, ]
+              object@entropy        <- matrix(object@entropy[index],
+                                               nrow = object@M, ncol = 1)
+              object@ST             <- matrix(object@ST[index], 
+                                              nrow = object@M, ncol = 1) 
               ## Check which S stay ##
-              ms <- M - ncol(object@S)
+              stores <- ncol(object@S)
+              ms <- M - stores
               index.S <- index[(ms + 1):M]
-              object@S <- object@S[,index.S]
-              
+              if(!any(index.S)) {
+                  object@S <- array()
+              } else {
+                  object@S <- object@S[,index.S]
+              }
+              object@NK             <- object@NK[index,]
               return(object)
           }
 )
@@ -307,25 +315,28 @@ setMethod("swapElements", signature(object = "mcmcoutputbase",
               if (dim(index)[1] != object@M || dim(index)[2] != object@model@K) {
                   stop("Argument 'index' has wrong dimension.")
               }
-              if (object@model@K == 1) {
-                  return(object)
-              } else {
-                  dist          <- object@model@dist
-                  ## Call method 'swapElements()' from 'mcmcoutputfix' 
-                  object        <- callNextMethod(object, index)
-                  ## Rcpp::export 'swap_cc()'
-                  object@weight <- swap_cc(object@weight, index)
-                  ## Rcpp::export 'swapInd_cc()'
-                  M             <- object@M
-                  storeS        <- ncol(object@S)
-                  index.S       <- index[(M - storeS + 1):M, ]
-                  object@S      <- swapInd_cc(object@S, index.S)
-                  ## Rcpp::export 'swapST_cc()'
-                  object@ST     <- swapST_cc(object@ST, index)
-                  ## Rcpp::export 'swap_cc()'
-                  object@NK     <- swapInteger_cc(object@NK, index)
-                  return(object)
+              if (typeof(index) != "integer") {
+                  stop("Argument 'index' must be of type 'integer'.") 
               }
+              if (!all(index > 0)) {
+                  stop("Elements of argument 'index' must be greater 0 
+                       and not exceeding its number of columns..")
+              }
+              dist          <- object@model@dist
+              ## Call method 'swapElements()' from 'mcmcoutputfix' 
+              object        <- callNextMethod(object, index)
+              ## Rcpp::export 'swap_cc()'
+              object@weight <- swap_cc(object@weight, index)
+              ## Rcpp::export 'swapInd_cc()'
+              M             <- object@M
+              storeS        <- ncol(object@S)
+              index.S       <- index[(M - storeS + 1):M, ]
+              object@S      <- swapInd_cc(object@S, index.S)
+              ## Rcpp::export 'swapST_cc()'
+              object@ST     <- swapST_cc(object@ST, index)
+              ## Rcpp::export 'swap_cc()'
+              object@NK     <- swapInteger_cc(object@NK, index)
+              return(object)
           }
 )
 

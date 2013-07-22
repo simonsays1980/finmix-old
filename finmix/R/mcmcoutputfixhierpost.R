@@ -1,9 +1,10 @@
-setClass("mcmcoutputfixhierpost",
-	contains = c("mcmcoutputfixhier", "mcmcoutputfixpost"),
-	validity = function(object) {
-			## else: OK
-			TRUE
-	}
+setClass("mcmcoutputfixhierpost", 
+         representation(post = "list"),
+	     contains = c("mcmcoutputfixhier"),
+	     validity = function(object) {
+			 ## else: OK
+			 TRUE
+	     }
 )
 
 setMethod("show", "mcmcoutputfixhierpost", function(object) {
@@ -227,44 +228,62 @@ setMethod("plotHist", signature(x = "mcmcoutputfixhierpost", dev = "ANY"),
 	
 })
 
-setMethod("subseq", signature(object = "mcmcoutputfixhier",
-                              index = "logical"), 
+setMethod("subseq", signature(object = "mcmcoutputfixhierpost",
+                              index = "array"), 
           function(object, index) {
               ## TODO: Check arguments via .validObject ##
               if (dim(index)[1] != object@M) {
                   stop("Argument 'index' has wrong dimension.")
               }
+              if (typeof(index) != "logical") {
+                  stop("Argument 'index' must be of type 'logical'.")
+              }
               dist <- object@model@dist
               ### Call only the 'subseq' method from the 
               ## 'mcmcoutputfixhier' class
-              object <- subseq(as(object, "mcmcoutputfixhier"), index)
+              object <- callNextMethod(object, index)
+              cat(object@hyper$b)
               ## post ##
               if (dist == "poisson") {
-                  object@post$a <- object@post$a[index, ]
-                  object@post$b <- object@post$b[index, ]
+                  if (object@model@K == 1) {
+                      object@post$par$a <- matrix(object@post$par$a[index], 
+                                                  nrow = object@M, ncol = 1)
+                      object@post$par$b <- matrix(object@post$par$b[index],
+                                                  nrow = object@M, ncol = 1)
+                  } else {
+                      object@post$par$a <- object@post$par$a[index, ]
+                      object@post$par$b <- object@post$par$b[index, ]
+                  }
               }
+              return(object)
           }
 )
 
 ## Generic defined in 'mcmcoutputfix.R' ##
 setMethod("swapElements", signature(object = "mcmcoutputfixhierpost", 
-                                    index = "integer"),
+                                    index = "array"),
           function(object, index) {
               ## Check arguments, TODO: .validObject ##
-              if (dim(index)[1] != object@M || dim(index)[1] != object@model@K) {
+              if (dim(index)[1] != object@M || dim(index)[2] != object@model@K) {
                   stop("Argument 'index' has wrong dimension.")
+              }
+              if (typeof(index) != "integer") {
+                  stop("Argzment 'index' must be of type 'integer'.")
+              }
+              if (!all(index > 0)) {
+                  stop("Elements of argument 'index' must be greater 0.")
               }
               if (object@model@K == 1) {
                   return(object)
               } else {
                   dist <- object@model@dist
                   ## Call method 'swapElements()' from 'mcmcoutputfixhier' 
-                  object <- swapElements(as(object, "mcmcoutfixhier"), index)
+                  object <- callNextMethod(object, index)
     
                   if (dist == "poisson") {
                       ## Rcpp::export 'swap_cc' 
-                      object@post$a <- swap_cc(object@post$a, index)
-                      object@post$b <- swap_cc(object@post$b, index)
+                      object@post$par$a <- swap_cc(object@post$par$a, index)
+                      object@post$par$b <- swap_cc(object@post$par$b, index)
                   }
                   return(object)
               }

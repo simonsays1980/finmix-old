@@ -253,7 +253,7 @@ setMethod("subseq", signature(object = "mcmcoutputfixhier",
 
 ## Generic defined in 'mcmcoutputfix.R' ##
 setMethod("swapElements", signature(object = "mcmcoutputfixhier", 
-                                    index = "integer"),
+                                    index = "array"),
           function(object, index) {
               ## Check arguments, TODO: .validObject ##
               if (dim(index)[1] != object@M || dim(index)[2] != object@model@K) {
@@ -262,8 +262,10 @@ setMethod("swapElements", signature(object = "mcmcoutputfixhier",
               if (typeof(index) != "integer") {
                   stop("Argument 'index' must be of type 'integer'")
               }
-              if (!all(index > 0)) {
-                  stop("ELements in argument 'index' must be greater 0.")
+              cat("index:", index)
+              if (!all(index > 0) || any(index > object@model@K)) {
+                  stop("Elements in argument 'index' must be greater 0 
+                       and must not exceed its number of columns.")
               }
               if (object@model@K == 1) {
                   return(object)
