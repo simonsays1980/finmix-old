@@ -19,9 +19,12 @@ export( ## user-defined constructors
         "sdatamoments",
         "datamoments",
     	"mixturemcmc",
-        "swap_cc",         ## Rcpp::export
+        "swap_cc",          ## Rcpp::export
+        "swapInteger_cc",   ## Rcpp::export
         "swapInd_cc",       ## Rcpp::export
-        "swapST_cc"         ## Rcpp::export
+        "swapST_cc",        ## Rcpp::export
+        "mcmcpermute",
+        "mcmcestimate"
 )
 
 exportClasses( ## all classes
@@ -59,6 +62,7 @@ exportMethods( ## name of the generic, as with other methods
         "getT",
         "setT<-",
         "plot",
+
         ## 'modelmoments' class ##
         "getMean",
         "getVar",
@@ -84,8 +88,8 @@ exportMethods( ## name of the generic, as with other methods
     	"setN<-",
         "getS",
         "setS<-",
-        "getByColumn",
-        "setByColumn<-",
+        "getBycolumn",
+        "setBycolumn<-",
         "getName",
         "setName<-",
         "getType",
@@ -108,7 +112,7 @@ exportMethods( ## name of the generic, as with other methods
         "getT",
 
         ## 'cdatamoments' class ##
-        "getSDataMoments",
+        "getSDatamoments",
     	"mixturemar",
 
         ## 'mcmc' class ##
@@ -122,6 +126,7 @@ exportMethods( ## name of the generic, as with other methods
         "getLog",
         "getModel",
         "getPrior",
+        "plotHist",
         "subseq",
         "swapElements",
 
@@ -134,5 +139,26 @@ exportMethods( ## name of the generic, as with other methods
         ## 'mcmcoutputbase' class ##
         "getEntropy",
         "getST",
-        "getClust"
+        "getClust",
+
+        ## 'mcmcpermfix' class ##
+        "getMperm",
+        "getParperm",
+        
+        ## 'mcmcpermfixpost' class ##
+        "getPostperm",
+
+        ## 'mcmcpermind'  class ##
+        "getWeightperm",
+        "getSTperm",
+        "getSperm",
+        "getNKperm",
+
+        ## 'mcmcestfix' class ##
+        "getMap",
+        "getBml",
+        "getIeavg",
+        
+        ## 'mcmcestind' class ##
+        "getEavg"
 )

@@ -225,34 +225,35 @@ setMethod("plot", "data", function(x, y, ..., deparse.level=1) {
 			}
 )
 
- setMethod("show", "data", function(object) {
-					has.S <- !all(is.na(object@S))
-					has.exp <- !all(is.na(object@exp))
-					has.T <- !all(is.na(object@T))
-					name <- ifelse(length(object@name) == 0, "", object@name)
-					
-					cat("Data object '", name, "'\n")
-					cat("	class		:", class(object), "\n")
-					cat("	y		:", paste(dim(object@y), collapse="x"), "\n")
-					cat("	bycolumn	:", object@bycolumn, "\n")
-					cat("	N		:", object@N, "\n")
-					cat("	r 		:", object@r, "\n")
-					if(has.S) {
-						classification <- paste(dim(object@S), collapse="x")
-						cat("	S		:", classification, "\n")
-					}
-					cat("	type (data)	:", object@type, "\n")
-					cat("	sim		:", object@sim, "\n")
-					if(has.exp) {
-						exposures <- paste(dim(object@exp), collapse="x")
-						cat("	exp		:", exposures, "\n")
-					}
-					if(has.T) {
-						repetitions <- paste(dim(object@T), collapse="x")
-						cat("	T		:", repetitions, "\n")
-					}
-				}
+setMethod("show", "data", 
+          function(object) {
 
+              has.S <- !all(is.na(object@S))
+			  has.exp <- !all(is.na(object@exp))
+			  has.T <- !all(is.na(object@T))
+			  name <- ifelse(length(object@name) == 0, "name", object@name)
+              cat("Object '", name, "'\n")
+              cat("     class       :", class(name), "\n")
+              cat("     y           :", 
+                  paste(dim(object@y), collapse = "x"), "\n")
+              cat("     bycolumn    :", object@bycolumn, "\n")
+              cat("     N           :", object@N, "\n")
+              cat("     r           :", object@r, "\n")
+              if (has.S) {
+                  cat("     S           :", 
+                      paste(dim(S), collapse = "x"), "\n")
+              }
+              cat("     type        :", object@type, "\n")
+              cat("     sim         :", object@sim, "\n")
+              if (has.exp) {
+                  cat("     exp         :", 
+                      paste(dim(object@exp), collapse = "x"), "\n")
+              }
+              if (has.T) {
+                  cat("     T           :", 
+                      paste(dim(object@T), collapse = "x"), "\n")
+              }
+          }
 )
 ## Setters and Getters as a user interface to manipulate the slots ## 
 ## Combined Getter and Setter ##
@@ -280,8 +281,8 @@ setMethod("getS", "data", function(.Object) {
 			}
 )
 
-setGeneric("getByColumn", function(.Object) standardGeneric("getByColumn"))
-setMethod("getByColumn", "data", function(.Object) {
+setGeneric("getBycolumn", function(.Object) standardGeneric("getBycolumn"))
+setMethod("getBycolumn", "data", function(.Object) {
 					return(.Object@bycolumn)
 				}
 )
@@ -359,8 +360,9 @@ setReplaceMethod("setS", "data", function(.Object, value) {
 				}
 )
 
-setGeneric("setByColumn<-", function(.Object, value) standardGeneric("setByColumn<-"))
-setReplaceMethod("setByColumn", "data", function(.Object, value) {						
+setGeneric("setBycolumn<-", function(.Object, value) standardGeneric("setBycolumn<-"))
+setReplaceMethod("setBycolumn", signature(.Object = "data", value = "logical"), 
+                 function(.Object, value) {						
 						.Object@bycolumn <- value
 						validObject(.Object)
 						return(.Object)

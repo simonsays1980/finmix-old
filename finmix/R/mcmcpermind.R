@@ -180,10 +180,31 @@ setClassUnion("mcmcoutputperm",
 )
 
 ## Getters ##
-setGeneric("getWeightPerm", function(object) standardGeneric("getWeightPerm"))
-setMethod("getWeightPerm", "mcmcpermind", function(object) {
+setGeneric("getWeightperm", function(object) standardGeneric("getWeightperm"))
+setMethod("getWeightperm", "mcmcpermind", function(object) {
           return(object@weightperm)
 })
+
+setGeneric("getSTperm", function(object) standardGeneric("getSTperm"))
+setMethod("getSTperm", "mcmcpermind", 
+          function(object) {
+              return(object@STperm)
+          }
+)
+
+setGeneric("getSperm", function(object) standardGeneric("getSperm"))
+setMethod("getSperm", "mcmcpermind", 
+          function(object) {
+              return(object@STperm)
+          }
+)
+
+setGeneric("getNKperm", function(object) standardGeneric("getNKperm"))
+setMethod("getNKperm", "mcmcpermind", 
+          function(object) {
+              return(object@STperm)
+          }
+)
 
 ## No setters as users are not intended to modify these ##
 ## obect.                                               ##

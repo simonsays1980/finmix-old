@@ -98,8 +98,8 @@ setMethod("show", "mcmcoutputpermfixhier",
 )
 
 ## Getters ##
-setGeneric("getMPerm", function(object) standardGeneric("getMPerm"))
-setMethod("getMPerm", "mcmcpermfix", 
+setGeneric("getMperm", function(object) standardGeneric("getMperm"))
+setMethod("getMperm", "mcmcpermfix", 
           function(object) {
               w
               return(object@Mperm)

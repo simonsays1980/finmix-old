@@ -9,7 +9,7 @@ setClass("cdatamoments",
 	validity = function(object) {
 		mom.moments <- object@higher
 		mom.data <- object@data
-		mom.r <- getR(mom.data)
+		mom.r <- mom.data@r
 		if(mom.r != ncol(object@mean)) 
 			return("[Error] Data dimension and dimension of the mean do not match.")
 		if(mom.r != ncol(object@var)) 
@@ -116,22 +116,28 @@ setMethod("initialize", "cdatamoments", function(.Object, ..., data) {
 				return(.Object)
 }
 
-setMethod("show", "cdatamoments", function(object) {
-						name.data <- getName(getData(object))
-						oname <- ifelse(length(name.data) == 0, "", name.data)
-						cat("Datamoments object '", oname, "'\n")
-						cat("	Type		:", class(object),"\n")
-						cat("	Mean		:", paste(dim(object@mean), collapse= "x"), "\n")
-						cat("	Var		:", paste(dim(object@var), collapse = "x"), "\n")
-						cat("	Higher		:", paste(dim(object@higher), collapse = "x"), "\n")
-						cat("	Skewness	:", paste(dim(object@skewness), collapse = "x"), "\n")
-						cat("	Kurtosis	:", paste(dim(object@kurtosis), collapse = "x"), "\n")
-						cat("	Corr		:", paste(dim(object@corr), collapse = "x"), "\n")
-						has.S <- !all(is.na(getS(object@data)))
-						if(has.S) {
-							cat("	SDataMoments	:", class(object@sdatamoments), "\n")
-						}
-					}
+setMethod("show", "cdatamoments", 
+          function(object) {
+		      name.data <- getName(getData(object))
+			  oname <- ifelse(length(name.data) == 0, "datamoments", name.data)
+              cat("Object '", oname, "'\n")
+              cat("     class       :", class(object), "\n")
+              cat("     mean        :", 
+                  paste(dim(object@mean), collapse = "x"), "\n")
+              cat("     var         :", 
+                  paste(dim(object@var), collapse = "x"), "\n")
+              cat("     higher      :", 
+                  paste(dim(object@higher), collapse = "x"), "\n")
+              cat("     skewness    :", 
+                  paste(dim(object@skewness), collapse = "x"), "\n")
+              cat("     kurtosis    :", 
+                  paste(dim(object@kurtosis), collapse = "x"), "\n")
+              cat("     corr        :", 
+                  paste(dim(object@corr), collapse = "x"), "\n")
+              if (!all(is.na(object@data@S))) {
+                  cat("     sdatamoments    :", class(object@sdatamoments), "\n")
+              }
+          }
 )
 
 ## Getters ##
@@ -151,7 +157,7 @@ setMethod("getData", "cdatamoments", function(.Object) {
 			}
 )
 ## Generic set in 'datamoments' class ##
-setMethod("getSDataMoments", "cdatamoments", function(.Object) {
+setMethod("getSDatamoments", "cdatamoments", function(.Object) {
 							return(.Object@sdatamoments)
 						}
 )

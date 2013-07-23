@@ -11,7 +11,7 @@ setClass("datamoments",
 
 ## Getters ##
 setGeneric("getData", function(.Object) standardGeneric("getData"))
-setGeneric("getSDataMoments", function(.Object) standardGeneric("getSDataMoments"))
+setGeneric("getSDatamoments", function(.Object) standardGeneric("getSDatamoments"))
 
 ## Setters ##
 ## No setters as users should not manipulate a 'datamoments' object ##

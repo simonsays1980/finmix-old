@@ -134,7 +134,7 @@ setMethod("getData", "ddatamoments", function(.Object) {
 				return(.Object@data)
 			}
 )
-setMethod("getSDataMoments", "ddatamoments", function(.Object) {
+setMethod("getSDatamoments", "ddatamoments", function(.Object) {
 					return(.Object@sdatamoments)
 				}
 )
