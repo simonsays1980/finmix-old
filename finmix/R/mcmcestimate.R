@@ -17,7 +17,7 @@
 
     ## If it inherits from 'mcmcoutputbase' indicators 
     ## must be simulated.
-    indicfix    <- !inherits(mcmcout, what = "mcmcoutputbase")
+    indicfix    <- mcmcout@model@indicfix
 
     ## If it inherits from 'mcmcoutputperm' it has already 
     ## identified samples
@@ -72,6 +72,7 @@
                     if (returnOut) {
                         return.list <- list(mcmcest = mcmcest, 
                                             mcmcoutputperm = mcmcoutperm)
+                        return(return.list)
                     } else {
                         return(mcmcest)
                     }
@@ -82,8 +83,8 @@
             }
         } else { 
             ## 'eavg'
-            mcmcest <- new("mcmcestfix", dist = dist, K = K, indicmode = indicmod,
-                          pm = pm, bml = bml, ieavg = eavg)
+            mcmcest <- new("mcmcestfix", dist = dist, K = K, indicmod = indicmod,
+                          map = map, bml = bml, ieavg = eavg)
             return(mcmcest)
         }
     }
@@ -132,13 +133,12 @@
     dist <- mcmcout@model@dist
     indicfix <- !inherits(mcmcout, what = "mcmcoutputbase")
     if (dist == "poisson") {
-        par.est <- list(lambda = as.array(mcmcout@par$lambda[m, ], 
-                                          dim = c(1, K)))
+        par.est <- list(lambda = as.array(mcmcout@par$lambda[m, ]))
     }
     if(!indicfix && K > 1) {
-        weight.est <- mcmcout@weight[m, ]
+        weight.est <- as.array(mcmcout@weight[m, ])
         est.list <- list(par = par.est,  weight = weight.est)
-        return(map.list)
+        return(est.list)
     }
     est.list <- list(par = par.est)
     return(est.list)
@@ -155,11 +155,11 @@
     perm <- inherits(mcmcout, what = "mcmcoutputperm")
     if (dist == "poisson") {
         if(!perm) {
-            par.eavg <- list(lambda = apply(mcmcout@par$lambda, 
-                                            2, mean, na.rm = TRUE))
+            par.eavg <- list(lambda = as.array(apply(mcmcout@par$lambda, 
+                                            2, mean, na.rm = TRUE)))
         } else {
-            par.eavg <- list(lambda = apply(mcmcout@parperm$lambda,
-                                            2, mean, na.rm = TRUE))
+            par.eavg <- list(lambda = as.array(apply(mcmcout@parperm$lambda,
+                                            2, mean, na.rm = TRUE)))
         }
     }
     if (indicfix) {

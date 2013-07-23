@@ -13,11 +13,11 @@ setMethod("show", "mcmcoutputfixhier", function(object) {
 	cat("	class		:", class(object), "\n")
 	cat("	M		:", object@M, "\n")
 	cat("	ranperm		:", object@ranperm, "\n")
-	cat("	par		: List of ", 
+	cat("	par		: List of", 
 		length(object@par), "\n")
-	cat("	log		: List of ",
+	cat("	log		: List of",
 		length(object@par), "\n")
-	cat("	hyper		: List of ",
+	cat("	hyper		: List of",
 		length(object@hyper), "\n")
 	cat("	model		: Object of class",
 		class(object@model), "\n")
@@ -262,7 +262,6 @@ setMethod("swapElements", signature(object = "mcmcoutputfixhier",
               if (typeof(index) != "integer") {
                   stop("Argument 'index' must be of type 'integer'")
               }
-              cat("index:", index)
               if (!all(index > 0) || any(index > object@model@K)) {
                   stop("Elements in argument 'index' must be greater 0 
                        and must not exceed its number of columns.")

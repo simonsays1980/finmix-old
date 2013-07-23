@@ -18,9 +18,9 @@ setMethod("show", "mcmcoutputfix",
               cat("     class       :", class(object), "\n")
               cat("     M           :", object@M, "\n")
               cat("     ranperm     :", object@ranperm, "\n")
-              cat("     par         : List of ", 
+              cat("     par         : List of", 
                   length(object@par), "\n")
-              cat("     log         : List of ", 
+              cat("     log         : List of", 
                   length(object@log), "\n")
               cat("     model       : Object of class", 
                   class(object@model), "\n")
@@ -251,17 +251,14 @@ setMethod("swapElements", signature(object = "mcmcoutputfix", index = "array"),
               if (typeof(index) != "integer") {
                   stop("Argument 'index' must be of type 'integer'.")
               }
-              cat(index)
               if (!all(index > 0) || any(index > object@model@K)) {
                   stop("Elements in argument 'index' must be greater 0 
                        and must not exceed its number of columns.")
               }
               if(object@model@K == 1) {
-                  cat("mcmcoutputfix: K = 1\n")
                   return(object)
               } else {
                   dist <- object@model@dist
-                    cat("mcmcoutputfix: K > 1\n")             
                   if (dist == "poisson") {
                       ## Rcpp::export 'swap_cc'
                       object@par$lambda <- swap_cc(object@par$lambda, index)

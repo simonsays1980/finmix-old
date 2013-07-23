@@ -318,9 +318,9 @@ setMethod("swapElements", signature(object = "mcmcoutputbase",
               if (typeof(index) != "integer") {
                   stop("Argument 'index' must be of type 'integer'.") 
               }
-              if (!all(index > 0)) {
+              if (!all(index > 0) || any(index > object@model@K)) {
                   stop("Elements of argument 'index' must be greater 0 
-                       and not exceeding its number of columns..")
+                       and must not exceed its number of columns.")
               }
               dist          <- object@model@dist
               ## Call method 'swapElements()' from 'mcmcoutputfix' 

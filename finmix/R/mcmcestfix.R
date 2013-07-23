@@ -14,6 +14,7 @@ setClass("mcmcestfix",
 setMethod("show", "mcmcestfix", 
           function(object) {
               cat("Object 'mcmcest\n")
+              cat("     dist        :", object@dist, "\n")
               cat("     K           :", object@K, "\n")
               cat("     indicmod    :", object@indicmod, 
                   "\n")
@@ -27,6 +28,12 @@ setMethod("show", "mcmcestfix",
 )
 
 ## Getters ##
+## Generic set in 'model.R' ##
+setMethod("getDist", "mcmcestfix", 
+          function(object) {
+              return(object@dist)
+          }
+)
 ## Generic set in 'model.R' ##
 setMethod("getK", "mcmcestfix", 
           function(object) {

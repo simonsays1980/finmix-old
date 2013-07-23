@@ -28,23 +28,23 @@ setMethod("show", "mcmcoutputhierpost",
               cat("     class       :", class(object), "\n")
               cat("     M           :", object@M, "\n")
               cat("     ranperm     :", object@ranperm, "\n")
-              cat("     par         : List of ", 
+              cat("     par         : List of", 
                   length(object@par), "\n")
-              cat("     weight      : ",
+              cat("     weight      :",
                   paste(dim(object@weight), collapse = "x"), "\n")
-              cat("     log         : List of ", 
+              cat("     log         : List of", 
                   length(object@log), "\n")
-              cat("     hyper       : List of ",
+              cat("     hyper       : List of",
                   length(object@hyper), "\n")
-              cat("     post        : List of ",
+              cat("     post        : List of",
                   length(object@post), "\n")
-              cat("     ST          : ", 
+              cat("     ST          :", 
                   paste(dim(object@ST), collapse = "x"), "\n")
-              cat("     S           : ", 
+              cat("     S           :", 
                   paste(dim(object@S), collapse = "x"), "\n")
-              cat("     NK          : ",
+              cat("     NK          :",
                   paste(dim(object@NK), collapse = "x"), "\n")
-              cat("     clust       : ",
+              cat("     clust       :",
                   paste(dim(object@clust), collapse = "x"), "\n")
               cat("     model       : Object of class", 
                   class(object@model), "\n")
@@ -268,9 +268,9 @@ setMethod("swapElements", signature(object = "mcmcoutputhierpost",
               if (typeof(index) != "integer") {
                   stop("Argument 'index' must be of type 'integer'.")
               }
-              if (!all(index > 0) || !all(index <= object@model@K)) {
+              if (!all(index > 0) || any(index > object@model@K)) {
                   stop("Elements of argument 'index' must be greater 0 
-                       and not exceed the number of its columns.")
+                       and must not exceed its number of columns.")
               }
               if (object@model@K == 1) {
                   return(object)

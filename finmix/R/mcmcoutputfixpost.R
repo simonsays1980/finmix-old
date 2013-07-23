@@ -247,28 +247,25 @@ setMethod("swapElements", signature(object = "mcmcoutputfixpost",
               }
               if (typeof(index) != "integer") {
                   stop("Argument 'index' must be of type 'integer'.")
-              }
-              if (!all(index > 0)) {
-                  stop("Elements of argument 'index' must be greater 0.")
+              } 
+              if (!all(index > 0) || any(index > object@model@K)) {
+                  stop("Elements of argument 'index' must be greater 0 
+                       and must not exceed its number of columns.")
               }
               if (object@model@K == 1) {
-                  cat("mcmcoutputfixpost: K = 1\n")
                   return(object)
               } else {
                   dist <- object@model@dist
-                  cat("mcmcoutputfixpost: K > 1\n")
                   ## Call method 'swapiElements()' from 'mcmcoutputfix' 
+                  object <- callNextMethod()
                   if (dist == "poisson") {
                       ## Rcpp::export 'swap_cc' 
-                      cat("mcmcoutputfixpost: call swap_cc\n")
                       object@post$par$a <- swap_cc(object@post$par$a, index)
                       object@post$par$b <- swap_cc(object@post$par$b, index)
                   }
-                  cat("mcmcoutputfixpost: callNextMethod\n")
-                   object <- callNextMethod()
-                 return(object)
-              }
-          }
+                  return(object)
+             }                 
+         }
 )
 
 setGeneric("getPost", function(object) standardGeneric("getPost"))

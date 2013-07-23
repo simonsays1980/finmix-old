@@ -176,13 +176,13 @@
 	######################### MCMC SAMPLING #############################
 	if(model@dist == "poisson") {
 		## base slots inherited to every derived class ##
-		M 		<- as.integer(mcmc@M)
-		ranperm 	<- mcmc@ranperm
-		pars 		<- list(lambda = array(numeric(), dim = c(M, K)))
-		log.mixlik 	<- array(numeric(), dim = c(M, 1))
+		M 		        <- as.integer(mcmc@M)
+		ranperm 	    <- mcmc@ranperm
+		pars 		    <- list(lambda = array(numeric(), dim = c(M, K)))
+		log.mixlik 	    <- array(numeric(), dim = c(M, 1))
 		log.mixprior 	<- array(numeric(), dim = c(M, 1))
 		## model with fixed indicators ##
-		if(model@indicfix || K == 1) {
+		if(model@indicfix || K == 1) { 
 			logs 	<- list(mixlik = log.mixlik, mixprior = log.mixprior)
 			## model with simple prior ##
 			if (!prior@hier) {

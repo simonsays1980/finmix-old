@@ -14,6 +14,7 @@ setClassUnion("mcmcest", c("mcmcestfix",
 setMethod("show", "mcmcestind",
           function(object) {
               cat("Object 'mcmcest\n")
+              cat("     dist        :", object@dist, "\n")
               cat("     K           :", object@K, "\n")
               cat("     indicmod    :", object@indicmod, 
                   "\n")

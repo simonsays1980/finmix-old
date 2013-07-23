@@ -26,6 +26,7 @@ setMethod("initialize", "mcmcoutputpermbase",
               .Object@M             <- mcmcoutput@M
               .Object@ranperm       <- mcmcoutput@ranperm
               .Object@par           <- mcmcoutput@par
+              .Object@weight        <- mcmcoutput@weight
               .Object@log           <- mcmcoutput@log
               .Object@ST            <- mcmcoutput@ST
               .Object@S             <- mcmcoutput@S
@@ -49,28 +50,28 @@ setMethod("show", "mcmcoutputpermbase",
               cat("     class       :", class(object), "\n")
               cat("     M           :", object@M, "\n")
               cat("     ranperm     :", object@ranperm, "\n")
-              cat("     par         : List of ", 
+              cat("     par         : List of", 
                   length(object@par), "\n")
-              cat("     log         : List of ", 
+              cat("     log         : List of", 
                   length(object@log), "\n")
-              cat("     ST          : ", 
+              cat("     ST          :", 
                   paste(dim(object@ST), collapse = "x"), "\n")
-              cat("     S           : ", 
+              cat("     S           :", 
                   paste(dim(object@S), collapse = "x"), "\n")
-              cat("     NK          : ",
+              cat("     NK          :",
                   paste(dim(object@NK), collapse = "x"), "\n")
-              cat("     clust       : ",
+              cat("     clust       :",
                   paste(dim(object@clust), collapse = "x"), "\n")
-              cat("     Mperm       : ", object@Mperm, "\n")
-              cat("     parperm     : List of ", 
+              cat("     Mperm       :", object@Mperm, "\n")
+              cat("     parperm     : List of", 
                   length(object@parperm), "\n")
-              cat("     weightperm  : ",
+              cat("     weightperm  :",
                   paste(dim(object@weightperm), collapse = "x"), "\n")
-              cat("     STperm      : ",
+              cat("     STperm      :",
                   paste(dim(object@STperm), collapse = "x"), "\n")
-              cat("     Sperm       : ",
+              cat("     Sperm       :",
                   paste(dim(object@Sperm), collapse = "x"), "\n")
-              cat("     NKperm      : ", 
+              cat("     NKperm      :", 
                   paste(dim(object@NKperm), collapse = "x"), "\n")
               cat("     model       : Object of class", 
                   class(object@model), "\n")
@@ -94,6 +95,7 @@ setMethod("initialize", "mcmcoutputpermhier",
               .Object@M             <- mcmcoutput@M
               .Object@ranperm       <- mcmcoutput@ranperm
               .Object@par           <- mcmcoutput@par
+              .Object@weight        <- mcmcoutput@weight
               .Object@log           <- mcmcoutput@log
               .Object@hyper         <- mcmcoutput@hyper
               .Object@ST            <- mcmcoutput@ST
@@ -118,30 +120,30 @@ setMethod("show", "mcmcoutputpermhier",
               cat("     class       :", class(object), "\n")
               cat("     M           :", object@M, "\n")
               cat("     ranperm     :", object@ranperm, "\n")
-              cat("     par         : List of ", 
+              cat("     par         : List of", 
                   length(object@par), "\n")
-              cat("     log         : List of ", 
+              cat("     log         : List of", 
                   length(object@log), "\n")
-              cat("     hyper       : List of ",
+              cat("     hyper       : List of",
                   length(object@hyper), "\n")
-              cat("     ST          : ", 
+              cat("     ST          :", 
                   paste(dim(object@ST), collapse = "x"), "\n")
-              cat("     S           : ", 
+              cat("     S           :", 
                   paste(dim(object@S), collapse = "x"), "\n")
-              cat("     NK          : ",
+              cat("     NK          :",
                   paste(dim(object@NK), collapse = "x"), "\n")
-              cat("     clust       : ",
+              cat("     clust       :",
                   paste(dim(object@clust), collapse = "x"), "\n")
-              cat("     Mperm       : ", object@Mperm, "\n")
-              cat("     parperm     : List of ", 
+              cat("     Mperm       :", object@Mperm, "\n")
+              cat("     parperm     : List of", 
                   length(object@parperm), "\n")
-              cat("     weightperm  : ",
+              cat("     weightperm  :",
                   paste(dim(object@weightperm), collapse = "x"), "\n")
-              cat("     STperm      : ",
+              cat("     STperm      :",
                   paste(dim(object@STperm), collapse = "x"), "\n")
-              cat("     Sperm       : ",
+              cat("     Sperm       :",
                   paste(dim(object@Sperm), collapse = "x"), "\n")
-              cat("     NKperm      : ", 
+              cat("     NKperm      :", 
                   paste(dim(object@NKperm), collapse = "x"), "\n")
               cat("     model       : Object of class", 
                   class(object@model), "\n")

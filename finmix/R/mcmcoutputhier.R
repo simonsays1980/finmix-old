@@ -240,9 +240,9 @@ setMethod("swapElements", signature(object = "mcmcoutputhier",
               if (typeof(index) != "integer") {
                   stop("Argument 'index' must be of type 'integer'.")
               }
-              if (!all(index > 0) || !all(index <= object@model@K)) {
+              if (!all(index > 0) || any(index > object@model@K)) {
                   stop("Elements of argument 'index' must be greater 0
-                        and not exceeding its number of components.")
+                        and must not exceed its number of columns.")
               }
               ## Call method 'swapElements()' from 'mcmcoutputbase' 
               object <- callNextMethod(object, index)

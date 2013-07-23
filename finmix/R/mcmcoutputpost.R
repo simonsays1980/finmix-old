@@ -13,7 +13,7 @@ setMethod("show", "mcmcoutputpost", function(object) {
 	cat("	class		:", class(object), "\n")
 	cat("	M		:", object@M, "\n")
 	cat("	ranperm		:", object@ranperm, "\n")
-	cat("	par		: List of ", 
+	cat("	par		: List of", 
 		length(object@par), "\n")
 	cat("	weight		:", paste(dim(object@weight), 
 		collapse = "x"), "\n")
@@ -342,7 +342,7 @@ setMethod("swapElements", signature(object = "mcmcoutputpost",
               if (typeof(index) != "integer") {
                   stop("argument 'index# must be of type 'integer'.")
               }
-              if (!all(index > 0) || !all(index <= object@model@K)) {
+              if (!all(index > 0) || any(index > object@model@K)) {
                   stop("Elements in argument 'index' must be greater 0 
                        and must not exceed its number of columns.")
               }

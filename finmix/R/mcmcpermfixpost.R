@@ -16,12 +16,18 @@ setClass("mcmcoutputpermfixpost",
 )
 
 setMethod("initialize", "mcmcoutputpermfixpost",
-          function(.Object, mcmcoutput) {
+          function(.Object, mcmcoutput, Mperm, parperm, 
+                   postperm) {
               .Object@M         <- mcmcoutput@M
               .Object@ranperm   <- mcmcoutput@ranperm
               .Object@par       <- mcmcoutput@par
               .Object@log       <- mcmcoutput@log
               .Object@post      <- mcmcoutput@post
+              .Object@model     <- mcmcoutput@model
+              .Object@prior     <- mcmcoutput@prior
+              .Object@Mperm     <- Mperm
+              .Object@parperm   <- parperm
+              .Object@postperm  <- postperm
               .Object
           }
 )
@@ -32,15 +38,17 @@ setMethod("show", "mcmcoutputpermfixpost",
               cat("     class       :", class(object), "\n")
               cat("     M           :", object@M, "\n")
               cat("     ranperm     :", object@ranperm, "\n")
-              cat("     par         : List of ", 
+              cat("     par         : List of", 
                   length(object@par), "\n")
-              cat("     log         : List of ", 
+              cat("     log         : List of", 
                   length(object@log), "\n")
-              cat("     post        : List of ",
+              cat("     post        : List of",
                   length(object@post), "\n")
-              cat("     Mperm       : ", object@Mperm, "\n")
-              cat("     parperm     : List of ", 
+              cat("     Mperm       :", object@Mperm, "\n")
+              cat("     parperm     : List of", 
                   length(object@parperm), "\n")
+              cat("     postperm    : List of",
+                  length(object@postperm), "\n")
               cat("     model       : Object of class", 
                   class(object@model), "\n")
               cat("     prior       : Object of class",
@@ -58,13 +66,19 @@ setClass("mcmcoutputpermfixhierpost",
 )
 
 setMethod("initialize", "mcmcoutputpermfixhierpost",
-          function(.Object, mcmcoutput) {
+          function(.Object, mcmcoutput, Mperm, parperm,
+                   postperm) {
               .Object@M         <- mcmcoutput@M
               .Object@ranperm   <- mcmcoutput@ranperm
               .Object@par       <- mcmcoutput@par
               .Object@log       <- mcmcoutput@log
               .Object@hyper     <- mcmcoutput@hyper
               .Object@post      <- mcmcoutput@post
+              .Object@model     <- mcmcoutput@model
+              .Object@prior     <- mcmcoutput@prior
+              .Object@Mperm     <- Mperm
+              .Object@parperm   <- parperm
+              .Object@postperm  <- postperm
               .Object
           }
 )
@@ -75,16 +89,16 @@ setMethod("show", "mcmcoutputpermfixhierpost",
               cat("     class       :", class(object), "\n")
               cat("     M           :", object@M, "\n")
               cat("     ranperm     :", object@ranperm, "\n")
-              cat("     par         : List of ", 
+              cat("     par         : List of", 
                   length(object@par), "\n")
-              cat("     log         : List of ", 
+              cat("     log         : List of", 
                   length(object@log), "\n")
-              cat("     hyper       : List of ",
+              cat("     hyper       : List of",
                   length(object@hyper), "\n")
-              cat("     post        : List of ",
+              cat("     post        : List of",
                   length(object@post), "\n")
-              cat("     Mperm       : ", object@Mperm, "\n")
-              cat("     parperm     : List of ", 
+              cat("     Mperm       :", object@Mperm, "\n")
+              cat("     parperm     : List of", 
                   length(object@parperm), "\n")
               cat("     model       : Object of class", 
                   class(object@model), "\n")

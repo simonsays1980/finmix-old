@@ -37,12 +37,12 @@ setMethod("show", "mcmcoutputpermfix",
               cat("     class       :", class(object), "\n")
               cat("     M           :", object@M, "\n")
               cat("     ranperm     :", object@ranperm, "\n")
-              cat("     par         : List of ", 
+              cat("     par         : List of", 
                   length(object@par), "\n")
-              cat("     log         : List of ", 
+              cat("     log         : List of", 
                   length(object@log), "\n")
-              cat("     Mperm       : ", object@Mperm, "\n")
-              cat("     parperm     : List of ", 
+              cat("     Mperm       :", object@Mperm, "\n")
+              cat("     parperm     : List of", 
                   length(object@parperm), "\n")
               cat("     model       : Object of class", 
                   class(object@model), "\n")
@@ -61,12 +61,16 @@ setClass("mcmcoutputpermfixhier",
 )
 
 setMethod("initialize", "mcmcoutputpermfixhier",
-          function(.Object, mcmcoutput) {
+          function(.Object, mcmcoutput, Mperm, parperm) {
               .Object@M         <- mcmcoutput@M
               .Object@ranperm   <- mcmcoutput@ranperm
               .Object@par       <- mcmcoutput@par
               .Object@log       <- mcmcoutput@log
               .Object@hyper     <- mcmcoutput@hyper
+              .Object@model     <- mcmcoutput@model
+              .Object@prior     <- mcmcoutput@prior
+              .Object@Mperm     <- Mperm
+              .Object@parperm   <- parperm
               .Object
           }
 )
@@ -77,14 +81,14 @@ setMethod("show", "mcmcoutputpermfixhier",
               cat("     class       :", class(object), "\n")
               cat("     M           :", object@M, "\n")
               cat("     ranperm     :", object@ranperm, "\n")
-              cat("     par         : List of ", 
+              cat("     par         : List of", 
                   length(object@par), "\n")
-              cat("     log         : List of ", 
+              cat("     log         : List of", 
                   length(object@log), "\n")
-              cat("     hyper       : List of ",
+              cat("     hyper       : List of",
                   length(object@hyper), "\n")
-              cat("     Mperm       : ", object@Mperm, "\n")
-              cat("     parperm     : List of ", 
+              cat("     Mperm       :", object@Mperm, "\n")
+              cat("     parperm     : List of", 
                   length(object@parperm), "\n")
               cat("     model       : Object of class", 
                   class(object@model), "\n")
