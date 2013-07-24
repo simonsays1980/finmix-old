@@ -354,10 +354,9 @@ setClass("prior",
 		## prior weights ##
 		if(K > 1) {
 			e0 <- 4
-			weight <- matrix(e0, nrow = 1, ncol = K)
-		
+			weight <- matrix(e0, nrow = 1, ncol = K)	
 		}
-		else { ## K = 1
+		else {
 			weight <- matrix()
 		}
 		prior <- new("prior", weight = weight, par = par, type = type, hier = hier)
