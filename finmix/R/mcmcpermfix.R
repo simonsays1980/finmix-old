@@ -1,7 +1,8 @@
 setClass("mcmcpermfix", 
          representation(
                         Mperm       = "integer",
-                        parperm     = "list"),
+                        parperm     = "list",
+                        logperm     = "list"),
          validity = function(object) {
              ## else: OK
              TRUE
@@ -18,7 +19,8 @@ setClass("mcmcoutputpermfix",
 )
 
 setMethod("initialize", "mcmcoutputpermfix", 
-          function(.Object, mcmcoutput, Mperm, parperm) {
+          function(.Object, mcmcoutput, Mperm, parperm,
+                   logperm) {
               .Object@M         <- mcmcoutput@M
               .Object@ranperm   <- mcmcoutput@ranperm
               .Object@par       <- mcmcoutput@par
@@ -27,6 +29,7 @@ setMethod("initialize", "mcmcoutputpermfix",
               .Object@prior     <- mcmcoutput@prior
               .Object@Mperm     <- Mperm
               .Object@parperm   <- parperm
+              .Object@logperm   <- logperm
               .Object
           }
 )
@@ -44,6 +47,8 @@ setMethod("show", "mcmcoutputpermfix",
               cat("     Mperm       :", object@Mperm, "\n")
               cat("     parperm     : List of", 
                   length(object@parperm), "\n")
+              cat("     logperm     : List of",
+                  length(object@logperm), "\n")
               cat("     model       : Object of class", 
                   class(object@model), "\n")
               cat("     prior       : Object of class",
@@ -61,7 +66,8 @@ setClass("mcmcoutputpermfixhier",
 )
 
 setMethod("initialize", "mcmcoutputpermfixhier",
-          function(.Object, mcmcoutput, Mperm, parperm) {
+          function(.Object, mcmcoutput, Mperm, parperm, 
+                   logperm) {
               .Object@M         <- mcmcoutput@M
               .Object@ranperm   <- mcmcoutput@ranperm
               .Object@par       <- mcmcoutput@par
@@ -71,6 +77,7 @@ setMethod("initialize", "mcmcoutputpermfixhier",
               .Object@prior     <- mcmcoutput@prior
               .Object@Mperm     <- Mperm
               .Object@parperm   <- parperm
+              .Object@logperm   <- logperm
               .Object
           }
 )
@@ -90,6 +97,8 @@ setMethod("show", "mcmcoutputpermfixhier",
               cat("     Mperm       :", object@Mperm, "\n")
               cat("     parperm     : List of", 
                   length(object@parperm), "\n")
+              cat("     logperm     : List of",
+                  length(object@logperm), "\n")
               cat("     model       : Object of class", 
                   class(object@model), "\n")
               cat("     prior       : Object of class",
@@ -113,5 +122,11 @@ setMethod("getParperm", "mcmcpermfix",
           }
 )
 
+setGeneric("getLogperm", function(object) standardGeneric("getLogperm"))
+setMethod("getLogperm", "mcmcpermfix", 
+          function(object) {
+              return(object@logperm)
+          }
+)
 ## No setters as users are not intended to modify these ##
 ## obect.                                               ##

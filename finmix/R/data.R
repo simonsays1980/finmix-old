@@ -1,15 +1,14 @@
 setClass("data", 
-	representation (
-		y = "matrix",
-		N = "numeric",
-		r = "numeric",
-		S = "matrix",
-		bycolumn = "logical",
-		name = "character",
-		type = "character",
-		sim = "logical",
-		exp = "matrix",
-		T = "matrix"
+         representation (y           = "matrix",
+		                 N           = "integer",
+                   		 r           = "integer",
+                		 S           = "matrix",
+                		 bycolumn    = "logical",
+                		 name        = "character",
+		                 type        = "character",
+		                 sim         = "logical",
+		                 exp         = "matrix",
+	    	             T           = "matrix"
 	),	
 	validity = function (object) {
 				type.choices <- c("continuous", "discrete")
@@ -34,33 +33,31 @@ setClass("data",
 		storage.mode(exp.) <- "integer"
 		
 		has.data <- !all(is.na(y.))
-		if(missing(N.)) {
-			if(bycolumn. && has.data) {
+		if (missing(N.) && has.data) {
+			if(bycolumn.) {
 				N. <- nrow(y.)
-			}
-			if(!bycolumn. && has.data) {
+			} else {
 				N. <- col(y.)
 			}
-			else {
-				N. <- 1
-			}
-		}
-		if(missing(r.)) {
-			if(bycolumn. && has.data) {
-                                r. <- ncol(y.)
-                        }
-                        if(!bycolumn. && has.data) {
-                                r. <- nrow(y.)
-                        }
-                        else {
-                                r. <- 1
-                        }
-		}
-
+        } else if (missing(N.) && !has.data) {
+				N. <- as.integer(1)
+	    } else {
+            N. <- as.integer(N.)
+        }
 		
+		if (missing(r.) && has.data) {
+			if (bycolumn.) {
+                r. <- ncol(y.)
+            } else {
+                r. <- nrow(y.)
+            } 
+        } else if (missing(r.) && !has.data){
+            r. <- as.integer(1)
+        } else {
+            r. <- as.integer(r.)
+        }
 		data <- new("data", y = y., N = N., r = r., S = S., bycolumn = bycolumn., name = name., type = type.
 				, sim = sim., exp = exp., T = T.)
-		
 		return(data)
 }
 
@@ -231,9 +228,9 @@ setMethod("show", "data",
               has.S <- !all(is.na(object@S))
 			  has.exp <- !all(is.na(object@exp))
 			  has.T <- !all(is.na(object@T))
-			  name <- ifelse(length(object@name) == 0, "name", object@name)
+			  name <- ifelse(length(object@name) == 0, "data", object@name)
               cat("Object '", name, "'\n")
-              cat("     class       :", class(name), "\n")
+              cat("     class       :", class(object), "\n")
               cat("     y           :", 
                   paste(dim(object@y), collapse = "x"), "\n")
               cat("     bycolumn    :", object@bycolumn, "\n")
@@ -241,7 +238,7 @@ setMethod("show", "data",
               cat("     r           :", object@r, "\n")
               if (has.S) {
                   cat("     S           :", 
-                      paste(dim(S), collapse = "x"), "\n")
+                      paste(dim(object@S), collapse = "x"), "\n")
               }
               cat("     type        :", object@type, "\n")
               cat("     sim         :", object@sim, "\n")
@@ -338,7 +335,7 @@ setReplaceMethod("setY", "data", function(.Object, value) {
 
 setGeneric("setN<-", function(.Object, value) standardGeneric("setN<-"))
 setReplaceMethod("setN", "data", function(.Object, value) {
-					.Object@N <- value
+					.Object@N <- as.integer(value)
 					validObject(.Object)
 					return(.Object)
 				}
@@ -346,7 +343,7 @@ setReplaceMethod("setN", "data", function(.Object, value) {
 
 ## Already set as generic in 'model.R' ##
 setReplaceMethod("setR", "data", function(.Object, value) {
-					.Object@r <- value
+					.Object@r <- as.integer(value)
 					validObject(.Object)
 					return(.Object)
 				}

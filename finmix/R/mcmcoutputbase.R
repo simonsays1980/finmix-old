@@ -294,12 +294,10 @@ setMethod("subseq", signature(object = "mcmcoutputbase",
               object@ST             <- matrix(object@ST[index], 
                                               nrow = object@M, ncol = 1) 
               ## Check which S stay ##
-              stores <- ncol(object@S)
+              stores <- dim(object@S)[2]
               ms <- M - stores
               index.S <- index[(ms + 1):M]
-              if(!any(index.S)) {
-                  object@S <- array()
-              } else {
+              if(any(index.S) && stores != 0) {
                   object@S <- object@S[,index.S]
               }
               object@NK             <- object@NK[index,]
@@ -329,9 +327,11 @@ setMethod("swapElements", signature(object = "mcmcoutputbase",
               object@weight <- swap_cc(object@weight, index)
               ## Rcpp::export 'swapInd_cc()'
               M             <- object@M
-              storeS        <- ncol(object@S)
-              index.S       <- index[(M - storeS + 1):M, ]
-              object@S      <- swapInd_cc(object@S, index.S)
+              storeS        <- dim(object@S)[2]
+              if (storeS != 0) {
+                  index.S       <- index[(M - storeS + 1):M, ]
+                  object@S      <- swapInd_cc(object@S, index.S)
+              }
               ## Rcpp::export 'swapST_cc()'
               object@ST     <- swapST_cc(object@ST, index)
               ## Rcpp::export 'swap_cc()'

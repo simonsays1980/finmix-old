@@ -144,12 +144,14 @@ exportMethods( ## name of the generic, as with other methods
         ## 'mcmcpermfix' class ##
         "getMperm",
         "getParperm",
+        "getLogperm",
         
         ## 'mcmcpermfixpost' class ##
         "getPostperm",
 
         ## 'mcmcpermind'  class ##
         "getWeightperm",
+        "getEntropyperm",
         "getSTperm",
         "getSperm",
         "getNKperm",

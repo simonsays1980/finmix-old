@@ -19,7 +19,8 @@ setClass("mcmcoutputpermpost",
 
 setMethod("initialize", "mcmcoutputpermpost",
           function(.Object, mcmcoutput, Mperm, parperm,
-                   weightperm, postperm, STperm, Sperm, NKperm) {
+                   weightperm, logperm, postperm, 
+                   entropyperm, STperm, Sperm, NKperm) {
               .Object@M             <- mcmcoutput@M
               .Object@ranperm       <- mcmcoutput@ranperm
               .Object@par           <- mcmcoutput@par
@@ -35,7 +36,9 @@ setMethod("initialize", "mcmcoutputpermpost",
               .Object@Mperm         <- Mperm
               .Object@parperm       <- parperm
               .Object@weightperm    <- weightperm
+              .Object@logperm       <- logperm
               .Object@postperm      <- postperm
+              .Object@entropyperm   <- entropyperm
               .Object@STperm        <- STperm
               .Object@Sperm         <- Sperm
               .Object@NKperm        <- NKperm
@@ -70,8 +73,12 @@ setMethod("show", "mcmcoutputpermpost",
                   length(object@parperm), "\n")
               cat("     weightperm  :",
                   paste(dim(object@weightperm), collapse = "x"), "\n")
+              cat("     logperm     : List of",
+                  length(object@logperm), "\n")
               cat("     postperm    : List of",
                   length(object@postperm), "\n")
+              cat("     entropyperm :",
+                  paste(dim(object@entropyperm), collapse = "x"), "\n")
               cat("     STperm      :",
                   paste(dim(object@STperm), collapse = "x"), "\n")
               cat("     Sperm       :",
@@ -96,7 +103,8 @@ setClass("mcmcoutputpermhierpost",
 
 setMethod("initialize", "mcmcoutputpermhierpost",
           function(.Object, mcmcoutput, Mperm, parperm,
-                   weightperm, postperm, STperm, Sperm, NKperm) {
+                   weightperm, logperm, postperm, 
+                   entropyperm, STperm, Sperm, NKperm) {
               .Object@M             <- mcmcoutput@M
               .Object@ranperm       <- mcmcoutput@ranperm
               .Object@par           <- mcmcoutput@par
@@ -113,7 +121,9 @@ setMethod("initialize", "mcmcoutputpermhierpost",
               .Object@Mperm         <- Mperm
               .Object@parperm       <- parperm
               .Object@weightperm    <- weightperm
+              .Object@logperm       <- logperm
               .Object@postperm      <- postperm
+              .Object@entropyperm   <- entropyperm
               .Object@STperm        <- STperm
               .Object@Sperm         <- Sperm
               .Object@NKperm        <- NKperm
@@ -150,8 +160,12 @@ setMethod("show", "mcmcoutputpermhierpost",
                   length(object@parperm), "\n")
               cat("     weightperm  :",
                   paste(dim(object@weightperm), collapse = "x"), "\n")
+              cat("     logperm     : List of",
+                  length(object@logperm), "\n")
               cat("     postperm    : List of",
                   length(object@postperm), "\n")
+              cat("     entropyperm :",
+                  paste(dim(object@entropyperm), collapse = "x"), "\n")
               cat("     STperm      :",
                   paste(dim(object@STperm), collapse = "x"), "\n")
               cat("     Sperm       :",

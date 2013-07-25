@@ -240,7 +240,7 @@
 			weights 	<- array(numeric(), dim = c(M, K))
 			entropies 	<- array(numeric(), dim = c(M, 1))
 			STm 		<- array(integer(), dim = c(M, 1))
-			Sm 		<- array(integer(), dim = c(N, mcmc@storeS))
+   			Sm 		<- array(integer(), dim = c(N, mcmc@storeS))
 			NKm		<- array(integer(), dim = c(M, K))
 			clustm 		<- array(integer(), dim = c(N, 1))
 			if(mcmc@startpar) {
@@ -370,7 +370,7 @@
 			weights 	<- array(numeric(), dim = c(M, K))
 			entropies 	<- array(numeric(), dim = c(M, 1))
 			STm 		<- array(integer(), dim = c(M, 1))
-			Sm 		<- array(integer(), dim = c(N, mcmc@storeS))
+   			Sm 		<- array(integer(), dim = c(N, mcmc@storeS))
 			NKm		<- array(integer(), dim = c(M, K))
 			clustm 		<- array(integer(), dim = c(N, 1))
 			if(mcmc@startpar) {

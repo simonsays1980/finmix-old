@@ -321,9 +321,9 @@ setMethod("show", "model", function(object) {
 				}
 )
 ## Getters ##
-setGeneric("getDist", function(.Object) standardGeneric("getDist"))
-setMethod("getDist", "model", function(.Object) {
-					return(.Object@dist)
+setGeneric("getDist", function(object) standardGeneric("getDist"))
+setMethod("getDist", "model", function(object) {
+					return(object@dist)
 				}
 )
 setGeneric("getR", function(.Object) standardGeneric("getR"))

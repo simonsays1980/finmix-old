@@ -1,5 +1,6 @@
 setClass("mcmcpermind", 
          representation(weightperm  = "array",
+                        entropyperm = "array",
                         STperm      = "array",
                         Sperm       = "array",
                         NKperm      = "array"
@@ -21,8 +22,9 @@ setClass("mcmcoutputpermbase",
 )
 
 setMethod("initialize", "mcmcoutputpermbase",
-          function(.Object, mcmcoutput, Mperm, parperm,
-                   weightperm, STperm, Sperm, NKperm) {
+          function(.Object, mcmcoutput, Mperm, parperm,  
+                   weightperm, logperm, entropyperm,
+                   STperm, Sperm, NKperm) {
               .Object@M             <- mcmcoutput@M
               .Object@ranperm       <- mcmcoutput@ranperm
               .Object@par           <- mcmcoutput@par
@@ -37,6 +39,8 @@ setMethod("initialize", "mcmcoutputpermbase",
               .Object@Mperm         <- Mperm
               .Object@parperm       <- parperm
               .Object@weightperm    <- weightperm
+              .Object@logperm       <- logperm
+              .Object@entropyperm   <- entropyperm
               .Object@STperm        <- STperm
               .Object@Sperm         <- Sperm
               .Object@NKperm        <- NKperm
@@ -67,6 +71,10 @@ setMethod("show", "mcmcoutputpermbase",
                   length(object@parperm), "\n")
               cat("     weightperm  :",
                   paste(dim(object@weightperm), collapse = "x"), "\n")
+              cat("     logperm     : List of", 
+                  length(object@logperm), "\n")
+              cat("     entropyperm :",
+                  paste(dim(object@entropyperm), collapse = "x"), "\n")
               cat("     STperm      :",
                   paste(dim(object@STperm), collapse = "x"), "\n")
               cat("     Sperm       :",
@@ -91,7 +99,8 @@ setClass("mcmcoutputpermhier",
 
 setMethod("initialize", "mcmcoutputpermhier",
           function(.Object, mcmcoutput, Mperm, parperm,
-                   weightperm, STperm, Sperm, NKperm) {
+                   weightperm, logperm, entropyperm, 
+                   STperm, Sperm, NKperm) {
               .Object@M             <- mcmcoutput@M
               .Object@ranperm       <- mcmcoutput@ranperm
               .Object@par           <- mcmcoutput@par
@@ -107,6 +116,8 @@ setMethod("initialize", "mcmcoutputpermhier",
               .Object@Mperm         <- Mperm
               .Object@parperm       <- parperm
               .Object@weightperm    <- weightperm
+              .Object@logperm       <- logperm
+              .Object@entropyperm   <- entropyperm
               .Object@STperm        <- STperm
               .Object@Sperm         <- Sperm
               .Object@NKperm        <- NKperm
@@ -139,6 +150,10 @@ setMethod("show", "mcmcoutputpermhier",
                   length(object@parperm), "\n")
               cat("     weightperm  :",
                   paste(dim(object@weightperm), collapse = "x"), "\n")
+              cat("     logperm     : List of",
+                  length(object@logperm), "\n")
+              cat("     entropyperm :",
+                  paste(dim(object@entropyperm), collapse = "x"), "\n")
               cat("     STperm      :",
                   paste(dim(object@STperm), collapse = "x"), "\n")
               cat("     Sperm       :",
@@ -184,6 +199,13 @@ setGeneric("getWeightperm", function(object) standardGeneric("getWeightperm"))
 setMethod("getWeightperm", "mcmcpermind", function(object) {
           return(object@weightperm)
 })
+
+setGeneric("getEntropyperm", function(object) standardGeneric("getEntropyperm"))
+setMethod("getEntropyperm", "mcmcpermind", 
+          function(object) {
+              return(object@entropyperm)
+          }
+)
 
 setGeneric("getSTperm", function(object) standardGeneric("getSTperm"))
 setMethod("getSTperm", "mcmcpermind", 

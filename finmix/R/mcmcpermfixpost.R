@@ -17,7 +17,7 @@ setClass("mcmcoutputpermfixpost",
 
 setMethod("initialize", "mcmcoutputpermfixpost",
           function(.Object, mcmcoutput, Mperm, parperm, 
-                   postperm) {
+                   logperm, postperm) {
               .Object@M         <- mcmcoutput@M
               .Object@ranperm   <- mcmcoutput@ranperm
               .Object@par       <- mcmcoutput@par
@@ -27,6 +27,7 @@ setMethod("initialize", "mcmcoutputpermfixpost",
               .Object@prior     <- mcmcoutput@prior
               .Object@Mperm     <- Mperm
               .Object@parperm   <- parperm
+              .Object@logperm   <- logperm
               .Object@postperm  <- postperm
               .Object
           }
@@ -47,6 +48,8 @@ setMethod("show", "mcmcoutputpermfixpost",
               cat("     Mperm       :", object@Mperm, "\n")
               cat("     parperm     : List of", 
                   length(object@parperm), "\n")
+              cat("     logperm     : List of",
+                  length(object@logperm), "\n")
               cat("     postperm    : List of",
                   length(object@postperm), "\n")
               cat("     model       : Object of class", 
@@ -67,7 +70,7 @@ setClass("mcmcoutputpermfixhierpost",
 
 setMethod("initialize", "mcmcoutputpermfixhierpost",
           function(.Object, mcmcoutput, Mperm, parperm,
-                   postperm) {
+                   logperm, postperm) {
               .Object@M         <- mcmcoutput@M
               .Object@ranperm   <- mcmcoutput@ranperm
               .Object@par       <- mcmcoutput@par
@@ -78,6 +81,7 @@ setMethod("initialize", "mcmcoutputpermfixhierpost",
               .Object@prior     <- mcmcoutput@prior
               .Object@Mperm     <- Mperm
               .Object@parperm   <- parperm
+              .Object@logperm   <- logperm
               .Object@postperm  <- postperm
               .Object
           }
@@ -100,6 +104,10 @@ setMethod("show", "mcmcoutputpermfixhierpost",
               cat("     Mperm       :", object@Mperm, "\n")
               cat("     parperm     : List of", 
                   length(object@parperm), "\n")
+              cat("     logperm     : List of",
+                  length(object@logperm), "\n")
+              cat("     postperm    : List of",
+                  length(object@postperm), "\n")
               cat("     model       : Object of class", 
                   class(object@model), "\n")
               cat("     prior       : Object of class",

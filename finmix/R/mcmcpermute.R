@@ -65,23 +65,27 @@
         if (class(mcmcout) == "mcmcoutputfix") {
             mcmcoutperm <- new("mcmcoutputpermfix", mcmcout, 
                                Mperm        = mcmcout.swap@M,
-                               parperm      = mcmcout.swap@par)
+                               parperm      = mcmcout.swap@par,
+                               logperm      = mcmcout.swap@log)
             return(mcmcoutperm)
         } else if (class(mcmcout) == "mcmcoutputfixhier") {
             mcmcoutperm <- new("mcmcoutputpermfixhier", mcmcout, 
                                Mperm        = mcmcout.swap@M,
-                               parperm      = mcmcout.swap@par)
+                               parperm      = mcmcout.swap@par,
+                               logperm      = mcmcout.swap@log)
             return(mcmcoutperm)
         } else if (class(mcmcout) == "mcmcoutputfixpost") {
             mcmcoutperm <- new("mcmcoutputpermfixpost", mcmcout,
                                Mperm        = mcmcout.swap@M,
                                parperm      = mcmcout.swap@par,
+                               logperm      = mcmcout.swap@log,
                                postperm     = mcmcout.swap@post)
             return(mcmcoutperm)
         } else if (class(mcmcout) == "mcmcoutputfixhierpost") {
             mcmcoutperm <- new("mcmcoutputpermfixhierpost", mcmcout,
                                Mperm        = mcmcout.swap@M,
                                parperm      = mcmcout.swap@par,
+                               logperm      = mcmcout.swap@log,
                                postperm     = mcmcout.swap@post)
             return(mcmcoutperm)
         } else if (class(mcmcout) == "mcmcoutputbase") {
@@ -89,6 +93,8 @@
                                Mperm        = mcmcout.swap@M,
                                parperm      = mcmcout.swap@par,
                                weightperm   = mcmcout.swap@weight,
+                               logperm      = mcmcout.swap@log,
+                               entropyperm  = mcmcout.swap@entropy,
                                STperm       = mcmcout.swap@ST,
                                Sperm        = mcmcout.swap@S,
                                NKperm       = mcmcout.swap@NK)
@@ -98,6 +104,8 @@
                                Mperm        = mcmcout.swap@M,
                                parperm      = mcmcout.swap@par,
                                weightperm   = mcmcout.swap@weight,
+                               logperm      = mcmcout.swap@log,
+                               entropyperm  = mcmcout.swap@entropy,
                                STperm       = mcmcout.swap@ST,
                                Sperm        = mcmcout.swap@S,
                                NKperm       = mcmcout.swap@NK)
@@ -107,7 +115,9 @@
                                Mperm        = mcmcout.swap@M,
                                parperm      = mcmcout.swap@par,
                                weightperm   = mcmcout.swap@weight,
+                               logperm      = mcmcout.swap@log,
                                postperm     = mcmcout.swap@post,
+                               entropyperm  = mcmcout.swap@entropy,
                                STperm       = mcmcout.swap@ST,
                                Sperm        = mcmcout.swap@S,
                                NKperm       = mcmcout.swap@NK)
@@ -117,7 +127,9 @@
                                Mperm        = mcmcout.swap@M,
                                parperm      = mcmcout.swap@par,
                                weightperm   = mcmcout.swap@weight,
+                               logperm      = mcmcout.swap@log,
                                postperm     = mcmcout.swap@post,
+                               entropyperm  = mcmcout.swap@entropy,
                                STperm       = mcmcout.swap@ST,
                                Sperm        = mcmcout.swap@S,
                                NKperm       = mcmcout.swap@NK)
@@ -131,23 +143,27 @@
         if (class(mcmcout) == "mcmcoutputfix") {
             mcmcoutperm <- new("mcmcoutputpermfix", mcmcout, 
                                Mperm        = Mperm,
-                               parperm      = list())
+                               parperm      = list(),
+                               logperm      = list())
             return(mcmcoutperm)
         } else if (class(mcmcout) == "mcmcoutputfixhier") {
             mcmcoutperm <- new("mcmcoutputpermfixhier", mcmcout, 
                                Mperm        = Mperm,
-                               parperm      = list())
+                               parperm      = list(),
+                               logperm      = list())
             return(mcmcoutputperm)
         } else if (class(mcmcout) == "mcmcoutputfixpost") {
             mcmcoutperm <- new("mcmcoutputpermfixpost", mcmcout,
                                Mperm        = Mperm,
                                parperm      = list(),
+                               logperm      = list(),
                                postperm     = list())
             return(mcmcoutperm)
         } else if (class(mcmcout) == "mcmcoutputfixhierpost") {
             mcmcoutperm <- new("mcmcoutputpermfixhierpost", mcmcout,
                                Mperm        = Mperm,
                                parperm      = list(),
+                               logperm      = list(),
                                postperm     = list())
             return(mcmcoutperm)
         } else if (class(mcmcout) == "mcmcoutputbase") {
@@ -155,6 +171,8 @@
                                Mperm        = MPerm,
                                parperm      = list(),
                                weightperm   = array(),
+                               logperm      = list(),
+                               entropyperm  = array(),
                                STperm       = array(),
                                Sperm        = array(),
                                NKperm       = array())
@@ -164,6 +182,8 @@
                                Mperm        = Mperm,
                                parperm      = list(),
                                weightperm   = array(),
+                               logperm      = list(),
+                               entropyperm  = array(),
                                STperm       = array(),
                                Sperm        = array(),
                                NKperm       = array())
@@ -173,7 +193,9 @@
                                Mperm        = Mperm,
                                parperm      = list(),
                                weightperm   = array(),
+                               logperm      = list(),
                                postperm     = list(),
+                               entropyperm  = array(),
                                STperm       = array(),
                                Sperm        = array(),
                                NKperm       = array())
@@ -183,7 +205,9 @@
                                Mperm        = Mperm,
                                parperm      = list(),
                                weightperm   = array(),
+                               logperm      = list(),
                                postperm     = list(),
+                               entropyperm  = array(),
                                STperm       = array(),
                                Sperm        = array(),
                                NKperm       = array())
