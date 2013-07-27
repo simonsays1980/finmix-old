@@ -297,7 +297,7 @@ setMethod("subseq", signature(object = "mcmcoutputbase",
               stores <- dim(object@S)[2]
               ms <- M - stores
               index.S <- index[(ms + 1):M]
-              if(any(index.S) && stores != 0) {
+              if(any(index.S) && stores != 0) {
                   object@S <- object@S[,index.S]
               }
               object@NK             <- object@NK[index,]
