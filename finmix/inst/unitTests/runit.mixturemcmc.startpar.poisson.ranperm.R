@@ -9,17 +9,30 @@ if(TRUE) {
 
 ".setUp.data.startpar.ranperm" <- function(withInd = FALSE) {
         ## Get path ##
-        data.path <- paste(getwd(), 
-			"/../data/poisson.data.csv", sep= "")
+        pkg <- "finmix"
+        if (Sys.getenv("RCMDCHECK") == FALSE) {
+            data.path <- file.path(getwd(), "..", 
+                                   "data", "poisson.data.csv")        
+        } else {
+            data.path <- system.file(package = pkg, 
+                                     'data/poisson.data.csv')
+        }
         data <- read.csv(data.path, header = FALSE, sep = ",")
         if(withInd) {
-                ind.path <- paste(getwd(), 
-				"/../data/poisson.ind.csv", sep = "")
-                ind <- read.csv(ind.path, header = FALSE, sep = ",")
-                data <- data(y. = as.matrix(data), S. = as.matrix(ind), type. = "discrete",
-                                r. = 1, N. = nrow(data), sim. = TRUE,
-                                bycolumn. = TRUE)
-                return(data)
+            if (Sys.getenv("RCMDCHECK") == FALSE) {
+
+                ind.path <- file.path(getwd(), "..", 
+                                       "data", 
+                                       "poisson.ind.csv")        
+            } else {
+                ind.path <- system.file(package = pkg, 
+                                        'data/poisson.ind.csv')
+            }               
+            ind <- read.csv(ind.path, header = FALSE, sep = ",")
+            data <- data(y. = as.matrix(data), S. = as.matrix(ind), type. = "discrete",
+                         r. = 1, N. = nrow(data), sim. = TRUE,
+                         bycolumn. = TRUE)
+            return(data)
         }
         else {
                 data <- data(y. = as.matrix(data), type. = "discrete", r. = 1,

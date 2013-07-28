@@ -13,7 +13,7 @@ if(require("RUnit", quietly = TRUE)) {
 	else {
 		## Path to unit tests for R CMD check 
 		## finmix.Rcheck/tests/../finmix/unitTests
-		path <- system.file(package=finmix, "unitTests")
+		path <- system.file(package=pkg, "unitTests")
 	}
 	cat("\nRunning unit tests\n")
 	print(list(pkg=pkg, getwd=getwd(), pathToUnitTests=path))
