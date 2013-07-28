@@ -65,7 +65,7 @@
                     ## Use ergodic average function on 'mcmcoutputperm'
                     ## object
                     ## Build 'avg.id'
-                    ieavg <- mcmc.eavg(mcmcout)
+                    ieavg <- mcmc.eavg(mcmcoutperm)
                     mcmcest <- new("mcmcestind", dist = dist, K = K, 
                                    indicmod = indicmod, map = map, bml = bml,
                                    ieavg = ieavg, eavg = eavg)

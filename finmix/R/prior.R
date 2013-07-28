@@ -364,16 +364,19 @@ setClass("prior",
 		
 }
 	
-setMethod("show", "prior", function(object) {
-					cat("Object 'prior'\n")
-					cat("	type		:", class(object), "\n")
-					cat("	hier		:", getHier(object), "\n")
-					cat("	type (prior)	:", getType(object), "\n")
-					cat("	par		: List of ", length(names(getPar(object))), "\n")
-					if(!all(is.na(object@weight))) {
-						cat("	weight		:", paste(dim(object@weight), collapse = "x"),"\n")
-					}
-				}
+setMethod("show", "prior", 
+          function(object) {
+              cat("Object 'prior'\n")
+              cat("     class       :", class(object), "\n")
+              cat("     hier        :", object@hier, "\n")
+              cat("     type        :", object@type, "\n")
+              cat("     par         : List of", 
+                  length(object@par), "\n")
+              if(!all(is.na(object@weight))) {
+                  cat("     weight      :",
+                      paste(dim(object@weight), collapse = "x"), "\n")
+              }		
+          }
 )
 ## Getters ##
 ## Generic set in 'model' class ##

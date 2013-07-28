@@ -298,27 +298,30 @@ setMethod("mixturemar", "model", function(.Object, J) {
 )
 	
 ## Show ##
-setMethod("show", "model", function(object) {
-					cat("Object 'model'\n")
-					cat("	type	    :", class(object), "\n")
-					cat("	dist 	    :", object@dist, "\n")
-					cat("	r	        :", object@r, "\n")
-					cat("	K	        :", object@K, "\n")
-					cat("	weight	    :", paste(dim(object@weight), collapse = "x"), "\n")
-					if(!all(is.na(object@par))) {
-						cat("	par	        : List of ", length(names(getPar(object))), "\n")
-					}	
-					cat("	indicmod    :", object@indicmod,"\n")
-					cat("	indicfix    :", object@indicfix, "\n")
-					if(object@dist == "binomial") {
-						if(length(T) > 1) {
-							cat("	T	        :", paste(dim(object@T), collapse = "x"), "\n")
-						}
-						else { ## T is the same for all 
-							cat("	T	        :", object@T, "\n")
-						}
-					}
-				}
+setMethod("show", "model", 
+          function(object) {
+              cat("Object 'model'\n")
+              cat("     class       :", class(object), "\n")
+              cat("     dist        :", object@dist, "\n")
+              cat("     r           :", object@r, "\n")
+              cat("     K           :", object@K, "\n")
+              cat("     weight      :", 
+                  paste(dim(object@weight), collapse = "x"), "\n")
+              if (!all(is.na(object@par))) {
+                  cat("     par     : List of",
+                      length(object@par), ",\n")
+              }
+              cat("     indicmod    :", object@indicmod, "\n")
+              cat("     indicfix    :", object@indicfix, "\n")
+              if (object@dist == 'binomial') {
+                  if(length(object@T) > 1) {
+                      cat("     T       :",
+                          paste(dim(object@T), collapse = "x"), "\n")
+                  } else {
+                      cat("     T       :", object@T, "\n")
+                  }
+              }				
+          }
 )
 ## Getters ##
 setGeneric("getDist", function(object) standardGeneric("getDist"))

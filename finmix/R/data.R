@@ -229,7 +229,7 @@ setMethod("show", "data",
 			  has.exp <- !all(is.na(object@exp))
 			  has.T <- !all(is.na(object@T))
 			  name <- ifelse(length(object@name) == 0, "data", object@name)
-              cat("Object '", name, "'\n")
+              cat("Object '", name, "'\n", sep = "")
               cat("     class       :", class(object), "\n")
               cat("     y           :", 
                   paste(dim(object@y), collapse = "x"), "\n")

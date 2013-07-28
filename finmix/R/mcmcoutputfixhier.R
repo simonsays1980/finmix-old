@@ -110,7 +110,7 @@ setMethod("plotHist", signature(x = "mcmcoutputfixhier", dev = "ANY"),
 					border = "white", cex = 0.7,
 					cex.axis = 0.7, freq = TRUE,
 					xlab = "", main = "")
-				rug(lambda, col = "gray47")
+				rug(lambda[, k], col = "gray47")
 				mtext(side = 1, bquote(lambda[k = .(k)]),
 					cex = 0.7, line = 3)
 			}
@@ -202,7 +202,7 @@ setMethod("plotHist", signature(x = "mcmcoutputfixhier", dev = "ANY"),
 						cex.axis = 0.7, freq = TRUE,
 						xlab = "", main = "")
 					rug(lambda[, K - 1], col = "gray47")
-					mtext(side = 1, bquote(lambda[k = 
+                    mtext(side = 1, bquote(lambda[k = 
 						.(K - 1)]), line = 3)
 					plot.new()
 					hist(lambda[, K], col = "gray65",

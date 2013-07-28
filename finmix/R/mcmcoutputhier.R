@@ -93,7 +93,7 @@ setMethod("plot", signature(x = "mcmcoutputhier",
 	}
 })
 
-setMethod("plotHist", signature(x = "mcmcoutputbase", dev = "ANY"), 
+setMethod("plotHist", signature(x = "mcmcoutputhier", dev = "ANY"), 
 	function(x, dev = TRUE, ...) {
 	if(x@model@dist == "poisson") {
 		K <- x@model@K 
@@ -144,7 +144,7 @@ setMethod("plotHist", signature(x = "mcmcoutputbase", dev = "ANY"),
     					border = "white", cex = 0.7,
     					cex.axis = 0.7, freq = TRUE,
     					xlab = "", main = "")
-    				rug(lambda, col = "gray47")
+    				rug(lambda[, k], col = "gray47")
     				mtext(side = 1, bquote(lambda[k = .(k)]),
     					cex = 0.7, line = 3)
                 }

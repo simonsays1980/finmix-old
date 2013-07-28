@@ -28,16 +28,17 @@ setClass("mcmc",
 		return(mcmc)
 }
 
-setMethod("show", "mcmc", function(object) {
-					cat("Object 'mcmc'\n")
-					cat("	type		:", paste(class(object)), "\n")
-					cat("	burnin		:", object@burnin, "\n")
-					cat("	M		:", object@M, "\n")
-					cat("	startpar	:", object@startpar, "\n")
-					cat("	storeS		:", object@storeS, "\n")
-					cat("	storepost	:", object@storepost, "\n")
-					cat("	ranperm		:", object@ranperm, "\n")
-				}
+setMethod("show", "mcmc", 
+          function(object) {
+              cat("Object 'mcmc'\n")
+              cat("     class       :", class(object), "\n")
+              cat("     burnin      :", object@burnin, "\n")
+              cat("     M           :", object@M, "\n")
+              cat("     startpar    :", object@startpar, "\n")
+              cat("     storeS      :", object@storeS, "\n")
+              cat("     storepost   :", object@storepost, "\n")
+              cat("     ranperm     :", object@ranperm, "\n")		
+          }
 )
 ## Getters ##
 setGeneric("getBurnin", function(.Object) standardGeneric("getBurnin"))

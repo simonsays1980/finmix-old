@@ -66,7 +66,7 @@ setMethod("show", "mcmcoutputpost",
           }
 )
 
-setMethod("plot", signature(x = "mcmcoutputhier", 
+setMethod("plot", signature(x = "mcmcoutputpost", 
 	y = "missing"), function(x, y, ...) {
 	if (x@model@dist == "poisson") {
 		K <- x@model@K
@@ -179,7 +179,7 @@ setMethod("plotHist", signature(x = "mcmcoutputpost", dev = "ANY"),
     					border = "white", cex = 0.7,
     					cex.axis = 0.7, freq = TRUE,
     					xlab = "", main = "")
-    				rug(lambda, col = "gray47")
+    				rug(lambda[, k], col = "gray47")
     				mtext(side = 1, bquote(lambda[k = .(k)]),
     					cex = 0.7, line = 3)
                 }
