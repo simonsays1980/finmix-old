@@ -1,12 +1,12 @@
 Package: finmix
 Type: Package
-Title: What the package does (short line)
+Title: Gibbs sampling for finite mixture distributions.
 Version: 0.1
 Date: 2013-07-05
 Author: Lars Simon Zehnder
 Maintainer: Lars Simon Zehnder <szehnder@uni-bonn.de>
 Description: More about what it does (maybe more than one line)
-License: What license is it under?
+License: GPL (>= 3)
 Depends: Rcpp (>= 0.10.2), RcppArmadillo (>= 0.3.6.2), graphics, 
 		mnormt (>= 1.4-5)
 Imports: graphics, mnormt (>= 1.4-5)

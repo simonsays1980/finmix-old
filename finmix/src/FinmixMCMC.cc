@@ -1,15 +1,25 @@
-/*
- * FinmixMCMC.cc
- * 
- * Definition of FinmixMCMC struct to contain 
- * finmix 'model' S4-object 
- * Also a converter from Rcpp S4-object to
- * C++-struct is provided.
+/******************************************************************************
  *
- *  author: Lars Simon Zehnder
- * package: finmix (1.0.0)
- * created: 19 Feb. 2013
- */
+ * Copyright (C) 2013 Lars Simon Zehnder. All Rights Reserved.
+ *
+ * Author: Lars Simon Zehnder <simon.zehnder@gmail.com>
+ *
+ * This file is part of the R package finmix.
+ *
+ * finmix is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published
+ * by the Free Software Foundatio, either version 3 of the License, or
+ * any later version.
+ *
+ * finmix is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with 'finmix'. If not, see <http://www.gnu.org/licenses/>.
+ *
+ ******************************************************************************/
 #include "FinmixMCMC.h"
 
 FinmixMCMC::FinmixMCMC(const Rcpp::S4& classS4) {

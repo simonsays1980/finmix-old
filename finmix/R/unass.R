@@ -5,9 +5,7 @@
 # This code has been copied from 'https://gist.github.com/spacedman/4543212'
 # and is used in package 'finmix' to assign several modified objects 
 # to a list. 
-#
-# package:	finmix 1.0.1
-#
+
 unsass <- function(lhs,rhs){
   nvalues = length(rhs)
   lhss = getFormulaNames(lhs)
