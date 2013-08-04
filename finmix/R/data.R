@@ -31,11 +31,30 @@ setClass("data",
 				type.choices <- c("continuous", "discrete")
 				has.T <- !all(is.na(object@T))
 				has.Exp <- !all(is.na(object@exp))
-				if(has.T && any(object@T < 0)) 
+                if (object@bycolumn) {
+                    if (nrow(object@y) != object@N) {
+                        warning("Slot 'N' does not correspond to 
+                                the number of rows in slot 'y'.")
+                    }
+                    if (ncol(object@y) != object@r) {
+                        warning("Slot 'r' does not correspond to 
+                                the number of columns of slot 'y'.")
+                    }
+                } else {
+                    if (ncol(object@y) != object@N) {
+                        warning("Slot 'N' does not correspond to 
+                                the number of columns of slot 'y'.")
+                    }
+                    if (nrow(object@y) != object@r) {
+                        warning("Slot 'r' does not correspond to 
+                                the number of rows of slot 'y'.")
+                    }
+                }
+				if (has.T && any(object@T < 0)) 
 					return("[Error] Repetitions 'T' smaller zero.")
-				if(has.Exp && any(object@exp < 0)) 
+				if (has.Exp && any(object@exp < 0)) 
 					return("[Error] Exposures 'exp' smaller zero.")
-				if(!(object@type %in% type.choices)) 
+				if (!(object@type %in% type.choices)) 
 					return("[Error] Unknown data 'type'. 'type' has to be 'continuous' or 'discrete'.")
 				
 				## else: ok
@@ -80,159 +99,159 @@ setClass("data",
 
 setGeneric("plot", function(x, y, ...) standardGeneric("plot"))
 setMethod("plot", "data", function(x, y, ..., deparse.level=1) {
-				.Object <- x
-				lname <- length(.Object@name)
-				if(.Object@type == "continuous") {
-					if(.Object@bycolumn) {
-						if(.Object@r > 1) {
-							labels <- colnames(.Object@y)
-							par(mfcol = c(ceiling(.Object@r/2), 2), omi = c(0,0,0.3,0))
-							for(i in 1:.Object@r) {
+				object <- x
+				lname <- length(object@name)
+				if(object@type == "continuous") {
+					if(object@bycolumn) {
+						if(object@r > 1) {
+							labels <- colnames(object@y)
+							par(mfcol = c(ceiling(object@r/2), 2), omi = c(0,0,0.3,0))
+							for(i in 1:object@r) {
 								xlab <- ifelse(is.null(labels), paste("var ", i), labels[i])
-								hist(.Object@y[,i], xlab = xlab, main = "", ...) 
+								hist(object@y[,i], xlab = xlab, main = "", ...) 
 							}
-							if( lname > 0) title(main = .Object@name, outer = TRUE, cex = 1.5)
+							if( lname > 0) title(main = object@name, outer = TRUE, cex = 1.5)
 							dev.new()
 							if(r > 2) {
-								par(mfcol=c(ceiling(choose(.Object@r,2)/2), 2), omi = c(0,0,0.3,0))
+								par(mfcol=c(ceiling(choose(object@r,2)/2), 2), omi = c(0,0,0.3,0))
 							}
-							for(i in 1:(.Object@r - 1)) {
-								for(j in (i + 1):.Object@r) {
+							for(i in 1:(object@r - 1)) {
+								for(j in (i + 1):object@r) {
 									xlab <- ifelse(is.null(labels), paste("var ", i), 
 											labels[i])
 									ylab <- ifelse(is.null(labels), paste("var ", j), 
 											labels[j]) 
-									plot(.Object@y[,i], .Object@y[,j], xlab = xlab, 
+									plot(object@y[,i], object@y[,j], xlab = xlab, 
 										ylab = ylab, ...)
 								}
 							}
 							if(r > 2) {
-								if( lname > 0 ) title(main = .Object@name, outer = TRUE, cex = 1.5)
+								if( lname > 0 ) title(main = object@name, outer = TRUE, cex = 1.5)
 							}
 							else{ ## r == 2
-								title(main = .Object@name, outer = FALSE, cex = 1.5)
+								title(main = object@name, outer = FALSE, cex = 1.5)
 							}
 							if(r > 2) {
 								dev.new()
-								main <- ifelse(lname == 0, "", .Object@name)
-								pairs(.Object@y, main = main, ...)
+								main <- ifelse(lname == 0, "", object@name)
+								pairs(object@y, main = main, ...)
 							}
 									 
 						}
 						else {
-							main <- ifelse(lname == 0, "", .Object@name)
-							xlab <- ifelse(is.null(colnames(.Object@y)), "",  
-								colnames(.Object@y))
-							hist(.Object@y, main = main , xlab = xlab, ...)
+							main <- ifelse(lname == 0, "", object@name)
+							xlab <- ifelse(is.null(colnames(object@y)), "",  
+								colnames(object@y))
+							hist(object@y, main = main , xlab = xlab, ...)
 						}
 					}
 					else { ## by row 
-						if(.Object@r > 1) {
-                                                        labels <- rownames(.Object@y)
-                                                        par(mfcol = c(ceiling(.Object@r/2), 2), omi = c(0,0,0.3,0))
-                                                        for(i in 1:.Object@r) {
+						if(object@r > 1) {
+                                                        labels <- rownames(object@y)
+                                                        par(mfcol = c(ceiling(object@r/2), 2), omi = c(0,0,0.3,0))
+                                                        for(i in 1:object@r) {
                                                                 xlab <- ifelse(is.null(labels), paste("var ", i), labels[i])
-                                                                hist(.Object@y[i,], xlab = xlab, main = "", ...)
+                                                                hist(object@y[i,], xlab = xlab, main = "", ...)
                                                         }
-                                                        if( lname > 0) title(main = .Object@name, outer = TRUE, cex = 1.5)
+                                                        if( lname > 0) title(main = object@name, outer = TRUE, cex = 1.5)
                                                         dev.new()
-                                                        par(mfcol=c(ceiling(choose(.Object@r,2)/2), 2), omi = c(0,0,0.3,0))
-                                                        for(i in 1:(.Object@r - 1)) {
-                                                                for(j in (i + 1):.Object@r) {
+                                                        par(mfcol=c(ceiling(choose(object@r,2)/2), 2), omi = c(0,0,0.3,0))
+                                                        for(i in 1:(object@r - 1)) {
+                                                                for(j in (i + 1):object@r) {
                                                                         xlab <- ifelse(is.null(labels), paste("var ", i),
                                                                                         labels[i])
                                                                         ylab <- ifelse(is.null(labels), paste("var ", j),
                                                                                         labels[j])
-                                                                        plot(.Object@y[i,], .Object@y[j,], xlab = xlab,
+                                                                        plot(object@y[i,], object@y[j,], xlab = xlab,
                                                                                 ylab = ylab, ...)
                                                                 }
                                                         }
-                                                        if( lname > 0 ) title(main = .Object@name, outer = TRUE, cex = 1.5)
+                                                        if( lname > 0 ) title(main = object@name, outer = TRUE, cex = 1.5)
                                                         dev.new()
-                                                        main <- ifelse(lname == 0, "", .Object@name)
-                                                        pairs(t(.Object)@y, main = main, ...)
+                                                        main <- ifelse(lname == 0, "", object@name)
+                                                        pairs(t(object)@y, main = main, ...)
 
 
                                                 }
                                                 else {
-                                                        main <- ifelse(lname == 0, "", .Object@name)
-                                                        xlab <- ifelse(is.null(rownames(.Object@y)), "",
-                                                                colnames(.Object@y))
-                                                        hist(t(.Object@y), main = main , xlab = xlab, ...)
+                                                        main <- ifelse(lname == 0, "", object@name)
+                                                        xlab <- ifelse(is.null(rownames(object@y)), "",
+                                                                colnames(object@y))
+                                                        hist(t(object@y), main = main , xlab = xlab, ...)
 						}
 					}
 							
 					
 				}
 				else { # if type is 'discrete'
-					if(.Object@bycolumn) {
-						if(.Object@r > 1) {
-							labels <- colnames(.Object@y)
-							par(mfcol = c(ceiling(.Object@r/2), 2), omi = c(0,0,0.3,0))
-							for(i in 1:.Object@r) {
+					if(object@bycolumn) {
+						if(object@r > 1) {
+							labels <- colnames(object@y)
+							par(mfcol = c(ceiling(object@r/2), 2), omi = c(0,0,0.3,0))
+							for(i in 1:object@r) {
 								xlab <- ifelse(is.null(labels), paste("var ", i), labels[i])
-								barplot(table(.Object@y[,i]), xlab = xlab, main = "", ...) 
+								barplot(table(object@y[,i]), xlab = xlab, main = "", ...) 
 							}
-							if( lname > 0) title(main = .Object@name, outer = TRUE, cex = 1.5)
+							if( lname > 0) title(main = object@name, outer = TRUE, cex = 1.5)
 							dev.new()
-							par(mfcol=c(ceiling(choose(.Object@r,2)/2), 2), omi = c(0,0,0.3,0))
-							for(i in 1:(.Object@r - 1)) {
-								for(j in (i + 1):ncol(.Object@y)) {
+							par(mfcol=c(ceiling(choose(object@r,2)/2), 2), omi = c(0,0,0.3,0))
+							for(i in 1:(object@r - 1)) {
+								for(j in (i + 1):ncol(object@y)) {
 									xlab <- ifelse(is.null(labels), paste("var ", i), 
 											labels[i])
 									ylab <- ifelse(is.null(labels), paste("var ", j), 
 											labels[j]) 
-									plot(.Object@y[,i], .Object@y[,j], xlab = xlab, 
+									plot(object@y[,i], object@y[,j], xlab = xlab, 
 										ylab = ylab, ...)
 								}
 							}
-							if( lname > 0 ) title(main = .Object@name, outer = TRUE, cex = 1.5)
+							if( lname > 0 ) title(main = object@name, outer = TRUE, cex = 1.5)
 							dev.new()
-							main <- ifelse(lname == 0, "", .Object@name)
-							pairs(.Object@y, main = main, ...)
+							main <- ifelse(lname == 0, "", object@name)
+							pairs(object@y, main = main, ...)
 
 									 
 						}
 						else { ## univariate data
-							main <- ifelse(lname == 0, "", .Object@name)
-							xlab <- ifelse(is.null(colnames(.Object@y)), "",  
-								colnames(.Object@y))
-							barplot(table(.Object@y), main = main , xlab = xlab, ...)
+							main <- ifelse(lname == 0, "", object@name)
+							xlab <- ifelse(is.null(colnames(object@y)), "",  
+								colnames(object@y))
+							barplot(table(object@y), main = main , xlab = xlab, ...)
 						}
 					}
 					else { ## ordered by row
-						if(.Object@r> 1) {
-                                                        labels <- rownames(.Object@y)
-                                                        par(mfcol = c(ceiling(.Object@r/2), 2), omi = c(0,0,0.3,0))
-                                                        for(i in 1:.Object@r) {
+						if(object@r> 1) {
+                                                        labels <- rownames(object@y)
+                                                        par(mfcol = c(ceiling(object@r/2), 2), omi = c(0,0,0.3,0))
+                                                        for(i in 1:object@r) {
                                                                 xlab <- ifelse(is.null(labels), paste("var ", i), labels[i])
-                                                                barplot(table(t(.Object@y[i,])), xlab = xlab, main = "", ...)
+                                                                barplot(table(t(object@y[i,])), xlab = xlab, main = "", ...)
                                                         }
-                                                        if( lname > 0) title(main = .Object@name, outer = TRUE, cex = 1.5)
+                                                        if( lname > 0) title(main = object@name, outer = TRUE, cex = 1.5)
                                                         dev.new()
-                                                        par(mfcol=c(ceiling(choose(.Object@r,2)/2), 2), omi = c(0,0,0.3,0))
-                                                        for(i in 1:(.Object@r - 1)) {
-                                                                for(j in (i + 1):.Object@r) {
+                                                        par(mfcol=c(ceiling(choose(object@r,2)/2), 2), omi = c(0,0,0.3,0))
+                                                        for(i in 1:(object@r - 1)) {
+                                                                for(j in (i + 1):object@r) {
                                                                         xlab <- ifelse(is.null(labels), paste("var ", i),
                                                                                         labels[i])
                                                                         ylab <- ifelse(is.null(labels), paste("var ", j),
                                                                                         labels[j])
-                                                                        plot(.Object@y[i,], .Object@y[j,], xlab = xlab,
+                                                                        plot(object@y[i,], object@y[j,], xlab = xlab,
                                                                                 ylab = ylab, ...)
                                                                 }
                                                         }
-                                                        if( lname > 0 ) title(main = .Object@name, outer = TRUE, cex = 1.5)
+                                                        if( lname > 0 ) title(main = object@name, outer = TRUE, cex = 1.5)
                                                         dev.new()
-                                                        main <- ifelse(lname == 0, "", .Object@r)
-                                                        pairs(t(.Object@y), main = main, ...)
+                                                        main <- ifelse(lname == 0, "", object@r)
+                                                        pairs(t(object@y), main = main, ...)
 
 
                                                 }
                                                 else { ## univariate discrete data ordered by row
-                                                        main <- ifelse(lname == 0, "", .Object@name)
-                                                        xlab <- ifelse(is.null(rownames(.Object@y)), "",
-                                                                colnames(.Object@y))
-                                                        barplot(table(t(.Object@y)), main = main , xlab = xlab, ...)
+                                                        main <- ifelse(lname == 0, "", object@name)
+                                                        xlab <- ifelse(is.null(rownames(object@y)), "",
+                                                                colnames(object@y))
+                                                        barplot(table(t(object@y)), main = main , xlab = xlab, ...)
 						}
 					}
 				}
@@ -271,15 +290,15 @@ setMethod("show", "data",
 )
 ## Setters and Getters as a user interface to manipulate the slots ## 
 ## Combined Getter and Setter ##
-setGeneric("getY", function(.Object) standardGeneric("getY"))
-setMethod("getY", "data", function(.Object) {
-				return(.Object@y)
+setGeneric("getY", function(object) standardGeneric("getY"))
+setMethod("getY", "data", function(object) {
+				return(object@y)
 			}
 )
  
-setGeneric("getN", function(.Object) standardGeneric("getN"))
-setMethod("getN", "data", function(.Object) {
-				return(.Object@N)
+setGeneric("getN", function(object) standardGeneric("getN"))
+setMethod("getN", "data", function(object) {
+				return(object@N)
 			}
 )
 
@@ -289,136 +308,136 @@ setMethod("getR", "data", function(object) {
 			}
 )
 
-setGeneric("getS", function(.Object) standardGeneric("getS"))
-setMethod("getS", "data", function(.Object) {
-				return(.Object@S)
+setGeneric("getS", function(object) standardGeneric("getS"))
+setMethod("getS", "data", function(object) {
+				return(object@S)
 			}
 )
 
-setGeneric("getBycolumn", function(.Object) standardGeneric("getBycolumn"))
-setMethod("getBycolumn", "data", function(.Object) {
-					return(.Object@bycolumn)
+setGeneric("getBycolumn", function(object) standardGeneric("getBycolumn"))
+setMethod("getBycolumn", "data", function(object) {
+					return(object@bycolumn)
 				}
 )
 
-setGeneric("getName", function(.Object) standardGeneric("getName"))
-setMethod("getName", "data", function(.Object) {
-					return(.Object@name)
+setGeneric("getName", function(object) standardGeneric("getName"))
+setMethod("getName", "data", function(object) {
+					return(object@name)
 				}
 )
 
-setGeneric("getType", function(.Object) standardGeneric("getType"))
-setMethod("getType", "data", function(.Object) {
-					return(.Object@type)
+setGeneric("getType", function(object) standardGeneric("getType"))
+setMethod("getType", "data", function(object) {
+					return(object@type)
 				}
 )
 
-setGeneric("getSim", function(.Object) standardGeneric("getSim"))
-setMethod("getSim", "data", function(.Object) {
-					return(.Object@sim)
+setGeneric("getSim", function(object) standardGeneric("getSim"))
+setMethod("getSim", "data", function(object) {
+					return(object@sim)
 				}
 )
-setGeneric("getExp", function(.Object) standardGeneric("getExp"))
-setMethod("getExp", "data", function(.Object) {
-					return(.Object@exp)
+setGeneric("getExp", function(object) standardGeneric("getExp"))
+setMethod("getExp", "data", function(object) {
+					return(object@exp)
 				}
 )
 ## Already set as Generic in 'model.R' ##
-setMethod("getT", "data", function(.Object) {
-					return(.Object@T)
+setMethod("getT", "data", function(object) {
+					return(object@T)
 				}
 )
 ## Explicit usual R setter ##
-setGeneric("setY<-", function(.Object, value) standardGeneric("setY<-"))
-setReplaceMethod("setY", "data", function(.Object, value) {
-					if(.Object@bycolumn && NROW(value) == 1) {
-						.Object@y <- t(value)
+setGeneric("setY<-", function(object, value) standardGeneric("setY<-"))
+setReplaceMethod("setY", "data", function(object, value) {
+					if(object@bycolumn && NROW(value) == 1) {
+						object@y <- t(value)
 					}
 					else {
-						.Object@y <- value
+						object@y <- value
 					}
-					if(.Object@bycolumn){
-						.Object@N <- NROW(value)
-						.Object@r <- NCOL(value)
+					if(object@bycolumn){
+						object@N <- NROW(value)
+						object@r <- NCOL(value)
 					}
 					else {
-						.Object@N <- NCOL(value)
-						.Object@r <- NROW(value)
+						object@N <- NCOL(value)
+						object@r <- NROW(value)
 					}
-					validObject(.Object)
-					return(.Object)
+					validObject(object)
+					return(object)
 				}
 )
 
-setGeneric("setN<-", function(.Object, value) standardGeneric("setN<-"))
-setReplaceMethod("setN", "data", function(.Object, value) {
-					.Object@N <- as.integer(value)
-					validObject(.Object)
-					return(.Object)
+setGeneric("setN<-", function(object, value) standardGeneric("setN<-"))
+setReplaceMethod("setN", "data", function(object, value) {
+					object@N <- as.integer(value)
+					validObject(object)
+					return(object)
 				}
 )
 
 ## Already set as generic in 'model.R' ##
-setReplaceMethod("setR", "data", function(.Object, value) {
-					.Object@r <- as.integer(value)
-					validObject(.Object)
-					return(.Object)
+setReplaceMethod("setR", "data", function(object, value) {
+					object@r <- as.integer(value)
+					validObject(object)
+					return(object)
 				}
 )
 
-setGeneric("setS<-", function(.Object, value) standardGeneric("setS<-"))
-setReplaceMethod("setS", "data", function(.Object, value) {
-					.Object@S <- value
-					validObject(.Object)
-					return(.Object)
+setGeneric("setS<-", function(object, value) standardGeneric("setS<-"))
+setReplaceMethod("setS", "data", function(object, value) {
+					object@S <- value
+					validObject(object)
+					return(object)
 				}
 )
 
-setGeneric("setBycolumn<-", function(.Object, value) standardGeneric("setBycolumn<-"))
-setReplaceMethod("setBycolumn", signature(.Object = "data", value = "logical"), 
-                 function(.Object, value) {						
+setGeneric("setBycolumn<-", function(object, value) standardGeneric("setBycolumn<-"))
+setReplaceMethod("setBycolumn", signature(object = "data", value = "logical"), 
+                 function(object, value) {						
 						.Object@bycolumn <- value
-						validObject(.Object)
-						return(.Object)
+						validObject(object)
+						return(object)
 					}
 )  
 
-setGeneric("setName<-", function(.Object, value) standardGeneric("setName<-"))
-setReplaceMethod("setName", "data", function(.Object, value) {
-						.Object@name <- value
-						validObject(.Object)
-						return(.Object)
+setGeneric("setName<-", function(object, value) standardGeneric("setName<-"))
+setReplaceMethod("setName", "data", function(object, value) {
+						object@name <- value
+						validObject(object)
+						return(object)
 					}
 )
 
-setGeneric("setType<-", function(.Object, value) standardGeneric("setType<-"))
-setReplaceMethod("setType", "data", function(.Object, value) {
-						.Object@type <- value
-						validObject(.Object)
-						return(.Object)
+setGeneric("setType<-", function(object, value) standardGeneric("setType<-"))
+setReplaceMethod("setType", "data", function(object, value) {
+						object@type <- value
+						validObject(object)
+						return(object)
 					}
 )
 
-setGeneric("setSim<-", function(.Object, value) standardGeneric("setSim<-"))
-setReplaceMethod("setSim", "data", function(.Object, value) {
-						.Object@sim <- value
-						validObject(.Object)
-						return(.Object)
+setGeneric("setSim<-", function(object, value) standardGeneric("setSim<-"))
+setReplaceMethod("setSim", "data", function(object, value) {
+						object@sim <- value
+						validObject(object)
+						return(object)
 					}
 )
-setGeneric("setExp<-", function(.Object, value) standardGeneric("setExp<-"))
-setReplaceMethod("setExp", "data", function(.Object, value) {
+setGeneric("setExp<-", function(object, value) standardGeneric("setExp<-"))
+setReplaceMethod("setExp", "data", function(object, value) {
 						storage.mode(value) <- "integer"
-						.Object@exp <- value
-						validObject(.Object)
-						return(.Object)
+						object@exp <- value
+						validObject(object)
+						return(object)
 					}
 )
 ## Already set as Generic in 'model.R' ##
-setReplaceMethod("setT", "data", function(.Object, value) {
+setReplaceMethod("setT", "data", function(object, value) {
 						storage.mode(value) <- "integer"
-						.Object@T <- value
-						validObject(.Object)
-						return(.Object)
+						object@T <- value
+						validObject(object)
+						return(object)
 					}
 )

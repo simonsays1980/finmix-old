@@ -53,7 +53,7 @@ setMethod("generateMoments", "ddatamoments",
 	          means           <- apply(datam, 2, mean, na.rm = TRUE)
               object@mean <- means
               object@var    <- var(datam, na.rm = TRUE)
-              momentsm[1, ]   <- means  
+              momentsm[1, ]   <- t(means)  
               momentsm[2, ]   <- apply(datam * apply(datam - 1, 2, max, 0), 
                                        2, mean, na.rm = TRUE)
               momentsm[3, ]   <- apply(datam * apply(datam - 2, 2, max, 0),

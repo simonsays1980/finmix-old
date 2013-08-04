@@ -117,19 +117,19 @@ setMethod("getVar", "csdatamoments", function(object) {
 				return(object@var)
 			}
 )
-setGeneric("getB", function(.Object) standardGeneric("getB"))
-setMethod("getB", "csdatamoments", function(.Object) {
-						return(.Object@B)
+setGeneric("getB", function(object) standardGeneric("getB"))
+setMethod("getB", "csdatamoments", function(object) {
+						return(object@B)
 					}
 )
-setGeneric("getW", function(.Object) standardGeneric("getW"))
-setMethod("getW", "csdatamoments", function(.Object) {
-						return(.Object@W)
+setGeneric("getW", function(object) standardGeneric("getW"))
+setMethod("getW", "csdatamoments", function(object) {
+						return(object@W)
 					}
 )
 ## Already set as generic in 'model.R' ## 
-setMethod("getT", "csdatamoments", function(.Object) {
-						return(.Object@T)
+setMethod("getT", "csdatamoments", function(object) {
+						return(object@T)
 					}
 )
 ## Generic set in 'model.R' ##
@@ -138,14 +138,14 @@ setMethod("getR", "csdatamoments",
               return(object@R)
           }
 )
-setGeneric("getRtr", function(.Object) standardGeneric("getRtr"))
-setMethod("getRtr", "csdatamoments", function(.Object) {
-						return(.Object@Rtr)
+setGeneric("getRtr", function(object) standardGeneric("getRtr"))
+setMethod("getRtr", "csdatamoments", function(object) {
+						return(object@Rtr)
 					}
 )
-setGeneric("getRdet", function(.Object) standardGeneric("getRdet"))
-setMethod("getRdet", "csdatamoments", function(.Object) {
-						return(.Object@Rdet)
+setGeneric("getRdet", function(object) standardGeneric("getRdet"))
+setMethod("getRdet", "csdatamoments", function(object) {
+						return(object@Rdet)
 					}
 )
 

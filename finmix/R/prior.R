@@ -397,52 +397,52 @@ setMethod("show", "prior",
 )
 ## Getters ##
 ## Generic set in 'model' class ##
-setMethod("getWeight", "prior", function(.Object) {
-					return(.Object@weight)
+setMethod("getWeight", "prior", function(object) {
+					return(object@weight)
 				}
 ) 
 ## Generic set in 'model' class ##
-setMethod("getPar", "prior", function(.Object) {
-					return(.Object@par)
+setMethod("getPar", "prior", function(object) {
+					return(object@par)
 				}
 )
-##setGeneric("getType", function(.Object) standardGeneric("getType"))
-setMethod("getType", "prior", function(.Object) {
-					return(.Object@type)
+##setGeneric("getType", function(object) standardGeneric("getType"))
+setMethod("getType", "prior", function(object) {
+					return(object@type)
 				}
 )
-setGeneric("getHier", function(.Object) standardGeneric("getHier"))
-setMethod("getHier", "prior", function(.Object){
-					return(.Object@hier)
+setGeneric("getHier", function(object) standardGeneric("getHier"))
+setMethod("getHier", "prior", function(object){
+					return(object@hier)
 				}
 )
 ## R usual setters ##
 ## Generic set in 'model' class ##
-setReplaceMethod("setWeight", "prior", function(.Object, value) {
-						.Object@weight <- value
-						validObject(.Object)
-						return(.Object)
+setReplaceMethod("setWeight", "prior", function(object, value) {
+						object@weight <- value
+						validObject(object)
+						return(object)
 					}
 )
 ## Generic set in 'model' class ##
-setReplaceMethod("setPar", "prior", function(.Object, value) {
-						.Object@par <- value
-						validObject(.Object)
-						return(.Object)
+setReplaceMethod("setPar", "prior", function(object, value) {
+						object@par <- value
+						validObject(object)
+						return(object)
 					}
 )
 ## Generic set in 'model' class ##
-setReplaceMethod("setType", "prior", function(.Object, value) {
-						.Object@type <- value
-						validObject(.Object)
-						return(.Object)
+setReplaceMethod("setType", "prior", function(object, value) {
+						object@type <- value
+						validObject(object)
+						return(object)
 					}
 )
-setGeneric("setHier<-", function(.Object, value) standardGeneric("setHier<-"))
-setReplaceMethod("setHier", "prior", function(.Object, value) {
-						.Object@hier <- value
-						validObject(.Object)
-						return(.Object)
+setGeneric("setHier<-", function(object, value) standardGeneric("setHier<-"))
+setReplaceMethod("setHier", "prior", function(object, value) {
+						object@hier <- value
+						validObject(object)
+						return(object)
 					}
 )
 

@@ -54,9 +54,8 @@ setMethod("generateMoments", "cdatamoments",
               means <- apply(datam, 2, mean, na.rm = TRUE)
               object@mean <- means
               object@var <- var(datam, na.rm = TRUE)
-              d = datam - means 
+              d <- datam - rep(means, each = nrow(datam)) 
               momentsm <- array(0, dim = c(4, object@data@r))
-              momentsm[1,] <- apply(d, 2, mean, na.rm = TRUE)
               momentsm[2,] <- apply(d^2, 2, mean, na.rm = TRUE)
               momentsm[3,] <- apply(d^3, 2, mean, na.rm = TRUE)
               momentsm[4,] <- apply(d^4, 2, mean, na.rm = TRUE)

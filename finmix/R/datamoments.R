@@ -24,13 +24,6 @@ setClass("datamoments",
                 		"VIRTUAL")
 )
 
-setMethod("initialize", "datamoments",
-          function(.Object, value){
-              .Object <- generateMoments(.Object)
-          return(.Object)
-          }
-)
-
 ## Getters ##
 ## Generic set in 'groupmoments.R' ##
 setGeneric("getSmoments", function(object) standardGeneric("getSmoments"))
@@ -40,7 +33,10 @@ setGeneric("getSmoments", function(object) standardGeneric("getSmoments"))
 
 ## mutual constructor for all type of datamoments ##
 "datamoments" <- function(data) {
-		if(data@type == "continuous") {
+        if (all(is.na(data@y))) {
+            stop("'data' object has no data. Slot 'y' is empty.")
+        }
+		if (data@type == "continuous") {
 			.Object <- new("cdatamoments", value = data)
         } else { 
 			.Object <- new("ddatamoments", value = data)

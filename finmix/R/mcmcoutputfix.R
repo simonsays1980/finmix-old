@@ -297,8 +297,8 @@ setMethod("getRanPerm", "mcmcoutputfix", function(object) {
 						}
 )
 ## Generic set in model.R ##
-setMethod("getPar", "mcmcoutputfix", function(.Object) {
-						return(.Object@par)
+setMethod("getPar", "mcmcoutputfix", function(object) {
+						return(object@par)
 					}
 )
 setGeneric("getLog", function(object) standardGeneric("getLog"))

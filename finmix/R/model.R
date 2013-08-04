@@ -68,40 +68,40 @@ setMethod("initialize", "model", function(.Object, ..., .cache = new.env()){
 
 setMethod("plot", "model", function(x, y, ..., dis.grid = 1:10, persp.grid.x = seq(-10, 10, length = 40), 
 					persp.grid.y = seq(-10, 10, length = 40), theta = 0, phi = 15, deparse.level = 1) {
-					.Object <- x
-					if(.Object@dist == "normal") {
-						main <- paste("Normal Mixture K=", .Object@K, sep="")
+					object <- x
+					if(object@dist == "normal") {
+						main <- paste("Normal Mixture K=", object@K, sep="")
 						fun <- function(y) {
 							fun.value <- 0
-							for(i in 1:.Object@K) {
-								fun.value <- fun.value + .Object@weight[i] * dnorm(y, 
-									mean = .Object@par$mu[i], sd = .Object@par$sigma[i]) 
+							for(i in 1:object@K) {
+								fun.value <- fun.value + object@weight[i] * dnorm(y, 
+									mean = object@par$mu[i], sd = object@par$sigma[i]) 
 							}
 							fun.value
 						}
 						curve(fun, main = main, ...)
 					}
-					else if(.Object@dist == "normult") {
-						main.outer <- paste("Mutlivariate Normal Mixture K=", .Object@K, sep ="")
+					else if(object@dist == "normult") {
+						main.outer <- paste("Mutlivariate Normal Mixture K=", object@K, sep ="")
 							
 						x.axis <- persp.grid.x
 						y.axis <- persp.grid.y
 						z.axis <- x.axis %*% t(y.axis)
-						fun <- function(y, Input.Object) {
+						fun <- function(y, Inputobject) {
 							fun.value <- 0
-							for(i in 1:Input.Object@K) {
-								fun.value <- fun.value + Input.Object@weight[i] * 
-									dmnorm(y, mean = Input.Object@par$mu[,i], 
-										varcov = Input.Object@par$sigma[,,i])
+							for(i in 1:Inputobject@K) {
+								fun.value <- fun.value + Inputobject@weight[i] * 
+									dmnorm(y, mean = Inputobject@par$mu[,i], 
+										varcov = Inputobject@par$sigma[,,i])
 							}
 							fun.value
 						}
 				
-						if(.Object@r == 2) {
+						if(object@r == 2) {
 							for(i in 1:length(x.axis)) {
 								for(j in 1:length(y.axis)){
 									input <- as.vector(c(x.axis[i], y.axis[j]))
-									z.axis[i,j] <- fun(input, .Object)
+									z.axis[i,j] <- fun(input, object)
 								}
 							}
 							par(mfcol = c(2,2))
@@ -110,13 +110,13 @@ setMethod("plot", "model", function(x, y, ..., dis.grid = 1:10, persp.grid.x = s
 							image(x.axis, y.axis, z.axis, ...)
 							mtext(main.outer, outer = TRUE)
 						}
-						else if(.Object@r > 2 && .Object@r < 6) {
-							par(mfcol = c(ceiling(choose(.Object@r, 2)/3), 3))
+						else if(object@r > 2 && object@r < 6) {
+							par(mfcol = c(ceiling(choose(object@r, 2)/3), 3))
 							par(mar = c(2, 2, 2, 0.5), oma = c(2, 2, 2, 2))
 							browser(expr = TRUE)	
-							for(k in 1:(.Object@r - 1)) {
-								for(l in (k + 1):.Object@r) {
-									marmodel <- mixturemar(.Object, J = c(k, l))
+							for(k in 1:(object@r - 1)) {
+								for(l in (k + 1):object@r) {
+									marmodel <- mixturemar(object, J = c(k, l))
 									for(i in 1:length(x.axis)) {
 						 				for(j in 1:length(y.axis)) {
 											input <- as.vector(c(x.axis[i], 
@@ -134,50 +134,50 @@ setMethod("plot", "model", function(x, y, ..., dis.grid = 1:10, persp.grid.x = s
 						else 
 							return("'plot()' is not implemented for model of dimension > 5. Use 'mixturemar()' to create margin models and then use 'plot' to show marginal distributions.")
 					}
-					else if(.Object@dist == "exponential") {
-						main <- paste("Exponential Mixture K=", .Object@K, sep = "")
+					else if(object@dist == "exponential") {
+						main <- paste("Exponential Mixture K=", object@K, sep = "")
 						fun <- function(y) {
 							fun.value <- 0
-							for(i in 1:.Object@K) {
-								fun.value <- fun.value + .Object@weight[i] * dexp(y, rate = 
-										.Object@par$lambda[i])
+							for(i in 1:object@K) {
+								fun.value <- fun.value + object@weight[i] * dexp(y, rate = 
+										object@par$lambda[i])
 							}
 							fun.value
 						}
 						curve(fun, main = main, ...)
 					}
-					else if(.Object@dist == "student") {
-						main <- paste("Student-t Mixture K=", .Object@K, sep="")
+					else if(object@dist == "student") {
+						main <- paste("Student-t Mixture K=", object@K, sep="")
 						fun <- function(y) {
 							fun.value <- 0
-							for(i in 1:.Object@K) {
-								fun.value <- fun.value + .Object@weight[i] * dstud(y, mu = .Object@par$mu[i], sigma = .Object@par$sigma[i], df = .Object@par$df[i])
+							for(i in 1:object@K) {
+								fun.value <- fun.value + object@weight[i] * dstud(y, mu = object@par$mu[i], sigma = object@par$sigma[i], df = object@par$df[i])
 							}
 							fun.value
 						}
 						curve(fun, main = main, ...)
 					}
-					else if(.Object@dist == "studmult") {
-						main.outer <- paste("Mutlivariate Student-t Mixture K=", .Object@K, sep ="")
+					else if(object@dist == "studmult") {
+						main.outer <- paste("Mutlivariate Student-t Mixture K=", object@K, sep ="")
 						x.axis <- persp.grid.x
 						y.axis <- persp.grid.y
 						z.axis <- x.axis %*% t(y.axis)
-						fun <- function(y, Input.Object) {
+						fun <- function(y, Inputobject) {
 							fun.value <- 0
-							for(i in 1:Input.Object@K) {
-								fun.value <- fun.value + Input.Object@weight[i] * 
-									dmt(y, mean = Input.Object@par$mu[,i], S =
-										Input.Object@par$sigma[,,i], 
-										df = Input.Object@par$df[i])
+							for(i in 1:Inputobject@K) {
+								fun.value <- fun.value + Inputobject@weight[i] * 
+									dmt(y, mean = Inputobject@par$mu[,i], S =
+										Inputobject@par$sigma[,,i], 
+										df = Inputobject@par$df[i])
 							}
 							fun.value
 						}
 				
-						if(.Object@r == 2) {
+						if(object@r == 2) {
 							for(i in 1:length(x.axis)) {
 								for(j in 1:length(y.axis)){
 									input <- as.vector(c(x.axis[i], y.axis[j]))
-									z.axis[i,j] <- fun(input, .Object)
+									z.axis[i,j] <- fun(input, object)
 								}
 							}
 
@@ -187,14 +187,14 @@ setMethod("plot", "model", function(x, y, ..., dis.grid = 1:10, persp.grid.x = s
 							image(x.axis, y.axis, z.axis, ...)
 							mtext(main.outer, outer = TRUE)
 						}
-						else if(.Object@r > 2 && .Object@r < 6) {
+						else if(object@r > 2 && object@r < 6) {
 							browser(expr = TRUE)
-							par(mfcol = c(ceiling(choose(.Object@r, 2)/3), 3))
+							par(mfcol = c(ceiling(choose(object@r, 2)/3), 3))
 							par(mar = c(2, 2, 2, 0.5), oma = c(2, 2, 2, 2))
 									
-							for(k in 1:(.Object@r - 1)) {
-								for(l in (k + 1):.Object@r) {
-									marmodel <- mixturemar(.Object, J = c(k, l))
+							for(k in 1:(object@r - 1)) {
+								for(l in (k + 1):object@r) {
+									marmodel <- mixturemar(object, J = c(k, l))
 									for(i in 1:length(x.axis)) {
 						 				for(j in 1:length(y.axis)) {
 											input <- as.vector(c(x.axis[i], 
@@ -215,13 +215,13 @@ setMethod("plot", "model", function(x, y, ..., dis.grid = 1:10, persp.grid.x = s
 							return("'plot()' is not implemented for model of dimension > 5. Use 'mixturemar()' to create margin models and then use 'plot' to show marginal distributions.")
 	
 					}
-					else if(.Object@dist == "poisson" || .Object@dist == "cond.poisson") {
-						main <- paste("Poisson Mixture K=", .Object@K, sep="")
+					else if(object@dist == "poisson" || object@dist == "cond.poisson") {
+						main <- paste("Poisson Mixture K=", object@K, sep="")
 						fun <- function(y) {
 							fun.value <- 0
-							for(i in 1:.Object@K) {
-								fun.value <- fun.value + .Object@weight[i] * dpois(y, 
-										lambda = .Object@par$lambda[i])
+							for(i in 1:object@K) {
+								fun.value <- fun.value + object@weight[i] * dpois(y, 
+										lambda = object@par$lambda[i])
 							}
 							fun.value
 						}
@@ -230,41 +230,41 @@ setMethod("plot", "model", function(x, y, ..., dis.grid = 1:10, persp.grid.x = s
 						names.grid <- as.character(dis.grid)
 						barplot(y.fun, main = main, names.arg = names.grid, ...)
 					}
-					else if(.Object@dist == "binomial") {
-						main <- paste("Binomial Mixture K=", .Object@K, sep="")
-						if(length(.Object@T) != 1)
+					else if(object@dist == "binomial") {
+						main <- paste("Binomial Mixture K=", object@K, sep="")
+						if(length(object@T) != 1)
 							return("[Error] Plotting a binomial distribution with differing repetitions is not possible.")
 						fun <- function(y) {
 							fun.value <- 0
-							for(i in 1:.Object@K) {
-								fun.value <- fun.value + .Object@weight[i] * dbinom(y, p =
-									.Object@par$p[i], size = .Object@T[1])
+							for(i in 1:object@K) {
+								fun.value <- fun.value + object@weight[i] * dbinom(y, p =
+									object@par$p[i], size = object@T[1])
 							}
 		
 							return(fun.value)
 						}
-						y <- 1:.Object@T[1]
+						y <- 1:object@T[1]
 						y.fun <- fun(y)
-						names.grid <- as.character(1:.Object@T[1])
+						names.grid <- as.character(1:object@T[1])
 						barplot(y.fun, main = main, names.arg = names.grid, ...)
 					}
 				}
 )
 
 ## Marginal Mixture ##
-setGeneric("mixturemar", function(.Object, J) standardGeneric("mixturemar"))
-setMethod("mixturemar", "model", function(.Object, J) {
-					if(.Object@dist == "normult") {	
+setGeneric("mixturemar", function(object, J) standardGeneric("mixturemar"))
+setMethod("mixturemar", "model", function(object, J) {
+					if(object@dist == "normult") {	
 						dist <- ifelse(length(J) == 1, "normal", "normult")
 						r <- length(J)
-						K <- .Object@K
-						weight <- .Object@weight
-						mu <- array(.Object@par$mu[J,1:K], dim = c(r, K))
+						K <- object@K
+						weight <- object@weight
+						mu <- array(object@par$mu[J,1:K], dim = c(r, K))
 						if(r == 1) {
-							sigma <- array(.Object@par$sigma[J, J, 1:K], dim =c(r, K))
+							sigma <- array(object@par$sigma[J, J, 1:K], dim =c(r, K))
 						}
 						else {
-							sigma <- array(.Object@par$sigma[J, J, 1:K], dim = c(r, r, K))
+							sigma <- array(object@par$sigma[J, J, 1:K], dim = c(r, r, K))
 						}
 						par <- list(mu = mu, sigma = sigma)
 						indicmod <- "multinomial"
@@ -273,24 +273,24 @@ setMethod("mixturemar", "model", function(.Object, J) {
 						margin.model <- new("model", dist = dist, r = r, K = K, weight = weight, 
 									par = par, indicmod = indicmod, 
 									indicfix = indicfix, T = T)
-						validObject(margin.model)
+						valiobject(margin.model)
 						return(margin.model)
 					}
-					else if(.Object@dist == "studmult") {
+					else if(object@dist == "studmult") {
 						dist <- ifelse(length(J) == 1, "student", "studmult")
 						r <- length(J)
-						K <- .Object@K
-						weight <- .Object@weight
+						K <- object@K
+						weight <- object@weight
 						if(r == 1) {
-							df <- .Object@par$df * matrix(.Object@par$sigma[J,J,1:K], nrow = 1,
+							df <- object@par$df * matrix(object@par$sigma[J,J,1:K], nrow = 1,
 											 ncol = K)
 						}
 						else {
-							df <- .Object@par$df
+							df <- object@par$df
 						}
-						mu <- array(.Object@par$mu[J,1:K], dim = c(r, K))
+						mu <- array(object@par$mu[J,1:K], dim = c(r, K))
 						if(r > 1) {
-							sigma <- array(.Object@par$sigma[J, J, 1:K], dim =c(r, r, K))
+							sigma <- array(object@par$sigma[J, J, 1:K], dim =c(r, r, K))
 						}
 						if(r == 1) {
 							par <- list(df = df, ncp = mu)
@@ -304,7 +304,7 @@ setMethod("mixturemar", "model", function(.Object, J) {
 						margin.model <- new("model", dist = dist, r = r, K = K, weight = weight, 
 									par = par, indicmod = indicmod,
 									indicfix = indicfix, T = T)
-						validObject(margin.model)
+						valiobject(margin.model)
 						return(margin.model)
 
 					}
@@ -356,14 +356,14 @@ setMethod("getK", "model", function(object) {
 					return(object@K)
 				}
 )
-setGeneric("getWeight", function(.Object) standardGeneric("getWeight"))
-setMethod("getWeight", "model", function(.Object) {
-						return(.Object@weight)
+setGeneric("getWeight", function(object) standardGeneric("getWeight"))
+setMethod("getWeight", "model", function(object) {
+						return(object@weight)
 					}
 )
-setGeneric("getPar", function(.Object) standardGeneric("getPar"))
-setMethod("getPar", "model", function(.Object) {
-					return(.Object@par)
+setGeneric("getPar", function(object) standardGeneric("getPar"))
+setMethod("getPar", "model", function(object) {
+					return(object@par)
 				}
 )
 setGeneric("getIndicmod", function(object) standardGeneric("getIndicmod"))
@@ -371,72 +371,72 @@ setMethod("getIndicmod", "model", function(object) {
 						return(object@indicmod)					
 					}
 )
-setGeneric("getIndicfix", function(.Object) standardGeneric("getIndicfix"))
-setMethod("getIndicfix", "model", function(.Object) {
-						return(.Object@indicfix)
+setGeneric("getIndicfix", function(object) standardGeneric("getIndicfix"))
+setMethod("getIndicfix", "model", function(object) {
+						return(object@indicfix)
 					}
 )
-setGeneric("getT", function(.Object) standardGeneric("getT"))
-setMethod("getT", "model", function(.Object) {
-					return(.Object@T)
+setGeneric("getT", function(object) standardGeneric("getT"))
+setMethod("getT", "model", function(object) {
+					return(object@T)
 				}
 )
 ## Setters ##
-setGeneric("setDist<-", function(.Object, value) standardGeneric("setDist<-"))
-setReplaceMethod("setDist", "model", function(.Object, value) {
-						.Object@dist <- value
-						validObject(.Object)
-						return(.Object)
+setGeneric("setDist<-", function(object, value) standardGeneric("setDist<-"))
+setReplaceMethod("setDist", "model", function(object, value) {
+						object@dist <- value
+						validObject(object)
+						return(object)
 					}
 )
-setGeneric("setR<-", function(.Object, value) standardGeneric("setR<-"))
-setReplaceMethod("setR", "model", function(.Object, value){
-						.Object@r <- as.integer(value)
-						validObject(.Object)
-						return(.Object)
+setGeneric("setR<-", function(object, value) standardGeneric("setR<-"))
+setReplaceMethod("setR", "model", function(object, value){
+						object@r <- as.integer(value)
+						validObject(object)
+						return(object)
 					}
 )
-setGeneric("setK<-", function(.Object, value) standardGeneric("setK<-"))
-setReplaceMethod("setK", "model", function(.Object, value) {
-						.Object@K <- as.integer(value)
-						.Object@weight <- matrix(1/value, 
+setGeneric("setK<-", function(object, value) standardGeneric("setK<-"))
+setReplaceMethod("setK", "model", function(object, value) {
+						object@K <- as.integer(value)
+						object@weight <- matrix(1/value, 
 							nrow = 1, ncol = value)
-						validObject(.Object)
-						return(.Object)
+						validObject(object)
+						return(object)
 					}
 )
-setGeneric("setWeight<-", function(.Object, value) standardGeneric("setWeight<-"))
-setReplaceMethod("setWeight", "model", function(.Object, value) {
-						.Object@weight <- value
-						validObject(.Object)
-						return(.Object)
+setGeneric("setWeight<-", function(object, value) standardGeneric("setWeight<-"))
+setReplaceMethod("setWeight", "model", function(object, value) {
+						object@weight <- value
+						validObject(object)
+						return(object)
 					}
 )
-setGeneric("setPar<-", function(.Object, value) standardGeneric("setPar<-"))
-setReplaceMethod("setPar", "model", function(.Object, value) {
-						.Object@par <- value
-						validObject(.Object)
-						return(.Object)
+setGeneric("setPar<-", function(object, value) standardGeneric("setPar<-"))
+setReplaceMethod("setPar", "model", function(object, value) {
+						object@par <- value
+						validObject(object)
+						return(object)
 					}
 )
-setGeneric("setIndicmod<-", function(.Object, value) standardGeneric("setIndicmod<-"))
-setReplaceMethod("setIndicmod", "model", function(.Object, value) {
-					.Object@indicmod <- value
-					validObject(.Object)
-					return(.Object)
+setGeneric("setIndicmod<-", function(object, value) standardGeneric("setIndicmod<-"))
+setReplaceMethod("setIndicmod", "model", function(object, value) {
+					object@indicmod <- value
+					validObject(object)
+					return(object)
 				}
 )
-setGeneric("setIndicfix<-", function(.Object, value) standardGeneric("setIndicfix<-"))
-setReplaceMethod("setIndicfix", "model", function(.Object, value) {
-							.Object@indicfix <- value
-							validObject(.Object)
-							return(.Object)
+setGeneric("setIndicfix<-", function(object, value) standardGeneric("setIndicfix<-"))
+setReplaceMethod("setIndicfix", "model", function(object, value) {
+							object@indicfix <- value
+							validObject(object)
+							return(object)
 						}
 )
-setGeneric("setT<-", function(.Object, value) standardGeneric("setT<-"))
-setReplaceMethod("setT", "model", function(.Object, value) {
-						.Object@T <- value
-						validObject(.Object)
-						return(.Object)
+setGeneric("setT<-", function(object, value) standardGeneric("setT<-"))
+setReplaceMethod("setT", "model", function(object, value) {
+						object@T <- value
+						validObject(object)
+						return(object)
 					}
 )
