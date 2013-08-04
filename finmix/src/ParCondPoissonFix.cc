@@ -34,8 +34,10 @@ void ParCondPoissonFix::update (PriorCondPoissonFix& hyperPar)
 	for(unsigned int k = 0; k < K; ++k) {
 		tmp = arma::as_scalar(hyperPar.coef.row(k) 
 			* lambda.t());
+        Rprintf("ParCondPoissonFix.cc, tmp:%15.6f\n", tmp);
 		tmp -= lambda(k);
-		hyperPar.cond(k) = tmp;	
+		Rprintf("ParCondPoissonFix.cc, tmp after:%15.6f\n", tmp);
+        hyperPar.cond(k) = tmp;	
 		lambda(k) = rggamma(hyperPar.aPost(k), 
 			hyperPar.bPost(k), tmp);
 	}

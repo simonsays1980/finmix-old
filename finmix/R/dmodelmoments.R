@@ -62,13 +62,13 @@ setMethod("show", "dmodelmoments", function(object) {
 )
 ## Getters ##
 ## Generic set in 'modelmoments' class ##
-setMethod("getMean", "dmodelmoments", function(.Object) {
-						return(.Object@mean)
+setMethod("getMean", "dmodelmoments", function(object) {
+						return(object@mean)
 					}
 )
 ## Generic set in 'modelmoments' class ##
-setMethod("getVar", "dmodelmoments", function(.Object) {
-						return(.Object@var)
+setMethod("getVar", "dmodelmoments", function(object) {
+						return(object@var)
 					}
 )
 setGeneric("getOver", function(.Object) standardGeneric("getOver"))

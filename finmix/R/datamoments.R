@@ -15,32 +15,37 @@
 # You should have received a copy of the GNU General Public License
 # along with Rcpp.  If not, see <http://www.gnu.org/licenses/>.
 
-## 'datamoments' is a virtual classes from which the corresponding      ##
+## 'datamoments' is a virtual class from which the corresponding      ##
 ## datamoments for 'continuous' and 'discrete' inherit	 		## 
 setClass("datamoments",
-	representation(
-		mean = "matrix",
-		var = "matrix",
-		data = "data",
-		sdatamoments = "sdatamoments",
-		"VIRTUAL")
+         representation(mean            = "numeric",
+                        var             = "matrix",
+		                data            = "data",
+                		"VIRTUAL")
+)
+
+setMethod("initialize", "datamoments",
+          function(.Object, value){
+              .Object <- generateMoments(.Object)
+          return(.Object)
+          }
 )
 
 ## Getters ##
-setGeneric("getData", function(.Object) standardGeneric("getData"))
-setGeneric("getSDatamoments", function(.Object) standardGeneric("getSDatamoments"))
+## Generic set in 'groupmoments.R' ##
+setGeneric("getSmoments", function(object) standardGeneric("getSmoments"))
 
 ## Setters ##
 ## No setters as users should not manipulate a 'datamoments' object ##
 
 ## mutual constructor for all type of datamoments ##
-"datamoments" <- function(dataset) {
-		if(getType(dataset) == "continuous") {
-			.Object <- new("cdatamoments", data = dataset)
-		}
-		else { 
-			.Object <- new("ddatamoments", data = dataset)
-		}
+"datamoments" <- function(data) {
+		if(data@type == "continuous") {
+			.Object <- new("cdatamoments", value = data)
+        } else { 
+			.Object <- new("ddatamoments", value = data)
+        }
 		return(.Object)
 }
+
 

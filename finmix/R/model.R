@@ -325,7 +325,7 @@ setMethod("show", "model",
               cat("     weight      :", 
                   paste(dim(object@weight), collapse = "x"), "\n")
               if (!all(is.na(object@par))) {
-                  cat("     par     : List of",
+                  cat("     par         : List of",
                       length(object@par), ",\n")
               }
               cat("     indicmod    :", object@indicmod, "\n")
@@ -346,9 +346,9 @@ setMethod("getDist", "model", function(object) {
 					return(object@dist)
 				}
 )
-setGeneric("getR", function(.Object) standardGeneric("getR"))
-setMethod("getR", "model", function(.Object) {
-					return(.Object@r)
+setGeneric("getR", function(object) standardGeneric("getR"))
+setMethod("getR", "model", function(object) {
+					return(object@r)
 				}
 )
 setGeneric("getK", function(object) standardGeneric("getK"))

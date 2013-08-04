@@ -16,168 +16,105 @@
 # along with Rcpp.  If not, see <http://www.gnu.org/licenses/>.
 
 setClass("csdatamoments",
-	representation(
-		B = "matrix",
-		W = "matrix",
-		T = "matrix",
-		Rtr = "numeric",
-		Rdet = "numeric",
-		data = "data"
-		),
-	contains = c("sdatamoments"),
-	validity = function(object) {
-		## else: ok
-		TRUE
-	}
+         representation(B       = "vector",
+		                W       = "vector",
+		                T       = "vector",
+                        R       = "numeric",
+		                Rtr     = "numeric",
+		                Rdet    = "numeric"),
+         contains = c("sdatamoments"),
+	     validity = function(object) {
+             ## else: ok
+		     TRUE
+         }
 )
 
-".csdatamoments" <-  function(data) {
-			              
-				groupmoments <- groupmoments(data)
-				## Calculate moments ##
-				## work only with data ordered by column ##
-				if(!data@bycolumn) {
-					datam <- t(data@y)
-					classm <- t(data@S)
-				}
-				else {
-					datam <- data@y
-					classm <- data@S
-				}
-				has.colnames <- !is.null(colnames(datam))
-				## Calculate within-group variability ##
-				## 'WK' is an 1 x K array for r == 1 ##
-				## 'WK' is an r x r x K array for r > 1 ##
-				## Calculate the variance ##
-				## 'var' is an 1 x K array for r == 1 ##
-				## 'var' is an r x r x K array for r > 1 ##
-				level.set <- as.numeric(levels(factor(classm)))
-				K <- length(level.set)
-				kmeans <- groupmoments@group.mean
-				r <- ncol(datam)
-				nkm <- groupmoments@NK
-				if(r == 1) {
-					wkm <- array(0, dim = c(1, K))
-					varm <- array(0, dim = c(1, K))
-					for(i in 1:K) {
-						group <- matrix(datam[which(classm == level.set[i]),])
-						wkm[i] <- sum((group - kmeans[i])^2, na.rm = TRUE)
-						varm[i] <- wkm[i]/kmeans[i]
-					}
-					dimnames(wkm) <- list(NULL, paste("k=", 1:K, sep=""))
-					dimnames(varm) <- list(NULL, paste("k=", 1:K, sep=""))
-					if(has.colnames) {
-						rownames(wkm) <- colnames(datam)
-						rownames(varm) <- colnames(datam)
-					}
-				}
-				else { ## r > 1
-					wkm <- array(0, c(r, r, K))
-					varm <- array(0, c(r, r, K))
-					for(i in 1:K) {
-						kmeanm <- t(as.matrix(kmeans[,i])[, rep(1, nkm[i])])
-						group <- as.matrix(datam[which(classm == level.set[i]),]) - kmeanm
-						out.prod <- matrix(0, ncol  = r, nrow = r)
-						for(j in 1:r) {
-							out.prod <- out.prod + group[j,] %o% group[j,] 	
-						}
-						wkm[,,i] <- out.prod
-						varm[,,i] <- out.prod/nkm[i] 
-					}
-					if(has.colnames) {
-						dimnames(wkm) <- list(colnames(datam), colnames(datam), 
-									paste("k=", 1:K, sep = ""))
-						dimnames(varm) <- list(colnames(datam), colnames(datam), 
-									paste("k=", 1:K, sep = ""))
-					} 
-					else {
-						dimnames(wkm) <- list(NULL, NULL, paste("k=", 1:K, sep=""))
-						dimnames(varm) <- list(NULL, NULL, paste("k=", 1:K, sep=""))
-					}
-				}
-				## Calculate the between-group variance ##
-				## 'B' is an 1 x 1 matrix for r == 1 ##
-				## 'B' is an r x r matrix for r > 1 ##
-				means <- as.matrix(apply(datam, 2, mean, na.rm = TRUE))
-				out.prod <- matrix(0, ncol = r, nrow = r)
-				for(i in 1:K) {
-					out.prod <- out.prod + nkm[i] * (kmeans[,i] - means) %*% t(kmeans[,i] - means)  
-				}	
-				if(has.colnames) {
-					colnames(out.prod) <- colnames(datam)
-					rownames(out.prod) <- colnames(datam)
-				}
-				## Calculate the within-group heterogeneity ##
-				## 'W' is an 1 x 1 matrix for r == 1 ##
-				## 'W' is an r x r matrix for r > 1 ##
-				if(r == 1){
-					wm <- matrix(0, ncol = 1, nrow = 1)
-					wm <- apply(wkm, 1, sum, na.rm = TRUE)
-				}		
-				else {
-					wm <- matrix(0, ncol = r, nrow = r)
-					for(i in 1:K) {
-						wm <- wm + wkm[,,i]
-					}
-				}
-				wm <- as.matrix(wm)
-				if(has.colnames) {
-                                        colnames(wm) <- colnames(datam)
-                                        rownames(wm) <- colnames(datam)
-                                }
-				## Calculate total variance ##
-				## 'T' is an 1 x 1 matrix for r == 1 ##
-				## 'T' is an r x r matrix for r > 1 ##
-				tm <- as.matrix(out.prod + wm)
-				## Calculate coefficient of determination ##
-				## 'Rtr' is an 1 x 1 numeric ##
-				## 'Rdet' is an 1 x 1 numeric ##
-				if(r > 1) { 
-					rtr <- 1 - (sum(diag(wm), na.rm = TRUE) / sum(diag(tm), na.rm = TRUE)) 
-					rdet <- 1 - (det(wm)/det(tm))
-						
-					csdatamoments <- new("csdatamoments", groupmoments = groupmoments, WK = wkm,
-								var = varm, B = as.matrix(out.prod), W = as.matrix(wm),
-								T = tm, Rdet = rdet, Rtr = rtr, data = data)
-				}
-					csdatamoments <- new("csdatamoments", groupmoments = groupmoments, WK = wkm,
-                                                                var = varm, B = as.matrix(out.prod), W = as.matrix(wm),
-                                                                T = tm, Rdet = numeric(), Rtr = numeric(), data = data)
-				return(csdatamoments)
-}
+setMethod("initialize", "csdatamoments",
+          function(.Object, value) {
+              object <- as(.Object, "sdatamoments")
+              object <- callNextMethod(object, value)
+              as(.Object, "sdatamoments") <- object
+              .Object <- generateMoments(.Object)
+              return(.Object)
+          }
+)
 
-setMethod("show", "csdatamoments", function(object) {
-						name.data <- getName(object@data)
-						oname <- ifelse(length(name.data) == 0, "", name.data)
-						cat("SDataMoments object '", oname, "'\n")
-						gmoments <- object@groupmoments
-						cat("	Type		:", class(object), "\n")
-						cat("	Group Moments	:", class(object@groupmoments), "\n")
-						cat("	WK		:", paste(dim(object@WK), collapse="x"), "\n")
-						cat("	Var (within)	:", paste(dim(object@var), collapse="x"), "\n")
-						cat("	B (var between)	:", paste(dim(object@B), collapse="x"), "\n")
-						cat("	W (het within)	:", paste(dim(object@W), collapse="x"), "\n")
-						cat("	T (var total)	:", paste(dim(object@T), collapse="x"), "\n")
-						if(length(object@Rtr) > 0) {
-						 	cat("	Rtr		: [", format(getRtr(object), trim = TRUE), "]\n")
-						}
-						if(length(object@Rdet) > 0) {
-							cat("	Rdet		: [", format(getRdet(object), trim = TRUE), "]\n")	
-						}
-					}
+setMethod("generateMoments", "csdatamoments",
+          function(object) {
+	          ## enforce column.wise ordering ##
+              if (!object@data@bycolumn) {
+		          datam     <- t(object@data@y)
+		          classm    <- t(object@data@S)
+              } else {
+        		  datam     <- object@data@y
+		          classm    <- object@data@S
+	          }
+   	          ## Calculate the between-group variance ##
+	          ## 'B' is an r x r matrix ##
+              gmeans <- object@gmoments@mean
+              nkm <- object@gmoments@NK
+              ## Calculate the total heterogeneity ##
+              ## 'T' is an r x r array ##
+              object@T <- var(datam, na.rm = TRUE) * nrow(datam)
+  		      ## Calculate the within-group heterogeneity ##
+			  ## 'W' is an r x r array ##
+              wkm <- object@gmoments@WK
+              object@W <- apply(wkm, c(1, 2), sum, na.rm = TRUE)
+              ## Calculate between-group heterogeneity ##
+			  ## 'B' is an r x r array ##
+			  object@B <- object@T - object@W
+			  ## Calculate coefficient of determination ##
+			  ## 'Rtr' is an 1 x 1 numeric ##
+			  ## 'Rdet' is an 1 x 1 numeric ##
+			  if (object@data@r > 1) {
+                  r <- NA
+                  object@R <- as.numeric(r)
+                  object@Rtr <- 1 - sum(diag(object@W), na.rm = TRUE) / 
+                                    sum(diag(object@T), na.rm = TRUE) 
+			      object@Rdet <- 1 - det(object@W)/det(object@T)
+              } else {
+                  rtr <- NA
+                  rdet <- NA
+                  object@Rtr <- as.numeric(rtr)
+                  object@Rdet <- as.numeric(rdet)
+                  object@R <- 1 - object@W[1]/object@T[1] 
+              }
+			  return(object)
+          }
+)
+
+setMethod("show", "csdatamoments", 
+          function(object) {
+              cat("Object 'sdatamoments'\n")
+              cat("     class       :", class(object), "\n")
+              cat("     B           : Vector of", 
+                  length(object@B), "\n")
+              cat("     W           : Vector of",
+                  length(object@W), "\n")
+              cat("     T           : Vector of",
+                  length(object@T), "\n")
+              if (object@data@r > 1) {
+                  cat("     Rdet        :", object@Rdet, "\n")
+                  cat("     Rtr         :", object@Rtr, "\n")
+              }
+              cat("     gmoments    : Object of class", 
+                  class(object@gmoments), "\n")
+              cat("     data        : Object of class", 
+                  class(object@data), "\n")
+          }
 )
 
 ## Getters ##
-setMethod("getGroupMoments", "csdatamoments", function(.Object) {
-						return(.Object@groupmoments)
+setMethod("getGmoments", "csdatamoments", function(object) {
+						return(object@gmoments)
 					}
 )
-setMethod("getWK", "csdatamoments", function(.Object) {
-						return(.Object@WK)
+setMethod("getWK", "csdatamoments", function(object) {
+						return(object@WK)
 					}
 )
-setMethod("getVar", "csdatamoments", function(.Object) {
-				return(.Object@var)
+setMethod("getVar", "csdatamoments", function(object) {
+				return(object@var)
 			}
 )
 setGeneric("getB", function(.Object) standardGeneric("getB"))
@@ -195,6 +132,12 @@ setMethod("getT", "csdatamoments", function(.Object) {
 						return(.Object@T)
 					}
 )
+## Generic set in 'model.R' ##
+setMethod("getR", "csdatamoments",
+          function(object) {
+              return(object@R)
+          }
+)
 setGeneric("getRtr", function(.Object) standardGeneric("getRtr"))
 setMethod("getRtr", "csdatamoments", function(.Object) {
 						return(.Object@Rtr)
@@ -205,8 +148,10 @@ setMethod("getRdet", "csdatamoments", function(.Object) {
 						return(.Object@Rdet)
 					}
 )
-setMethod("getData", "csdatamoments", function(.Object) {
-						return(.Object@data)				
+
+## Generic set in 'groupmoments.R' ##
+setMethod("getData", "csdatamoments", function(object) {
+						return(object@data)				
 					}
 )
 

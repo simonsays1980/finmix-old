@@ -284,8 +284,8 @@ setMethod("getN", "data", function(.Object) {
 )
 
 ## Already set as generic in 'model.R' ##
-setMethod("getR", "data", function(.Object) {
-				return(.Object@r)
+setMethod("getR", "data", function(object) {
+				return(object@r)
 			}
 )
 

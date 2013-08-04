@@ -51,14 +51,14 @@ setClass("modelmoments",
 }
 
 ## Getters ##
-setGeneric("getMean", function(.Object) standardGeneric("getMean"))
-setMethod("getMean", "modelmoments", function(.Object) {
-						return(.Object@mean)
+setGeneric("getMean", function(object) standardGeneric("getMean"))
+setMethod("getMean", "modelmoments", function(object) {
+						return(object@mean)
 					}		
 )
-setGeneric("getVar", function(.Object) standardGeneric("getVar"))
-setMethod("getVar", "modelmoments", function(.Object) {
-						return(.Object@var)
+setGeneric("getVar", function(object) standardGeneric("getVar"))
+setMethod("getVar", "modelmoments", function(object) {
+						return(object@var)
 					}
 )
 

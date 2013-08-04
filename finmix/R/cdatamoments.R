@@ -16,187 +16,139 @@
 # along with Rcpp.  If not, see <http://www.gnu.org/licenses/>.
 
 setClass("cdatamoments",
-	representation(
-		higher = "matrix",
-		skewness = "matrix",
-		kurtosis = "matrix",
-		corr = "matrix"		
-		),
-	contains = c("datamoments"),
-	validity = function(object) {
-		mom.moments <- object@higher
-		mom.data <- object@data
-		mom.r <- mom.data@r
-		if(mom.r != ncol(object@mean)) 
-			return("[Error] Data dimension and dimension of the mean do not match.")
-		if(mom.r != ncol(object@var)) 
-			return("[Error] Data dimension and dimension of the variance do not match.")
-		if(mom.r != ncol(mom.moments) || nrow(mom.moments) != 4) 
-			return("[Error] Data dimension and dimension of the L=4 moments do not match.")
-		if(mom.r != ncol(object@skewness)) 
-			return("[Error] Data dimension and dimension of the skewness do not match.")
-		if(mom.r != ncol(object@kurtosis)) 
-			return("[Error] Data dimension and dimension of the kurtosis do not match.")
-		if(!is.na(object@corr) && mom.r == 1)
-			return("[Error] Data has dimension 1. No correlation matrix available.")
-		if(!is.na(object@corr) && (mom.r != ncol(object@corr) || mom.r != nrow(object@corr)))
-			return("[Error] Data dimension and dimension of correlation matrix do not match.")
-		if(!is.na(object@kurtosis) && any(object@kurtosis < 0))
-			return("[Error] Kurtosis is negative.")
-		if(!is.na(object@var) && any(object@var < 0))
-			return("[Error] Variance is negative")
-		if(!is.na(mom.moments) && any(mom.moments[2,] < 0))
-			return("[Error] Second higher moment is negative.")
-		if(!is.na(mom.moments) && any(mom.moments[4,] < 0))
-			return("[Error ]Fourth higher moment is negative.")
-		## else: ok
-		TRUE
-	}
+        representation(higher      = "array",
+		               skewness    = "vector",
+		               kurtosis    = "vector",
+		               corr        = "matrix",
+                       smoments    = "csdatamoments"
+                       ),
+    	contains = c("datamoments"),
+    	validity = function(object) {
+            ## else: ok
+		    TRUE
+        }
 )
 
-setMethod("initialize", "cdatamoments", function(.Object, ..., data) {
-						.Object@data <- data
-						cmoments(.Object) <- .Object@data
-						has.S <- !all(is.na(data@S))
-						if(has.S) {
-							.Object@sdatamoments <- sdatamoments(data)
-						}
-						callNextMethod(.Object, ...)
-						return(.Object)
-					}
+setMethod("initialize", "cdatamoments", 
+          function(.Object, value) {
+              .Object@data <- value
+              .Object <- generateMoments(.Object)
+			  if (!all(is.na(value@S))) {
+                  .Object@smoments <- sdatamoments(value)
+              }
+			  return(.Object)
+          }
 )
 
-"cmoments<-" <-  function(.Object, value) {
-			              
-				## Compute means ##
-				## work only with data ordered by column ##
-				if(!value@bycolumn) {
-					datam <- t(value@y)
-				}
-				else {
-					datam <- value@y
-				}
-				has.colnames <- !is.null(colnames(datam))
-				## means is a matrix r x 1 ##
-				means <- matrix(0, nrow = value@r, ncol = 1)
-				for(i in 1:value@r) {
-					means[i] <- mean(datam[,i])
-				}
-				if(has.colnames) {
-					rownames(means) <- colnames(datam)
-				}
-				.Object@mean <- means
-				
-				## Compute variances or variance-covariance matrix ##
-				## variance is a r x r matrix ##
-				
-				.Object@var <- t(as.matrix(diag(var(datam))))
-				
-				## Compute higher moments ##
-				## higher.moments is a r x L matrix (L = 4) ##
-				d = datam - mapply(rep, means, nrow(datam)) 
-				momentsm <- matrix(0, nrow = value@r, ncol = 4)
-				for(i in 1:getR(value)) {
-					momentsm[i, 2] <- mean(d[,i]^2)
-					momentsm[i, 3] <- mean(d[,i]^3)
-					momentsm[i, 4] <- mean(d[,i]^4) 
-				}
-				if(has.colnames) {
-					rownames(momentsm) <- colnames(datam)
-				}
-				.Object@higher <- momentsm
-
-				## Compute skewness and kurtosis ##
-				## skewness and kurtosis are r x 1 matrices ## 
-				skewm <- matrix(0, nrow = value@r, ncol = 1)
-				kurtm <- matrix(0, nrow = value@r, ncol = 1)
-				for(i in 1:value@r) {
-					skewm[i] <- momentsm[i, 3]/momentsm[i, 2]^1.5
-					kurtm[i] <- momentsm[i, 4]/momentsm[i, 2]^2
-				}
-				if(has.colnames) {
-					rownames(skewm) <- colnames(datam)
-					rownames(kurtm) <- colnames(datam) 	
-				}
-				.Object@skewness <- skewm
-				.Object@kurtosis <- kurtm
-
-				## Compute corr matrix in case of r > 1 ##
-				## corr is a r x r matrix ##
-				if(value@r > 1) {
-					.Object@corr <- cor(value@y)			
-				}
-				else {
-					.Object@corr <- matrix()
-				}
-
-				return(.Object)
-}
+## Generic set in 'groupmoments.R' ##
+setMethod("generateMoments", "cdatamoments",
+          function(object) {
+              ## enforce column-wise ordering ##
+           	  if (!object@data@bycolumn) {
+                  datam <- t(object@data@y)
+          	  } else {
+        		  datam <- object@data@y
+	          }
+        	  ## Compute higher moments ##
+              ## higher.moments is a r x L matrix (L = 4) ##
+              means <- apply(datam, 2, mean, na.rm = TRUE)
+              object@mean <- means
+              object@var <- var(datam, na.rm = TRUE)
+              d = datam - means 
+              momentsm <- array(0, dim = c(4, object@data@r))
+              momentsm[1,] <- apply(d, 2, mean, na.rm = TRUE)
+              momentsm[2,] <- apply(d^2, 2, mean, na.rm = TRUE)
+              momentsm[3,] <- apply(d^3, 2, mean, na.rm = TRUE)
+              momentsm[4,] <- apply(d^4, 2, mean, na.rm = TRUE)
+              dimnames(momentsm) <- list(c("1st", "2nd", "3rd", "4th"), 
+                                         colnames(datam))
+    	      object@higher <- momentsm
+              ## Compute skewness and kurtosis ##
+              ## skewness and kurtosis are 1 x r vectors ## 
+              skewm <- momentsm[3, ]/momentsm[2, ]^1.5
+              kurtm <- momentsm[4, ]/momentsm[2, ]^2
+              names(skewm) <- colnames(datam)
+              names(kurtm) <- colnames(datam)
+              object@skewness <- skewm
+              object@kurtosis <- kurtm
+              ## Compute corr matrix in case of r > 1 ##
+              ## corr is a r x r matrix ##
+	          if(object@data@r  > 1) {
+        		  object@corr <- cor(datam)			
+              } else {
+        		  object@corr <- matrix()
+              }
+              return(object)
+          }
+)
 
 setMethod("show", "cdatamoments", 
           function(object) {
-		      name.data <- getName(getData(object))
-			  oname <- ifelse(length(name.data) == 0, "datamoments", name.data)
-              cat("Object '", oname, "'\n")
+              cat("Object 'datamoments'\n")
               cat("     class       :", class(object), "\n")
-              cat("     mean        :", 
-                  paste(dim(object@mean), collapse = "x"), "\n")
-              cat("     var         :", 
-                  paste(dim(object@var), collapse = "x"), "\n")
+              cat("     mean        : Vector of", 
+                  length(object@mean), "\n")
+              cat("     var         : Vector of", 
+                  length(object@var), "\n")
               cat("     higher      :", 
                   paste(dim(object@higher), collapse = "x"), "\n")
-              cat("     skewness    :", 
-                  paste(dim(object@skewness), collapse = "x"), "\n")
-              cat("     kurtosis    :", 
-                  paste(dim(object@kurtosis), collapse = "x"), "\n")
-              cat("     corr        :", 
-                  paste(dim(object@corr), collapse = "x"), "\n")
-              if (!all(is.na(object@data@S))) {
-                  cat("     sdatamoments    :", class(object@sdatamoments), "\n")
+              cat("     skewness    : Vector of", 
+                  length(object@skewness), "\n")
+              cat("     kurtosis    : Vector of", 
+                  length(object@kurtosis), "\n")
+              if (!all(is.na(object@corr))) {
+                  cat("     corr        :",
+                      paste(dim(object@corr), collapse = "x"), "\n")
               }
+              if (!all(is.na(object@data@S))) {
+                  cat("     smoments    : Object of class", 
+                      class(object@smoments), "\n")
+              }
+              cat("     data        : Object of class",
+                  class(object@data), "\n")
           }
 )
 
 ## Getters ##
 ## Generic set in 'modelmoments' class ##
-setMethod("getMean", "cdatamoments", function(.Object) {
-						return(.Object@mean)
+setMethod("getMean", "cdatamoments", function(object) {
+						return(object@mean)
 					}
 )
 ## Generic set in 'modelmoments' class ##
-setMethod("getVar", "cdatamoments", function(.Object) {
-						return(.Object@var)
+setMethod("getVar", "cdatamoments", function(object) {
+						return(object@var)
 					}
 )
-## Generic set in 'datamoments' class ##
-setMethod("getData", "cdatamoments", function(.Object) {
-				return(.Object@data)
+## Generic set in 'groupmoments.R' ##
+setMethod("getData", "cdatamoments", function(object) {
+				return(object@data)
 			}
 )
 ## Generic set in 'datamoments' class ##
-setMethod("getSDatamoments", "cdatamoments", function(.Object) {
-							return(.Object@sdatamoments)
+setMethod("getSmoments", "cdatamoments", function(object) {
+							return(object@smoments)
 						}
 )
 
 ## Generic set in 'nsmodelmoments' class ##
-setMethod("getHigher", "cdatamoments", function(.Object) {
-						return(.Object@higher)
+setMethod("getHigher", "cdatamoments", function(object) {
+						return(object@higher)
 					}
 )
 ## Generic set in 'nsmodelmoments' class ##
-setMethod("getSkewness", "cdatamoments", function(.Object) {
-						return(.Object@skewness)
+setMethod("getSkewness", "cdatamoments", function(object) {
+						return(object@skewness)
 					}
 )
 ## Generic set in 'nsmodelmoments' class ##
-setMethod("getKurtosis", "cdatamoments", function(.Object) {
-						return(.Object@kurtosis)
+setMethod("getKurtosis", "cdatamoments", function(object) {
+						return(object@kurtosis)
 					}
 )
 ## Generic set in 'nsmodelmoments' class ##
-setMethod("getCorr", "cdatamoments", function(.Object) {
-						return(.Object@corr)
+setMethod("getCorr", "cdatamoments", function(object) {
+						return(object@corr)
 					}
 )
 ## Setters ##

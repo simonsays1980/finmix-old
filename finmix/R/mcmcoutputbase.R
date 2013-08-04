@@ -377,7 +377,7 @@ setMethod("getS", "mcmcoutputbase", function(object) {
 							return(object@S)	
 						}
 )
-setGeneric("getNK", function(object) standardGeneric("getNK"))
+## Generic set in 'groupmoments.R' ##
 setMethod("getNK", "mcmcoutputbase", function(object) {
 							return(object@NK)	
 						}

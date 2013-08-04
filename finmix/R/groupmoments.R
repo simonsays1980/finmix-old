@@ -1,4 +1,4 @@
-## Copyright (C) 2013 Lars Simon Zehnder
+# Copyright (C) 2013 Lars Simon Zehnder
 #
 # This file is part of finmix.
 #
@@ -16,117 +16,131 @@
 # along with Rcpp.  If not, see <http://www.gnu.org/licenses/>.
 
 setClass("groupmoments", 
-	representation(
-		NK = "matrix",
-		group.mean = "matrix",
-		data = "data"), 
-	validity = function(object) {
-				mom.nk <- object@NK
-				mom.group.means <- object@group.mean
-				mom.K <- length(levels(factor(getS(object@data))))
-				if(mom.K != ncol(mom.nk)) 
-					return("[Error] Data dimension and dimension of group sizes do not match.")
-				if(mom.K != ncol(mom.group.means))
-					return("[Error] Data dimension and dimension of the group means fo not match.")
-				if(any(mom.nk < 0))
-					return("[Error] Group size is negative.") 
-				## else: ok
-				TRUE
-			}
+         representation(NK          = "array",
+                        mean        = "matrix",
+                        WK          = "array",
+                        var         = "array",
+                        data        = "data"), 
+         validity = function(object) {
+             ## else: ok
+			 TRUE
+         }
 )
 
 "groupmoments" <- function(data) {
-			## Compute group sizes ##
-			## work only with  ordered by column ##
-			if(!data@bycolumn) {
-				datam <- t(data@y)
-				classm <- t(data@S)
-			}
-			else {
-				datam <- data@y
-				classm <- data@S
-			}
-			
-			## Calculate group sizes and group means ##
-			## 'NK' is a 1 x K matrix ##
-			## 'group.mean' is a 1 x K matrix for r == 1 ## 
-			## 'group.mean' is a r x K matrix for r > 1 ##
-			level.set <- as.numeric(levels(factor(classm)))
-			if(data@r == 1) {
-				nkm <- matrix(0, ncol = length(level.set), nrow = 1)
-				group.means <- matrix(0, ncol = length(level.set), nrow = 1)
-				for(i in 1:length(level.set)) {
-					nkm[i] <- sum(match(classm, level.set[i]), na.rm = TRUE)
-					group.means[i] <- mean(datam[which(classm == level.set[i]), drop = FALSE], na.rm = TRUE)
-				}
-			}
-			else {
-				nkm <- matrix(0, ncol = length(level.set), nrow = 1)
-				group.means <- matrix(0, ncol = length(level.set), nrow = data@r)
-				for(i in 1:length(level.set)) {
-					nkm[i] <- sum(match(classm, level.set[i]), na.rm = TRUE)
-					group.means[,i] <- apply(datam[which(classm == level.set[i]), , drop = FALSE], 2, mean,na.rm = TRUE)
-				}
-			}
-		
-			groupmoments <- new("groupmoments", NK = as.matrix(nkm), group.mean = as.matrix(group.means), 
-						data = data)
-			
-			return(groupmoments)
+    if(all(is.na(data@y))) {
+        stop("'data' object has no data. Slot 'y' is empty.")
+    } else {
+        if(all(is.na(data@S))) {
+            stop("'data' object has no allocations. Slot 'S' is empty.")
+        }
+    }
+    object <- new("groupmoments", value = data)
+    return(object)
 }
 
+## initializes by immediately calling method ##
+## 'generateMoments' ##
+setMethod("initialize", "groupmoments",
+          function(.Object, value) {
+              .Object@data <- value
+              .Object <- generateMoments(.Object)
+              return(.Object)
+          }
+)
+
+## calculates all moments ##
+setGeneric("generateMoments", function(object) standardGeneric("generateMoments"))
+setMethod("generateMoments", "groupmoments",
+          function(object) {
+              if(all(is.na(object@data@S))) {
+                  return(object)
+              }
+            
+              ## Compute group sizes ##
+	          ## enforce column-wise ordering ##
+	          if (!object@data@bycolumn) {
+                  datam <- t(object@data@y)
+		          classm <- t(object@data@S)
+              } else {
+               	  datam <- object@data@y
+		          classm <- object@data@S
+              }		
+              ## Calculate group sizes and group means ##
+              ## 'NK' is an 1 x K vector ##
+	          ## 'groupmean' is an r x K matrix ##
+        	  level.set <- as.numeric(levels(factor(classm)))
+              K <- length(level.set)
+              r <- ncol(datam)
+              comp <- matrix(rep(classm, K), ncol = K) == matrix(seq(1,K), 
+                                                                 nrow = nrow(datam),
+                                                                 ncol = K,
+                                                                 byrow = TRUE)
+              object@NK <- as.array(apply(comp, 2, sum))
+              dimnames(object@NK) <- list(as.character(seq(1:K)))
+              gmeans <- matrix(NA, nrow = r, ncol = K)
+              for (i in seq(1,r)) {
+                  gmeans[i, ] <- (t(datam[,i]) %*% comp)/t(object@NK)
+              }
+              colnames(gmeans) <- as.character(seq(1,K))
+              rownames(gmeans) <- colnames(data)
+              object@mean <- gmeans
+              wkm <- array(NA, dim = c(r, r, K))
+              varm <- array(NA, dim = c(r, r, K))
+              for (k in seq(1, K)) {
+                  group.demeaned <- (datam - rep(gmeans[,k], each = nrow(datam))) * comp[, k]
+                  wkm[,, k] <- t(group.demeaned) %*% group.demeaned
+                  varm[,, k] <- wkm[,, k]/object@NK[k]
+              }
+              dimnames(wkm) <- list(colnames(datam), colnames(datam))
+              dimnames(varm) <- list(colnames(datam), colnames(datam))
+              object@WK <- wkm
+              object@var <- varm
+              return(object)
+          }
+)
+
 ## R usual 'show' function ##
-setMethod("show", "groupmoments", function(object) {
-						data.name <- getName(object@data)
-						oname <- ifelse(length(data.name) == 0, "", data.name)
-						cat("Groupmoments object '", oname, "'\n")
-						cat("	Type		:", class(object), "\n")
-						cat("	NK		:", paste(dim(object@NK), collapse="x"), "\n")
-						cat("	Group Mean	:", paste(dim(object@group.mean), collapse="x"), "\n")
-					##	cat("	NK		: [", format(object@NK, trim = TRUE), "]\n")
-					##	cat("	group.mean	: [", format(object@group.mean[1,], trim = TRUE), "]\n")
-					##	r <- nrow(object@group.mean)
-					##	if(r > 1) {
-					##		for(i in 2:r) 
-					##			cat("		  	  [", format(object@group.mean[i,], trim = TRUE), "]\n")
-					##	}
-						
-					}
+setMethod("show", "groupmoments", 
+          function(object) {
+              cat("Object 'groupmoments'\n")
+              cat("     class       :", class(object), "\n")
+              cat("     NK          : Vector of",
+                  length(object@NK), "\n")
+              cat("     mean        :",
+                  paste(dim(object@mean), collapse = "x"), "\n")
+              cat("     WK          :",
+                  paste(dim(object@WK), collapse = "x"), "\n")
+              cat("     var         :",
+                  paste(dim(object@var), collapse = "x"), "\n")
+          }
 )
  
 ## R usual Getters ##
-setGeneric("getNK", function(.Object) standardGeneric("getNK"))
-setMethod("getNK", "groupmoments", function(.Object) {
-						return(.Object@NK)					
+setGeneric("getNK", function(object) standardGeneric("getNK"))
+setMethod("getNK", "groupmoments", function(object) {
+						return(object@NK)					
 					}
 )
-setGeneric("getGroupMean", function(.Object) standardGeneric("getGroupMean"))
-setMethod("getGroupMean", "groupmoments", function(.Object) {
-						return(.Object@group.mean)	
+## Generic set in 'modelmoments' class ##
+setMethod("getMean", "groupmoments", function(object) {
+						return(object@mean)	
 					}
 )
-setGeneric("getData", function(.Object) standardGeneric("getData"))
-setMethod("getData", "groupmoments", function(.Object) {
-						return(.Object@data)		
+setGeneric("getWK", function(object) standardGeneric("getWK"))
+setMethod("getWK", "groupmoments", function(object) {
+						return(object@WK)
 					}
 )
-## R usual Setters ##
-setGeneric("setNK<-", function(.Object, value) standardGeneric("setNK<-"))
-setReplaceMethod("setNK", "groupmoments", function(.Object, value) {
-							.Object@NK <- value
-							return(.Object)							
-						}
-)
-setGeneric("setGroupMean<-", function(.Object, value) standardGeneric("setGroupMean<-"))
-setReplaceMethod("setGroupMean", "groupmoments", function(.Object, value) {
-						.Object@group.mean <- value
-						return(.Object)
+## Generic set in 'modelmoments' class ##
+setMethod("getVar", "groupmoments", function(object) {
+						return(object@var)
 					}
 )
-setGeneric("setData<-", function(.Object, value) standardGeneric("setData<-"))
-setReplaceMethod("setData", "groupmoments", function(.Object, value) {
-							.Object@data <- value
-							validObject(.Object)
-							return(.Object)
-						}
+setGeneric("getData", function(object) standardGeneric("getData"))
+setMethod("getData", "groupmoments", function(object) {
+						return(object@data)		
+					}
 )
+## No setters as user are not intended to manipulate this  ##
+## object ##

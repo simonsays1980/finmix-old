@@ -74,6 +74,7 @@ classification (const arma::ivec &S, const liklist &lik,
 	double mixlik = arma::sum(lsump);               				// mixture likelihood
 	p_m.each_col() /= sump_v;	                  				// classification probability matrix
 					          					// N x K matrix
+
 	dataC.prob = p_m;
 	/* simulate only if true mixture */
 	if(K > 1) {

@@ -34,7 +34,31 @@ PriorCondPoissonFix::PriorCondPoissonFix (const FinmixPrior& prior) :
 void PriorCondPoissonFix::update (const unsigned int& K, const arma::mat& y,
 			arma::ivec& S, const ParPoissonFix& par)  
 {
-	PriorPoissonFix::update(K, y, S, par);
+//	PriorPoissonFix::update(K, y, S, par);
+    if (K == 1) {
+        aPost(0) = aStart(0) + arma::accu(y);
+        bPost(0) = bStart(0) + y.n_rows;
+    } else {
+        arma::mat repY = arma::repmat(y, 1, K);
+        arma::imat repS = arma::repmat(S, 1, K);
+        arma::imat compM = arma::ones<arma::imat>(S.n_elem, K);
+        for(unsigned int k = 0; k < K; ++k) {
+            compM.col(k) = compM.col(k) * (k + 1);
+        }
+        arma::umat ind = (repS == compM);
+        arma::mat indDouble = arma::conv_to<arma::mat>::from(ind);
+        repY %= indDouble;
+        arma::rowvec prod = arma::sum(repY, 0);
+        arma::rowvec sprod = arma::sum(indDouble, 0);
+        arma::rowvec tmp(K);
+        for(unsigned int k = 1; k < K; ++k) {
+            tmp = coef.row(k);
+            tmp.subvec(0, k - 1) *= (-1.0);
+            prod(k) = std::max(arma::as_scalar(tmp * prod.t()),0.0);
+        }
+        aPost = aStart + prod;
+        bPost = bStart + sprod;
+    }
 }
 
 void PriorCondPoissonFix::updateHier(const ParPoissonFix& par)
@@ -43,15 +67,10 @@ void PriorCondPoissonFix::updateHier(const ParPoissonFix& par)
 		const unsigned int K = par.lambda.n_elem;
 		GetRNGstate();
 		double gN = g + arma::sum(aStart);
-		double GN = 0.0;
-		double b = 0.0;
-		for(unsigned int k = 0; k < K; ++k) {
-			GN = G * std::pow(2, arma::sum(coef.row(k)) - 1)
-				+ arma::sum(par.lambda);
-			b = R::rgamma(gN, 1/GN);
-			bStart(k) = b;
-		}
+        double GN = G + arma::sum(par.lambda);
+		double b = R::rgamma(gN, 1/GN);
 		PutRNGstate();
+        bStart.fill(b);
 	}
 }
 

@@ -33,10 +33,7 @@ exportClasses( ## all classes
         "data",
         "groupmoments",
         "sdatamoments",
-        "csdatamoments",
         "datamoments",
-        "cdatamoments",
-        "ddatamoments",
         "prior",
         "mcmc",
         "dataclass",
@@ -71,7 +68,6 @@ exportMethods( ## name of the generic, as with other methods
         "getHigher",
         "getSkewness",
         "getKurtosis",
-        "getR",
         "getRtr",
         "getRdet",
         "getCorr",
@@ -99,12 +95,11 @@ exportMethods( ## name of the generic, as with other methods
 
         ## 'groupmoments' class ##
         "getNK",
-        "getGroupMean",
+        "getWK",
         "getData",
 
         ## 'sdatamoments' class ##
-        "getGroupMoments",
-        "getWK",
+        "getGmoments",
 
         ## 'csdatamoments' class ##
         "getB",
@@ -112,8 +107,8 @@ exportMethods( ## name of the generic, as with other methods
         "getT",
 
         ## 'cdatamoments' class ##
-        "getSDatamoments",
-    	"mixturemar",
+        "getSmoments",
+ #   	"mixturemar",
 
         ## 'mcmc' class ##
         "getBurnin",

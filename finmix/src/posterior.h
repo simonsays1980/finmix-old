@@ -46,7 +46,7 @@ posterior_multinomial(const unsigned int &K, const arma::ivec &S,
 	}
 	arma::umat ind = (repS == compM);
 	arma::mat indDouble = arma::conv_to<arma::mat>::from(ind);
-	par_post = sum(indDouble); 
+	par_post = arma::sum(indDouble); 
 	par_post = par_post + weight;
 	
 	return par_post;

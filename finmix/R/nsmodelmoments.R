@@ -139,34 +139,46 @@ setMethod("show", "nsmodelmoments", function(object) {
 )
 ## Getters ##
 ## Generic set in 'modelmoments' class ##
-setMethod("getMean", "nsmodelmoments", function(.Object) {
-						return(.Object@mean)
+setMethod("getMean", "nsmodelmoments", function(object) {
+						return(object@mean)
 					}
 )
 ## Generic set in 'modelmoments' class ##
-setMethod("getVar", "nsmodelmoments", function(.Object) {
-						return(.Object@var)
+setMethod("getVar", "nsmodelmoments", function(object) {
+						return(object@var)
 					}
 )
-setGeneric("getHigher", function(.Object) standardGeneric("getHigher"))
-setMethod("getHigher", "nsmodelmoments", function(.Object) {
-							return(.Object@higher)
+setGeneric("getHigher", function(object) standardGeneric("getHigher"))
+setMethod("getHigher", "nsmodelmoments", function(object) {
+							return(object@higher)
 						}
 )
-setGeneric("getSkewness", function(.Object) standardGeneric("getSkewness"))
-setMethod("getSkewness", "nsmodelmoments", function(.Object) {
-							return(.Object@skewness) 
+setGeneric("getSkewness", function(object) standardGeneric("getSkewness"))
+setMethod("getSkewness", "nsmodelmoments", function(object) {
+							return(object@skewness) 
 						}
 )
-setGeneric("getKurtosis", function(.Object) standardGeneric("getKurtosis"))
-setMethod("getKurtosis", "nsmodelmoments", function(.Object) {
-							return(.Object@kurtosis)
+setGeneric("getKurtosis", function(object) standardGeneric("getKurtosis"))
+setMethod("getKurtosis", "nsmodelmoments", function(object) {
+							return(object@kurtosis)
 						}
 )
-setGeneric("getCorr", function(.Object) standardGeneric("getCorr"))
-setMethod("getCorr", "nsmodelmoments", function(.Object) {
-						return(.Object@corr)
+setGeneric("getCorr", function(object) standardGeneric("getCorr"))
+setMethod("getCorr", "nsmodelmoments", function(object) {
+						return(object@corr)
 					}
+)
+setGeneric("getRdet", function(object) standardGeneric("getRdet"))
+setMethod("getRdet", "nsmodelmoments", 
+          function(object) {
+              return(object@Rdet)
+          }
+)
+setGeneric("getRtr", function(object) standardGeneric("getRtr"))
+setMethod("getRtr", "nsmodelmoments", 
+          function(object) {
+              return(object@Rtr)
+          }
 )
 ## Setters ##
 ## No setters as users should not manipulate a 'nsmodelmoments' object ##

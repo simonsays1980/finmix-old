@@ -26,8 +26,8 @@ Collate:
         sdatamoments.R
         csdatamoments.R
         datamoments.R
-        cdatamoments.R
         ddatamoments.R
+        cdatamoments.R
         prior.R
         mcmc.R
 	unass.R

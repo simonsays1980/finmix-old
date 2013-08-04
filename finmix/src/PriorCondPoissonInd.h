@@ -25,16 +25,17 @@
 
 #include <RcppArmadillo.h>
 #include "PriorCondPoissonFix.h"
-#include "PriorPoissonInd.h"
 
-class PriorCondPoissonInd : public PriorCondPoissonFix,
-	public PriorPoissonInd {
+class PriorCondPoissonInd : public PriorCondPoissonFix {
 	public:	
+        arma::rowvec weightStart;
+        arma::rowvec weightPost;
+
 		PriorCondPoissonInd (const FinmixPrior&);
 		virtual ~PriorCondPoissonInd () {}
-		virtual void update (const unsigned int&, 
+		void update (const unsigned int&, 
 			const arma::mat&, arma::ivec&,
-			const ParPoissonInd&);
+			const ParPoissonFix&);
 		virtual void updateHier (const ParPoissonFix&);
 };
 #endif
