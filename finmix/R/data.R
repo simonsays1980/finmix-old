@@ -63,199 +63,119 @@ setClass("data",
 )
 
 ## Constructor for the data class ##
-"data" <- function(y. = matrix(), N., r., S. = matrix(), bycolumn. = TRUE, name. = character(), 
-			type. = "continuous", sim. = FALSE, exp. = matrix(), T. = matrix()) {
-		storage.mode(T.) <- "integer"
-		storage.mode(exp.) <- "integer"
+"data" <- function(y = matrix(), N, r, S = matrix(), 
+                   bycolumn = TRUE, name = character(), 
+			       type = "continuous", sim = FALSE, 
+                   exp = matrix(), T = matrix()) {
+		storage.mode(T) <- "integer"
+		storage.mode(exp) <- "integer"
 		
-		has.data <- !all(is.na(y.))
-		if (missing(N.) && has.data) {
-			if(bycolumn.) {
-				N. <- nrow(y.)
+		has.data <- !all(is.na(y))
+		if (missing(N) && has.data) {
+			if(bycolumn) {
+				N <- nrow(y)
 			} else {
-				N. <- col(y.)
+				N <- col(y)
 			}
-        } else if (missing(N.) && !has.data) {
-				N. <- as.integer(1)
+        } else if (missing(N) && !has.data) {
+				N <- as.integer(1)
 	    } else {
-            N. <- as.integer(N.)
+            N <- as.integer(N)
         }
 		
-		if (missing(r.) && has.data) {
-			if (bycolumn.) {
-                r. <- ncol(y.)
+		if (missing(r) && has.data) {
+			if (bycolumn) {
+                r <- ncol(y)
             } else {
-                r. <- nrow(y.)
+                r <- nrow(y)
             } 
-        } else if (missing(r.) && !has.data){
-            r. <- as.integer(1)
+        } else if (missing(r) && !has.data){
+            r <- as.integer(1)
         } else {
-            r. <- as.integer(r.)
+            r <- as.integer(r)
         }
-		data <- new("data", y = y., N = N., r = r., S = S., bycolumn = bycolumn., name = name., type = type.
-				, sim = sim., exp = exp., T = T.)
-		return(data)
+		object <- new("data", y = y, N = N, r = r, S = S, 
+                    bycolumn = bycolumn, name = name, type = type,
+				    sim = sim, exp = exp, T = T)
+		return(object)
 }
 
-setGeneric("plot", function(x, y, ...) standardGeneric("plot"))
-setMethod("plot", "data", function(x, y, ..., deparse.level=1) {
-				object <- x
-				lname <- length(object@name)
-				if(object@type == "continuous") {
-					if(object@bycolumn) {
-						if(object@r > 1) {
-							labels <- colnames(object@y)
-							par(mfcol = c(ceiling(object@r/2), 2), omi = c(0,0,0.3,0))
-							for(i in 1:object@r) {
-								xlab <- ifelse(is.null(labels), paste("var ", i), labels[i])
-								hist(object@y[,i], xlab = xlab, main = "", ...) 
-							}
-							if( lname > 0) title(main = object@name, outer = TRUE, cex = 1.5)
-							dev.new()
-							if(r > 2) {
-								par(mfcol=c(ceiling(choose(object@r,2)/2), 2), omi = c(0,0,0.3,0))
-							}
-							for(i in 1:(object@r - 1)) {
-								for(j in (i + 1):object@r) {
-									xlab <- ifelse(is.null(labels), paste("var ", i), 
-											labels[i])
-									ylab <- ifelse(is.null(labels), paste("var ", j), 
-											labels[j]) 
-									plot(object@y[,i], object@y[,j], xlab = xlab, 
-										ylab = ylab, ...)
-								}
-							}
-							if(r > 2) {
-								if( lname > 0 ) title(main = object@name, outer = TRUE, cex = 1.5)
-							}
-							else{ ## r == 2
-								title(main = object@name, outer = FALSE, cex = 1.5)
-							}
-							if(r > 2) {
-								dev.new()
-								main <- ifelse(lname == 0, "", object@name)
-								pairs(object@y, main = main, ...)
-							}
-									 
-						}
-						else {
-							main <- ifelse(lname == 0, "", object@name)
-							xlab <- ifelse(is.null(colnames(object@y)), "",  
-								colnames(object@y))
-							hist(object@y, main = main , xlab = xlab, ...)
-						}
-					}
-					else { ## by row 
-						if(object@r > 1) {
-                                                        labels <- rownames(object@y)
-                                                        par(mfcol = c(ceiling(object@r/2), 2), omi = c(0,0,0.3,0))
-                                                        for(i in 1:object@r) {
-                                                                xlab <- ifelse(is.null(labels), paste("var ", i), labels[i])
-                                                                hist(object@y[i,], xlab = xlab, main = "", ...)
-                                                        }
-                                                        if( lname > 0) title(main = object@name, outer = TRUE, cex = 1.5)
-                                                        dev.new()
-                                                        par(mfcol=c(ceiling(choose(object@r,2)/2), 2), omi = c(0,0,0.3,0))
-                                                        for(i in 1:(object@r - 1)) {
-                                                                for(j in (i + 1):object@r) {
-                                                                        xlab <- ifelse(is.null(labels), paste("var ", i),
-                                                                                        labels[i])
-                                                                        ylab <- ifelse(is.null(labels), paste("var ", j),
-                                                                                        labels[j])
-                                                                        plot(object@y[i,], object@y[j,], xlab = xlab,
-                                                                                ylab = ylab, ...)
-                                                                }
-                                                        }
-                                                        if( lname > 0 ) title(main = object@name, outer = TRUE, cex = 1.5)
-                                                        dev.new()
-                                                        main <- ifelse(lname == 0, "", object@name)
-                                                        pairs(t(object)@y, main = main, ...)
-
-
-                                                }
-                                                else {
-                                                        main <- ifelse(lname == 0, "", object@name)
-                                                        xlab <- ifelse(is.null(rownames(object@y)), "",
-                                                                colnames(object@y))
-                                                        hist(t(object@y), main = main , xlab = xlab, ...)
-						}
-					}
-							
-					
-				}
-				else { # if type is 'discrete'
-					if(object@bycolumn) {
-						if(object@r > 1) {
-							labels <- colnames(object@y)
-							par(mfcol = c(ceiling(object@r/2), 2), omi = c(0,0,0.3,0))
-							for(i in 1:object@r) {
-								xlab <- ifelse(is.null(labels), paste("var ", i), labels[i])
-								barplot(table(object@y[,i]), xlab = xlab, main = "", ...) 
-							}
-							if( lname > 0) title(main = object@name, outer = TRUE, cex = 1.5)
-							dev.new()
-							par(mfcol=c(ceiling(choose(object@r,2)/2), 2), omi = c(0,0,0.3,0))
-							for(i in 1:(object@r - 1)) {
-								for(j in (i + 1):ncol(object@y)) {
-									xlab <- ifelse(is.null(labels), paste("var ", i), 
-											labels[i])
-									ylab <- ifelse(is.null(labels), paste("var ", j), 
-											labels[j]) 
-									plot(object@y[,i], object@y[,j], xlab = xlab, 
-										ylab = ylab, ...)
-								}
-							}
-							if( lname > 0 ) title(main = object@name, outer = TRUE, cex = 1.5)
-							dev.new()
-							main <- ifelse(lname == 0, "", object@name)
-							pairs(object@y, main = main, ...)
-
-									 
-						}
-						else { ## univariate data
-							main <- ifelse(lname == 0, "", object@name)
-							xlab <- ifelse(is.null(colnames(object@y)), "",  
-								colnames(object@y))
-							barplot(table(object@y), main = main , xlab = xlab, ...)
-						}
-					}
-					else { ## ordered by row
-						if(object@r> 1) {
-                                                        labels <- rownames(object@y)
-                                                        par(mfcol = c(ceiling(object@r/2), 2), omi = c(0,0,0.3,0))
-                                                        for(i in 1:object@r) {
-                                                                xlab <- ifelse(is.null(labels), paste("var ", i), labels[i])
-                                                                barplot(table(t(object@y[i,])), xlab = xlab, main = "", ...)
-                                                        }
-                                                        if( lname > 0) title(main = object@name, outer = TRUE, cex = 1.5)
-                                                        dev.new()
-                                                        par(mfcol=c(ceiling(choose(object@r,2)/2), 2), omi = c(0,0,0.3,0))
-                                                        for(i in 1:(object@r - 1)) {
-                                                                for(j in (i + 1):object@r) {
-                                                                        xlab <- ifelse(is.null(labels), paste("var ", i),
-                                                                                        labels[i])
-                                                                        ylab <- ifelse(is.null(labels), paste("var ", j),
-                                                                                        labels[j])
-                                                                        plot(object@y[i,], object@y[j,], xlab = xlab,
-                                                                                ylab = ylab, ...)
-                                                                }
-                                                        }
-                                                        if( lname > 0 ) title(main = object@name, outer = TRUE, cex = 1.5)
-                                                        dev.new()
-                                                        main <- ifelse(lname == 0, "", object@r)
-                                                        pairs(t(object@y), main = main, ...)
-
-
-                                                }
-                                                else { ## univariate discrete data ordered by row
-                                                        main <- ifelse(lname == 0, "", object@name)
-                                                        xlab <- ifelse(is.null(rownames(object@y)), "",
-                                                                colnames(object@y))
-                                                        barplot(table(t(object@y)), main = main , xlab = xlab, ...)
-						}
-					}
-				}
-			}
+setMethod("plot", "data", 
+          function(x, y, ..., dev = TRUE){
+              if (x@bycolumn) {
+                  datam <- x@y
+              } else {
+                  datam <- t(x@y)
+              }
+              if (.check.grDevice() && dev) {
+                  dev.new(title = "Histograms")
+              }
+              if (x@type == "discrete") {
+                  ## univariate distributions ##
+                  ## only univariates are implemented ##
+                  barplot(table(datam), col = "gray65", 
+                          border = "white", cex = 0.7,
+                          cex.axis = 0.7, xlab = "", main = "",
+                          cex.lab = 0.7)
+                  if (!is.null(colnames(datam))) {
+                      col.names <- colnames(datam)
+                  } else {
+                      col.names <- c("")
+                  }
+                  mtext(side = 1, col.names, cex = 0.7,
+                        line = 3)     
+              } else { ## continuous
+                  if (x@r == 1) {
+                      .symmetric.Hist(datam, colnames(datam))
+                  } else if (x@r == 2) {        
+                      .symmetric.Hist(datam, colnames(datam))
+                      if (.check.grDevice() && dev) {
+                          dev.new(title = "Contour plot")
+                      }
+                      par(mfrow = c(1, 2), mar = c(2, 2, 2, 3),
+                          oma = c(4, 5, 1, 5))
+                      plot(datam[, 1], datam[, 2], col = "gray47",
+                           cex = 0.7, cex.axis = 0.7,
+                           pch = 20, xlab = "", ylab = "", 
+                           main = "")
+                      mtext(side = 1, colnames(datam)[1],
+                            cex = 0.7, line = 3)
+                      mtext(side = 2, colnames(datam)[2],
+                            cex = 0.7, line = 3)
+                      d <- bkde2D(datam, 
+                                  bandwidth = c(sd(datam[, 1]), 
+                                                sd(datam[, 2])))
+                      contour(d$x1, d$x2, d$fhat, col = "gray47",
+                              cex = 0.7, cex.axis = 0.7, 
+                              xlab = "", ylab = "")
+                      mtext(side = 1, colnames(datam)[1],
+                            cex = 0.7, line = 3)
+                      mtext(side = 2, colnames(datam)[2],
+                            cex = 0.7, line = 3)
+                      if (.check.grDevice() && dev) {
+                          dev.new("Perspective plot")
+                      }
+                      if (!is.null(colnames(datam))) {
+                          col.names <- colnames(datam)
+                      } else {
+                          col.names <- c("", "")
+                      }
+                      persp(d$x1, d$x2, d$fhat, main = "",
+                            xlab = col.names[1], ylab = col.names[2], 
+                            zlab = "", col = "gray65", 
+                            border = "gray47", theta = 120, phi = 30, 
+                            cex = 0.7, cex.axis = 0.7, cex.lab = 0.7, 
+                            ticktype = "detailed", cex.axis = 0.7)                   
+                  } else { ## multivariate distribution
+                      .symmetric.Hist(datam, colnames(datam))
+                      if (.check.grDevice() && dev) {
+                          dev.new(title = "Pairs")
+                      }
+                      pairs(datam, col = "gray47", pch = 20, 
+                            cex = 0.7, cex.axis = 0.7, cex.labels = 1.3)                      
+                  }
+              }
+          }
 )
 
 setMethod("show", "data", 

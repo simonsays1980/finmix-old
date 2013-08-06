@@ -16,54 +16,53 @@
 # along with Rcpp.  If not, see <http://www.gnu.org/licenses/>.
 
 setClass("model",
-	representation(
-		dist="character",
-		r = "integer",
-		K = "integer",
-		weight = "matrix",
-		par = "list",
-		indicmod = "character",
-		indicfix = "logical",
-		T = "matrix",
-		.cache = "environment"
-	),
-	validity = function(object) {
-				choices <- c("normal", "normult", "exponential", "student", 
-					"studmult", "poisson", "cond.poisson", "binomial")
-				univ.choices <-  c("normal", "exponential", "student", 
-					"poisson", "cond.poisson", "binomial")	
-				multiv.choices <- c("normult", "studmult")
-				indicmod.choices <- c("multinomial")
-				if(!(object@dist %in% choices)) 
-					return("[Error] Unknown distribution.")
-				if(object@K <= 0) 
-					return("[Error] Number of components 'K' must be a positive integer.")
-				if(object@indicmod != "multinomial")
-					return("[Error] Distribution of the indicator model 'indicmod' must be Multinomial.")
-				if(object@K != ncol(object@weight))
-					return("[Error] Dimension of weight does not match number of components.")
-				# else: OK ##
-
-				TRUE
-			}
-)
-
-## Initializer ##
-setMethod("initialize", "model", function(.Object, ..., .cache = new.env()){
-					callNextMethod(.Object, .cache = .cache, ...)				
-				}
+         representation(dist        ="character",
+		                r           = "integer",
+		                K           = "integer",
+		                weight      = "matrix",
+		                par         = "list",
+		                indicmod    = "character",
+		                indicfix    = "logical",
+		                T           = "matrix"),
+         validity = function(object) {
+             choices <- c("normal", "normult", "exponential", 
+                          "student", "studmult", "poisson", 
+                          "cond.poisson", "binomial")
+             univ.choices <-  c("normal", "exponential", "student", 
+                                "poisson", "cond.poisson", "binomial")	
+			 multiv.choices <- c("normult", "studmult")
+			 indicmod.choices <- c("multinomial")
+			 if (!(object@dist %in% choices)) {
+                 stop("Unknown distribution.")
+             }
+			 if (object@K <= 0) {					
+                 stop("Number of components 'K' must be a positive integer.")
+             }
+			 if (object@indicmod != "multinomial") {
+                 stop("Distribution of the indicator model 'indicmod' must be 
+                      'multinomial'.")
+             }
+             if (object@K != ncol(object@weight)) {
+                 stop("Dimension of slot 'weight' does not match number of 
+                      components.")
+             }
+		     ## else: OK ##
+			 TRUE
+		 }
 )
 
 ## Constructor for class 'model' ##
-"model" <- function(dist. = "normal", r. = as.integer(1), K. = as.integer(1), weight. = matrix(), 
-                    par. = list(), indicmod. = "multinomial", 
-           			indicfix. = FALSE, T. = matrix(1)) {
-    if(K. > 1 && all(is.na(weight.))) {
-	    weight. <- matrix(1/K., nrow = 1, ncol = K.)
+"model" <- function(dist = "normal", r = as.integer(1), 
+                    K = as.integer(1), weight = matrix(), 
+                    par = list(), indicmod = "multinomial", 
+           			indicfix = FALSE, T = matrix(1)) {
+    if(K > 1 && all(is.na(weight))) {
+	    weight <- matrix(1/K, nrow = 1, ncol = K)
 	}
-	model <- new("model", dist = dist., r = as.integer(r.), K = as.integer(K.), weight = weight., par = par., 
-				indicmod = indicmod.,indicfix = indicfix., T = T.)
-    return(model)
+	object <- new("model", dist = dist, r = as.integer(r), 
+                 K = as.integer(K), weight = weight, par = par, 
+				 indicmod = indicmod, indicfix = indicfix, T = T)
+    return(object)
 }
 
 setMethod("plot", "model", function(x, y, ..., dis.grid = 1:10, persp.grid.x = seq(-10, 10, length = 40), 

@@ -77,7 +77,7 @@ setMethod("show", "mcmcoutputpermfixpost",
 )
 
 setMethod("plot", signature(x = "mcmcoutputpermfixpost", 
-	y = "ANY"), function(x, yi = TRUE, ...) {
+	y = "ANY"), function(x, y = TRUE, ...) {
 	if (x@model@dist == "poisson") {
 		K <- x@model@K
 		trace.n <- K

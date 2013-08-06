@@ -106,7 +106,7 @@ setMethod("show", "mcmcoutputpermbase",
 )
 
 setMethod("plot", signature(x = "mcmcoutputpermbase", 
-	y = "ANY"), function(x, yi = TRUE, ...) {
+	y = "ANY"), function(x, y = TRUE, ...) {
 	if (x@model@dist == "poisson") {
 		K <- x@model@K
 		trace.n <- K * 2 - 1

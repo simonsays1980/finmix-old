@@ -2,6 +2,11 @@ useDynLib(finmix)
 exportPattern("^[[:alpha:]]+")
 
 importFrom(graphics, barplot)
+importFrom(graphics, hist)
+importFrom(graphics, persp)
+importFrom(graphics, contour)
+importFrom(graphics, pairs)
+importFrom(KernSmooth, bkde2D)
 importFrom(mnormt, dmnorm)
 importFrom(mnormt, dmt)
 export( ## user-defined constructors
@@ -58,7 +63,6 @@ exportMethods( ## name of the generic, as with other methods
         "setIndicfix<-",
         "getT",
         "setT<-",
-        "plot",
 
         ## 'modelmoments' class ##
         "getMean",

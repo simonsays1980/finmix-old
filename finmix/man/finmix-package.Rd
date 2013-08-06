@@ -16,16 +16,15 @@ Package: \tab finmix\cr
 Type: \tab Package\cr
 Version: \tab 0.1\cr
 Date: \tab 2013-07-05\cr
-License: \tab What license is it under?\cr
+License: \tab GPL >= 3\cr
 }
 ~~ An overview of how to use the package, including the most important ~~
 ~~ functions ~~
 }
 \author{
-Who wrote it
+Lars Simon Zehnder
 
-Maintainer: Who to complain to <yourfault@somewhere.net>
-~~ The author and/or maintainer of the package ~~
+Maintainer: Lars Simon Zehnder <simon.zehnder@gmail.com>
 }
 \references{
 ~~ Literature or other references for background information ~~
@@ -33,9 +32,13 @@ Maintainer: Who to complain to <yourfault@somewhere.net>
 ~~ Optionally other standard keywords, one per line, from file KEYWORDS in ~~
 ~~ the R documentation directory ~~
 \keyword{ package }
+
 \seealso{
 ~~ Optional links to other man pages, e.g. ~~
 ~~ \code{\link[<pkg>:<pkg>-package]{<pkg>}} ~~
+}
+\usage{
+data(y. = matrix(), )
 }
 \examples{
 }

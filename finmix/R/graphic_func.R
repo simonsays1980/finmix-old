@@ -20,3 +20,106 @@
 	any(names(formals(getOption("device")))
 		== "title")
 }
+
+".symmetric.Hist" <- function(y, lab.names) {
+    r <- NCOL(y)
+    if (r == 1) {
+        .comb.Hist(y, lab.names)
+    } else if (r == 2) {
+        par(mfrow = c(1, 2), mar = c(2, 2, 2, 2),
+            oma = c(4, 5, 1, 5))
+        for (i in 1:2) {
+            .comb.Hist(y[, i], lab.names[i])
+        }
+    } else if (r == 3) {
+        par(mfrow = c(1, 3), mar = c(2, 2, 2, 2),
+            oma = c(4, 5, 1, 5))
+        for (i in 1:r) {
+            .comb.Hist(y[, i], lab.names[i])
+        }
+    } else if (r > 3 && r < 17 && sqrt(r) %% 1 == 0) {
+        par(mfrow = c(sqrt(r), sqrt(r)), 
+            mar = c(2, 2, 2, 2), 
+            oma = c(4, 5, 1, 5))
+        for (i in 1:r) {
+            .comb.Hist(y[, i], lab.names[i])
+        }
+    } else {
+        if (r == 5) {
+            par(mfrow = c(2, 3),
+                mar = c(2, 2, 2, 2),
+                oma = c(4, 5, 1, 5))
+            for(i in 1:4) {
+                .comb.Hist(y[, i], lab.names[i])
+            }
+            plot.new()
+            .comb.Hist(y[, r], lab.names[r])
+        } else if (r == 6) {
+            par(mfrow = c(2, 3),
+                mar = c(2, 2, 2, 2),
+                oma = c(4, 5, 1, 5))
+            for (i in 1:r) {
+                .comb.Hist(y[, i], lab.names[i])
+            }
+        } else {
+            if (r %% 2 == 0) {
+                ## check how many rows can be completely 
+                ## filled 
+                n <- r %/% 4
+                par(mfrow = c(n, 4),
+                    mar = c(2, 2, 2, 2),
+                    oma = c(4, 5, 1, 5))
+                for(i in 1:(n * 4)) {
+                    .comb.Hist(y[, i], lab.names[i])
+                }
+                ## if some rows cannot be completely
+                ## filled, fill them symmetrically
+                ## there can only be two left:
+                .comb.Hist(y[, r - 1], lab.names[r - 1])
+                plot.new()
+                .comb.Hist(y[, r], lab.names[r])
+            } else {
+                n <- r %/% 5
+                par(mfrow = c(n, 5),
+                    mar = c(2, 2, 2, 2),
+                    oma = c(4, 5, 1, 5))
+                for(i in 1:(n * 5)) {
+                    .comb.Hist(y[, i], lab.names[i])
+                }
+                ## if some rows cannot be completely,
+                ## filled, fill them symmetrically
+                ## either there are two left or four
+                ## left
+                if (r %% 5 == 2) {
+                    plot.new()
+                    .comb.Hist(y[, r - 1], lab.names[r - 1])
+                    plot.new()
+                    .comb.Hist(y[, r], lab.names[r])
+                    plot.new()
+                } else {
+                    .comb.Hist(y[, r - 3], lab.names[r - 3])
+                    .comb.Hist(y[, r - 2], lab.names[r - 2])
+                    plot.new()
+                    .comb.Hist(y[, r - 1], lab.names[r - 1])
+                    .comb.Hist(y[, r], lab.names[r])
+                }
+            }
+        }
+    }
+}
+
+
+        
+
+
+
+".comb.Hist" <- function(y, lab.name) {
+    hist(y, col = "gray65", 
+         border = "white", cex = 0.7,
+         cex.axis = 0.7, freq = TRUE,
+         xlab = "", main = "", cex.lab = 0.7)
+    rug(y, col = "gray47")
+    mtext(side = 1, lab.name, 
+          cex = 0.7, line = 3)
+}
+

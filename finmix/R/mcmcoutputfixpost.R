@@ -43,7 +43,7 @@ setMethod("show", "mcmcoutputfixpost", function(object) {
 })
 
 setMethod("plot", signature(x = "mcmcoutputfixpost", 
-	y = "ANY"), function(x, yi = TRUE, ...) {
+	y = "ANY"), function(x, y = TRUE, ...) {
 	if (x@model@dist == "poisson") {
 		K <- x@model@K
 		trace.n <- K
