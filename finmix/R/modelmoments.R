@@ -15,51 +15,57 @@
 # You should have received a copy of the GNU General Public License
 # along with Rcpp.  If not, see <http://www.gnu.org/licenses/>.
 
-setClass("modelmoments", 
-	representation(
-	mean = "matrix",
-	var = "matrix"
-	),
-	validity = function(object) {
-		## else: OK
-		TRUE
-	}
+setClass("modelmoments",
+         representation(mean    = "vector",
+                        var     = "array",
+                        model   = "model"
+                        ),
+         validity = function(object) {
+             ## else: OK
+		     TRUE
+         },
+         prototype(
+                   mean     = vector(),
+                   var      = array(),
+                   model    = model()
+                   )
 )
 
-"modelmoments" <- function(model, J. = 4) {
-		dist <- model@dist
-		if(dist == "normal" || dist == "normult" ) {
-			
-			nsmodelmoments <- nsmodelmoments(model, J.)
-			return(nsmodelmoments)
-		}
-		else if(dist == "student" || dist == "studmult") {
-			return("[Warning] Function 'modelmoments' not implemented for Student mixtures.")
-		}
-		else if(dist == "poisson") {
-			
-			dmodelmoments <- dmodelmoments(model, J.)
-			return(dmodelmoments)
-		}
-		else if(dist == "binomial") {
-			return("[Warning] Function 'modelmoments' not implemented for binomial mixtures.")
-		}
-		else if(dist == "exponential") {
-			return("[Warning] Function 'modelmoments' not implemented for exponential mixtures")
-		}
-		
+"modelmoments" <- function(model) {
+    dist <- model@dist
+    if (dist == "normult") {
+        object <- .normultmodelmoments(model = model)
+    } else if (dist == "studmult") {
+        object <- .studmultmodelmoments(model = model)
+    } else if (dist == "student") {
+        object <- .studentmodelmoments(model = model)
+    } else if (dist == "normal") {
+        object <- .normalmodelmoments(model = model)
+    } else if (dist == "exponential") {
+        object <- .exponentialmodelmoments(model = model)
+    }
+    return(object)
 }
 
 ## Getters ##
 setGeneric("getMean", function(object) standardGeneric("getMean"))
-setMethod("getMean", "modelmoments", function(object) {
-						return(object@mean)
-					}		
+setMethod("getMean", "modelmoments", 
+          function(object) {
+              return(object@mean)
+          }		
 )
 setGeneric("getVar", function(object) standardGeneric("getVar"))
-setMethod("getVar", "modelmoments", function(object) {
-						return(object@var)
-					}
+setMethod("getVar", "modelmoments", 
+          function(object) {
+              return(object@var)
+          }
 )
 
-## Setters are not provided as users should not manipulate a 'modelmoments' object ##
+setGeneric("getModel", function(object) standardGeneric("getModel"))
+setMethod("getModel", "modelmoments",
+          function(object) {
+              return(object@model)
+          }
+)
+## Setters are not provided as users are not intended to manipulate ##
+## this object ##

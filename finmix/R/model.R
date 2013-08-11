@@ -22,8 +22,7 @@ setClass("model",
 		                weight      = "matrix",
 		                par         = "list",
 		                indicmod    = "character",
-		                indicfix    = "logical",
-		                T           = "matrix"),
+		                indicfix    = "logical"),
          validity = function(object) {
              choices <- c("normal", "normult", "exponential", 
                           "student", "studmult", "poisson", 
@@ -42,7 +41,7 @@ setClass("model",
                  stop("Distribution of the indicator model 'indicmod' must be 
                       'multinomial'.")
              }
-             if (object@K != ncol(object@weight)) {
+             if (object@K != 1 && object@K != ncol(object@weight)) {
                  stop("Dimension of slot 'weight' does not match number of 
                       components.")
              }
@@ -55,13 +54,13 @@ setClass("model",
 "model" <- function(dist = "normal", r = as.integer(1), 
                     K = as.integer(1), weight = matrix(), 
                     par = list(), indicmod = "multinomial", 
-           			indicfix = FALSE, T = matrix(1)) {
+           			indicfix = FALSE) {
     if(K > 1 && all(is.na(weight))) {
 	    weight <- matrix(1/K, nrow = 1, ncol = K)
 	}
 	object <- new("model", dist = dist, r = as.integer(r), 
                  K = as.integer(K), weight = weight, par = par, 
-				 indicmod = indicmod, indicfix = indicfix, T = T)
+				 indicmod = indicmod, indicfix = indicfix)
     return(object)
 }
 
@@ -231,20 +230,20 @@ setMethod("plot", "model", function(x, y, ..., dis.grid = 1:10, persp.grid.x = s
 					}
 					else if(object@dist == "binomial") {
 						main <- paste("Binomial Mixture K=", object@K, sep="")
-						if(length(object@T) != 1)
+						if(length(object@par$T) != 1)
 							return("[Error] Plotting a binomial distribution with differing repetitions is not possible.")
 						fun <- function(y) {
 							fun.value <- 0
 							for(i in 1:object@K) {
 								fun.value <- fun.value + object@weight[i] * dbinom(y, p =
-									object@par$p[i], size = object@T[1])
+									object@par$p[i], size = object@par$T[1])
 							}
 		
 							return(fun.value)
 						}
-						y <- 1:object@T[1]
+						y <- 1:object@par$T[1]
 						y.fun <- fun(y)
-						names.grid <- as.character(1:object@T[1])
+						names.grid <- as.character(1:object@par$T[1])
 						barplot(y.fun, main = main, names.arg = names.grid, ...)
 					}
 				}
@@ -252,65 +251,44 @@ setMethod("plot", "model", function(x, y, ..., dis.grid = 1:10, persp.grid.x = s
 
 ## Marginal Mixture ##
 setGeneric("mixturemar", function(object, J) standardGeneric("mixturemar"))
-setMethod("mixturemar", "model", function(object, J) {
-					if(object@dist == "normult") {	
-						dist <- ifelse(length(J) == 1, "normal", "normult")
-						r <- length(J)
-						K <- object@K
-						weight <- object@weight
-						mu <- array(object@par$mu[J,1:K], dim = c(r, K))
-						if(r == 1) {
-							sigma <- array(object@par$sigma[J, J, 1:K], dim =c(r, K))
-						}
-						else {
-							sigma <- array(object@par$sigma[J, J, 1:K], dim = c(r, r, K))
-						}
-						par <- list(mu = mu, sigma = sigma)
-						indicmod <- "multinomial"
-						indicfix <- TRUE
-						T <- matrix()
-						margin.model <- new("model", dist = dist, r = r, K = K, weight = weight, 
-									par = par, indicmod = indicmod, 
-									indicfix = indicfix, T = T)
-						valiobject(margin.model)
-						return(margin.model)
-					}
-					else if(object@dist == "studmult") {
-						dist <- ifelse(length(J) == 1, "student", "studmult")
-						r <- length(J)
-						K <- object@K
-						weight <- object@weight
-						if(r == 1) {
-							df <- object@par$df * matrix(object@par$sigma[J,J,1:K], nrow = 1,
-											 ncol = K)
-						}
-						else {
-							df <- object@par$df
-						}
-						mu <- array(object@par$mu[J,1:K], dim = c(r, K))
-						if(r > 1) {
-							sigma <- array(object@par$sigma[J, J, 1:K], dim =c(r, r, K))
-						}
-						if(r == 1) {
-							par <- list(df = df, ncp = mu)
-						}
-						else  {
-							par <- list(df = df, mu = mu, sigma = sigma)
-						}
-						indicmod <- "multinomial"
-						indicfix <- TRUE
-						T <- matrix()
-						margin.model <- new("model", dist = dist, r = r, K = K, weight = weight, 
-									par = par, indicmod = indicmod,
-									indicfix = indicfix, T = T)
-						valiobject(margin.model)
-						return(margin.model)
-
-					}
-					else {
-						return("[Error]: Marginal distribution can only be obtained from multivariate distribution.")
-					}
-				}
+setMethod("mixturemar", "model", 
+          function(object, J) {
+              if (object@dist == "normult") {	
+                  dist <- ifelse(length(J) == 1, "normal", "normult")
+                  r             <- length(J)
+                  K             <- object@K
+                  weight        <- object@weight
+                  mu            <- object@par$mu[J, ]
+                  sigma         <- object@par$sigma[J, J, ]
+                  par           <- list(mu = mu, sigma = sigma)
+                  indicmod      <- "multinomial"
+                  indicfix      <- TRUE
+                  margin.model  <- new("model", dist = dist, r = r, K = K, weight = weight, 
+                                       par = par, indicmod = indicmod, 
+                                       indicfix = indicfix)
+                  validObject(margin.model)
+                  return(margin.model)
+              } else if (object@dist == "studmult") {
+                  dist <- ifelse(length(J) == 1, "student", "studmult")
+                  r             <- length(J)
+                  K             <- object@K
+                  weight        <- object@weight
+                  mu            <- object@par$mu[J, ]
+                  sigma         <- object@par$sigma[J, J, ] 
+                  df            <- object@par$df
+                  par           <- list(mu = mu, sigma = sigma, df = df)
+                  indicmod      <- "multinomial"
+                  indicfix      <- TRUE
+                  margin.model  <- new("model", dist = dist, r = r, K = K, weight = weight, 
+                                       par = par, indicmod = indicmod,
+                                       indicfix = indicfix)
+                  validObject(margin.model)
+                  return(margin.model)
+              } else {
+                  stop("The marginal distribution can only be obtained from 
+                       multivariate distribution.")
+              }
+          }
 )
 	
 ## Show ##
@@ -321,22 +299,15 @@ setMethod("show", "model",
               cat("     dist        :", object@dist, "\n")
               cat("     r           :", object@r, "\n")
               cat("     K           :", object@K, "\n")
-              cat("     weight      :", 
-                  paste(dim(object@weight), collapse = "x"), "\n")
               if (!all(is.na(object@par))) {
-                  cat("     par         : List of",
-                      length(object@par), ",\n")
+                 cat("     weight      :", 
+                      paste(dim(object@weight), collapse = "x"), 
+                      "\n")
+                 cat("     par         : List of",
+                      length(object@par), "\n")
               }
               cat("     indicmod    :", object@indicmod, "\n")
               cat("     indicfix    :", object@indicfix, "\n")
-              if (object@dist == 'binomial') {
-                  if(length(object@T) > 1) {
-                      cat("     T       :",
-                          paste(dim(object@T), collapse = "x"), "\n")
-                  } else {
-                      cat("     T       :", object@T, "\n")
-                  }
-              }				
           }
 )
 ## Getters ##
@@ -375,11 +346,7 @@ setMethod("getIndicfix", "model", function(object) {
 						return(object@indicfix)
 					}
 )
-setGeneric("getT", function(object) standardGeneric("getT"))
-setMethod("getT", "model", function(object) {
-					return(object@T)
-				}
-)
+
 ## Setters ##
 setGeneric("setDist<-", function(object, value) standardGeneric("setDist<-"))
 setReplaceMethod("setDist", "model", function(object, value) {
@@ -432,10 +399,4 @@ setReplaceMethod("setIndicfix", "model", function(object, value) {
 							return(object)
 						}
 )
-setGeneric("setT<-", function(object, value) standardGeneric("setT<-"))
-setReplaceMethod("setT", "model", function(object, value) {
-						object@T <- value
-						validObject(object)
-						return(object)
-					}
-)
+

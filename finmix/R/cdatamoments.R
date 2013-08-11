@@ -146,6 +146,7 @@ setMethod("getKurtosis", "cdatamoments", function(object) {
 					}
 )
 ## Generic set in 'nsmodelmoments' class ##
+setGeneric("getCorr", function(object) standardGeneric("getCorr"))
 setMethod("getCorr", "cdatamoments", function(object) {
 						return(object@corr)
 					}

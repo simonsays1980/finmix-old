@@ -15,40 +15,39 @@
 # You should have received a copy of the GNU General Public License
 # along with Rcpp.  If not, see <http://www.gnu.org/licenses/>.
 
-.dmodelmoments <- setClass("dmodelmoments", 
+.cmodelmoments <- setClass("cmodelmoments", 
                            representation(
-                                          over            = "numeric",
-                                          factorial       = "array",
-                                          zero            = "numeric"
+                                          higher      = "array",
+                                          skewness    = "vector",
+                                          kurtosis    = "vector"
                                           ),
-                           contains = c("modelmoments"),	
+                           contains = c("modelmoments"),
                            validity = function(object) {
                                ## else: OK
                                TRUE
                            },
                            prototype(
-                                     over       = numeric(),
-                                     factorial  = array(),
-                                     zero       = numeric()
+                                     higher     = array(),
+                                     skewness   = vector(),
+                                     kurtosis   = vector()
                                      )
 )
 
 ## Getters ##
-setGeneric("getOver", function(.Object) standardGeneric("getOver"))
-setMethod("getOver", "dmodelmoments", function(.Object) {
-						return(.Object@over)
-					}
-)
-setGeneric("getFactorial", function(.Object) standardGeneric("getFactorial"))
-setMethod("getFactorial", "dmodelmoments", function(.Object) {
-							return(.Object@factorial)
+setGeneric("getHigher", function(object) standardGeneric("getHigher"))
+setMethod("getHigher", "cmodelmoments", function(object) {
+							return(object@higher)
 						}
 )
-setGeneric("getZero", function(.Object) standardGeneric("getZero"))
-setMethod("getZero", "dmodelmoments", function(.Object) {
-						return(.Object@zero)
-					}
+setGeneric("getSkewness", function(object) standardGeneric("getSkewness"))
+setMethod("getSkewness", "cmodelmoments", function(object) {
+							return(object@skewness) 
+						}
 )
-
+setGeneric("getKurtosis", function(object) standardGeneric("getKurtosis"))
+setMethod("getKurtosis", "cmodelmoments", function(object) {
+							return(object@kurtosis)
+						}
+)
 ## Setters ##
-## No setters as users should not manipulate a 'dmodelmoments' object ##
+## No setters as users should not manipulate a 'nsmodelmoments' object ##

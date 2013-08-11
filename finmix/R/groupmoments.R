@@ -49,8 +49,7 @@ setMethod("initialize", "groupmoments",
           }
 )
 
-## calculates all moments ##
-setGeneric("generateMoments", function(object) standardGeneric("generateMoments"))
+## Generic set in 'dmodelmoments.R' ##
 setMethod("generateMoments", "groupmoments",
           function(object) {
               if(all(is.na(object@data@S))) {

@@ -108,18 +108,13 @@
     }
 }
 
-
-        
-
-
-
 ".comb.Hist" <- function(y, lab.name) {
     hist(y, col = "gray65", 
          border = "white", cex = 0.7,
          cex.axis = 0.7, freq = TRUE,
          xlab = "", main = "", cex.lab = 0.7)
     rug(y, col = "gray47")
-    mtext(side = 1, lab.name, 
+    mtext(side = 1, do.call(bquote,lab.name), 
           cex = 0.7, line = 3)
 }
 

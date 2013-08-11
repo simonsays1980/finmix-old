@@ -31,7 +31,6 @@ class FinmixModel {
 	public:
 		Rcpp::List par;
 		arma::rowvec weight;
-		arma::ivec T;
 	
 		bool indicFix; 
 		unsigned int K;

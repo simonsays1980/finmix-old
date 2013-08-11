@@ -25,22 +25,26 @@ setClass("mcmcoutputfixhier",
 	}
 )
 
-setMethod("show", "mcmcoutputfixhier", function(object) {
-    cat("Object 'mcmcoutputfixhier\n")
-	cat("	class		:", class(object), "\n")
-	cat("	M		:", object@M, "\n")
-	cat("	ranperm		:", object@ranperm, "\n")
-	cat("	par		: List of", 
-		length(object@par), "\n")
-	cat("	log		: List of",
-		length(object@par), "\n")
-	cat("	hyper		: List of",
-		length(object@hyper), "\n")
-	cat("	model		: Object of class",
-		class(object@model), "\n")
-	cat("	prior		: Object of class",
-		class(object@prior), "\n")
-})
+setMethod("show", "mcmcoutputfixhier", 
+          function(object) {
+              cat("Object 'mcmcoutput'\n")
+              cat("     class       :", class(object), 
+                  "\n")
+              cat("     M           :", object@M, "\n")
+              cat("     ranperm     :", object@ranperm, 
+                  "\n")
+              cat("     par         : List of",
+                  length(object@par), "\n")
+              cat("     log         : List of",
+                  length(object@log), "\n")
+              cat("     hyper       : List of",
+                  length(object@hyper), "\n")
+              cat("     model       : Object of class",
+                  class(object@model), "\n")
+              cat("     prior       : Object of class",
+                  class(object@prior), "\n")
+          }
+)
 
 setMethod("plot", signature(x = "mcmcoutputfixhier", 
 	y = "ANY"), function(x, y = TRUE, ...) {
@@ -98,149 +102,21 @@ setMethod("plotHist", signature(x = "mcmcoutputfixhier", dev = "ANY"),
 		if (.check.grDevice() && dev) {
 			dev.new(title = "Histograms")
 		}
-		lambda <- x@par$lambda
-        b <- x@hyper$b
-	    if (K + 1 < 4) {
-			par(mfrow = c(1, K + 1), mar = c(2, 2, 2, 2),
-				oma = c(4, 5, 1, 5))
-			for (k in 1:K) {
-				hist(lambda[, k], col = "gray65",
-					border = "white", cex = 0.7,
-					cex.axis = 0.7, freq = TRUE,
-					xlab = "", main = "")
-				rug(lambda[, k], col = "gray47")
-				mtext(side = 1, bquote(lambda[k = .(k)]),
-					cex = 0.7, line = 3)
-			}
-            hist(b, col = "gray65", border = "white",
-                cex = 0.7, cex.axis = 0.7, freq  = TRUE,
-                xlab = "", main ="")
-            rug(b, col = "gray47")
-            mtext(side = 1, "b", line = 3)
-		}
-		else if (K + 1> 3 && K + 1 < 17 && sqrt(K + 1)%%1 == 0) {
-			par(mfrow = c(sqrt(K + 1), sqrt(K + 1)),
-				mar = c(2, 2, 2, 2), 
-				oma = c(4, 5, 1, 5))
-			for(k in 1:K) {
-				hist(lambda[, k], col = "gray65", 
-					border = "white", cex = 0.7,
-					cex.axis = 0.7, freq = TRUE,
-					xlab = "", main = "")
-				rug(lambda[, k], col = "gray47")
-				mtext(side = 1, bquote(lambda[k = .(k)]),
-					cex = 0.7, line = 3)
-			}
-            hist(b, col = "gray65", border = "white",
-                cex = 0.7, cex.axis = 0.7, freq  = TRUE,
-                xlab = "", main ="")
-            rug(b, col = "gray47")
-            mtext(side = 1, "b", line = 3)
-		}   
-		else {
-			if((K + 1) %% 2 == 0) {
-				## check how many rows can be completely 
-				## filled
-				n <- (K + 1) %/% 4
-				par(mfrow = c(n, 4), mar = c(2, 2, 2, 2),
-				oma = c(4, 5, 1, 5))
-				for (k in 1:(n * 4)) {
-                    if (k == K + 1) {
-                         hist(b, col = "gray65", border = "white",
-                            cex = 0.7, cex.axis = 0.7, freq  = TRUE,
-                            xlab = "", main ="")
-                         rug(b, col = "gray47")
-                         mtext(side = 1, "b", line = 3)
-                    } else {
-					    hist(lambda[, k], col = "gray65", 
-						    border = "white", cex = 0.7,
-					    	cex.axis = 0.7, freq = TRUE,
-					    	xlab = "", main = "")
-					    rug(lambda[, k], col = "gray47")
-					    mtext(side = 1, bquote(lambda[k =.(k)]),
-					    	cex = 0.7, line = 3)
-                    }
-				}
-				## if some rows cannot be completely filled
-				## fill them symmetrically
-				if ((K + 1) %% 4 != 0) {
-					## there can be only two left
-					hist(lambda[, K], col = "gray65",
-						border = "white", cex = 0.7,
-						cex.axis = 0.7, freq = TRUE,
-						xlab = "", main = "")
-					rug(lambda[, K], col = "gray47")
-					mtext(side = 1, bquote(lambda[K = 
-						.(K)]), cex = 0.7, line = 3)
-					replicate(2, plot.new())
-					hist(b, col = "gray65",
-						border = "white", cex = 0.7,
-						cex.axis = 0.7, freq = TRUE,
-						xlab = "", main = "")
-					rug(b, col = "gray47")
-					mtext(side = 1, "b", line = 3)
-				}
-				
-			} else {
-				n <- (K + 1) %/% 5
-				par(mfrow = c(n, 5), mar = c(2, 2, 2, 2),
-					oma = c(4, 5, 1, 5))
-				for (k in 1:(n * 5)) {
-                    if (k == (K + 1)) {
-                         hist(b, col = "gray65", border = "white",
-                            cex = 0.7, cex.axis = 0.7, freq  = TRUE,
-                            xlab = "", main ="")
-                         rug(b, col = "gray47")
-                         mtext(side = 1, "b", line = 3)
-                    } else {
-    					hist(lambda[, k], col = "gray65",
-    						border = "white", cex = 0.7,
-    						cex.axis = 0.7, freq = TRUE,
-    						xlab = "", main = "")
-    					rug(lambda[, k], col = "gray47")
-    					mtext(side = 1, bquote(lambda[k = 
-    						.(k)]), line = 3)
-                    }
-				}
-				if ((K + 1) %% 5 != 1) {
-					## put the last one in the middle
-					replicate(2, plot.new())
-					hist(b, col = "gray65",
-						border = "white", cex = 0.7,
-						cex.axis = 0.7, freq = TRUE,
-						xlab = "", main = "")
-					rug(b, col = "gray47")
-					mtext(side = 1, "b", line = 3)
-					replicate(2, plot.new())		
-				}
-				else if((K + 1) %% 5 != 3) {
-					hist(lambda[, K - 1], col = "gray65",
-						border = "white", cex = 0.7,
-						cex.axis = 0.7, freq = TRUE,
-						xlab = "", main = "")
-					rug(lambda[, K - 1], col = "gray47")
-                    mtext(side = 1, bquote(lambda[k = 
-						.(K - 1)]), line = 3)
-					plot.new()
-					hist(lambda[, K], col = "gray65",
-						border = "white", cex = 0.7,
-						cex.axis = 0.7, freq = TRUE,
-						xlab = "", main = "")
-					rug(lambda[, K], col = "gray47")	
-					mtext(side = 1, bquote(lambda[k = 
-						.(K)]), line = 3)
-					plot.new()
-					hist(b, col = "gray65",
-						border = "white", cex = 0.7,
-						cex.axis = 0.7, freq = TRUE,
-						xlab = "", main = "")
-					rug(b, col = "gray47")
-					mtext(side = 1, "b", line = 3)
-				}
-			}
-		}
+		lambda  <- x@par$lambda
+        b       <- x@hyper$b
+        vars    <- cbind(lambda, b)
+        if (K == 1) {
+            lab.names <- list(bquote(lambda), "b")
+            .symmetric.Hist(vars, lab.names)
+        } else {
+            lab.names <- vector("list", K + 1)
+            for (k in 1:K) {
+                lab.names[[k]] <- bquote(lambda[.(k)])
+            }
+            lab.names[[K + 1]] <- "b"
+            .symmetric.Hist(vars, lab.names)
+        }
 	}
-	
 })
 
 ## Generic defined int 'mcmcoutputfix.R' ##

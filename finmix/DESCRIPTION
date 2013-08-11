@@ -14,14 +14,19 @@ Suggests: RUnit
 LinkingTo: Rcpp, RcppArmadillo
 Collate:
     RcppExports.R
-	graphic_func.R 
-	distributions.R
-        model.R
-        mixturemoments.R
-        modelmoments.R
-        nsmodelmoments.R
-        dmodelmoments.R
-        data.R
+    graphic_func.R 
+    distributions.R
+    model.R
+    mixturemoments.R
+    modelmoments.R
+    cmodelmoments.R
+    dmodelmoments.R
+    normultmodelmoments.R
+    studmultmodelmoments.R
+    studentmodelmoments.R
+    normalmodelmoments.R
+    exponentialmodelmoments.R
+    data.R
         groupmoments.R
         sdatamoments.R
         csdatamoments.R
@@ -47,6 +52,14 @@ Collate:
     mcmcpermfixpost.R
     mcmcpermind.R
     mcmcpermindpost.R
+    mcmcoutputpermfix.R
+    mcmcoutputpermfixhier.R
+    mcmcoutputpermfixpost.R
+    mcmcoutputpermfixhierpost.R
+    mcmcoutputpermbase.R
+    mcmcoutputpermhier.R
+    mcmcoutputpermpost.R
+    mcmcoutputpermhierpost.R
     mcmcpermute.R
     mcmcestfix.R
     mcmcestind.R

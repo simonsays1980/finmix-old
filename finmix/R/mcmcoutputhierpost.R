@@ -138,106 +138,16 @@ setMethod("plotHist", signature(x = "mcmcoutputhierpost", dev = "ANY"),
 		lambda <- x@par$lambda
         weight <- x@weight
         b <- x@hyper$b
-        hist.n <- K * 2
-		if (hist.n == 2) {
-            par(mfrow = c(1, hist.n), mar = c(2, 2, 2, 2),
-                oma = c(4, 5, 1, 5))
-			hist(lambda, col = "gray65", border = "white",
-				cex = 0.7, cex.axis = 0.7, freq = TRUE,
-				xlab = "", main = "")
-			rug(lambda, col = "gray47")
-			mtext(side = 1, bquote(lambda), cex = 0.7,
-				line = 3)
-            hist(b, col = "gray65", border = "white",
-                cex = 0.7, cex.axis = 0.7, freq = TRUE,
-                xlab = "", main = "")
-            rug(b, col = "gray47")
-            mtext(side = 1, "b", line = 3)
-		} else if (hist.n > 3 && hist.n < 17 && sqrt(hist.n) 
-                  %% 1 == 0) {
-			par(mfrow = c(sqrt(hist.n), sqrt(hist.n)),
-				mar = c(2, 2, 2, 2), 
-				oma = c(4, 5, 1, 5))
-			for(k in 1:hist.n) {
-                if (k == hist.n) {
-                    hist(b, col = "gray65", border = "white",
-                        cex = 0.7, cex.axis = 0.7, freq = TRUE,
-                        xlab = "", main = "")
-                    rug(b, col = "gray47")
-                    mtext(side = 1, "b", line = 3)
-                } else if (k > K && k != hist.n) {
-                    i <- k - K
-                    hist(weight[, i], col = "gray65", 
-                        border = "white", cex = 0.7,
-                        cex.axis = 0.7, freq = TRUE,
-                        xlab = "", main = "")
-                    rug(weight[, i], col = "gray47")
-                    mtext(side = 1, bquote(eta[i = .(i)]),
-                        line = 3)
-                } else {
-    				hist(lambda[, k], col = "gray65", 
-    					border = "white", cex = 0.7,
-    					cex.axis = 0.7, freq = TRUE,
-    					xlab = "", main = "")
-    				rug(lambda[, k], col = "gray47")
-    				mtext(side = 1, bquote(lambda[k = .(k)]),
-    					cex = 0.7, line = 3)
-                }
-			}
-		}   
-		else {
-			## check how many rows can be completely 
-			## filled
-			n <- hist.n %/% 4
-			par(mfrow = c(n, 4), mar = c(2, 2, 2, 2),
-			oma = c(4, 5, 1, 5))
-			for (k in 1:(n * 4)) {
-                if (k == hist.n) {
-                    hist(b, col = "gray65", border = "white",
-                        cex = 0.7, cex.axis = 0.7, freq = TRUE,
-                        xlab = "", main = "")
-                    rug(b, col = "gray47")
-                    mtext(side = 1, "b", line = 3)
-                } else if (k > K && k != hist.n) {
-                    i <- k - K
-                    hist(weight[, i], col = "gray65", 
-                        border = "white", cex = 0.7,
-                        cex.axis = 0.7, freq = TRUE, 
-                        xlab = "", main = "")
-                    rug(weight[, i], col = "gray47")
-                    mtext(side = 1, bquote(eta[i = .(i)]),
-                        line = 3)
-                } else {
-				    hist(lambda[, k], col = "gray65", 
-					    border = "white", cex = 0.7,
-					    cex.axis = 0.7, freq = TRUE,
-					    xlab = "", main = "")
-			    	rug(lambda[, k], col = "gray47")
-			    	mtext(side = 1, bquote(lambda[k =.(k)]),
-			    		cex = 0.7, line = 3)
-                }
-			}
-			## if some rows cannot be completely filled
-			## fill them symmetrically
-			if (hist.n %% 4 != 0) {
-				## there can be only two left
-				hist(weight[, K - 1], col = "gray65",
-					border = "white", cex = 0.7,
-					cex.axis = 0.7, freq = TRUE,
-					xlab = "", main = "")
-				rug(weight[, K - 1], col = "gray47")
-				mtext(side = 1, bquote(eta[k = 
-					.(K - 1)]), cex = 0.7, line = 3)
-				replicate(2, plot.new())
-				hist(b, col = "gray65",
-					border = "white", cex = 0.7,
-					cex.axis = 0.7, freq = TRUE,
-					xlab = "", main = "")
-				rug(b, col = "gray47")
-				mtext(side = 1, "b", line = 3)
-			}
-				
- 		}
+        vars <- cbind(lambda, weight[, seq(1:(K - 1))], b)
+        lab.names <- vector("list", 2 * K)
+        for (k in 1:K) {
+            lab.names[[k]] <- bquote(lambda[.(k)])
+        }
+        for (k in (K + 1):(2 * K - 1)) {
+            lab.names[[k]] <- bquote(eta[.(k - K)])
+        }
+        lab.names[[2 * K]] <- "b"
+        .symmetric.Hist(vars, lab.names)
 	}
 	
 })

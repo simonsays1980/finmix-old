@@ -263,6 +263,7 @@ setMethod("getExp", "data", function(object) {
 				}
 )
 ## Already set as Generic in 'model.R' ##
+setGeneric("getT", function(object) standardGeneric("getT"))
 setMethod("getT", "data", function(object) {
 					return(object@T)
 				}
@@ -354,6 +355,7 @@ setReplaceMethod("setExp", "data", function(object, value) {
 					}
 )
 ## Already set as Generic in 'model.R' ##
+setGeneric("setT<-", function(object, value) standardGeneric("setT<-"))
 setReplaceMethod("setT", "data", function(object, value) {
 						storage.mode(value) <- "integer"
 						object@T <- value
