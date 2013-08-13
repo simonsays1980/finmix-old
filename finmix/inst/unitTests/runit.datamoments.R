@@ -29,15 +29,14 @@ if(TRUE) {
                                         'data/poisson.ind.csv')
             }               
             ind <- read.csv(ind.path, header = FALSE, sep = ",")
-            data <- data(y. = as.matrix(data), S. = as.matrix(ind), type. = "discrete",
-                         r. = 1, N. = nrow(data), sim. = TRUE,
-                         bycolumn. = TRUE)
+            data <- data(y = as.matrix(data), S = as.matrix(ind), type = "discrete",
+                         r = 1, N = nrow(data), sim = TRUE,
+                         bycolumn = TRUE)
             return(data)
-        }
-        else {
-                data <- data(y. = as.matrix(data), type. = "discrete", r. = 1,
-                                N. = nrow(data), sim. = TRUE,
-                                bycolumn. = TRUE)
+        } else {
+                data <- data(y = as.matrix(data), type = "discrete", r = 1,
+                             N = nrow(data), sim = TRUE,
+                             bycolumn. = TRUE)
                 return(data)
         }
 }

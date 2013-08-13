@@ -29,28 +29,27 @@ if(TRUE) {
                                         'data/poisson.ind.csv')
             }               
             ind <- read.csv(ind.path, header = FALSE, sep = ",")
-            data <- data(y. = as.matrix(data), S. = as.matrix(ind), type. = "discrete",
-                         r. = 1, N. = nrow(data), sim. = TRUE,
-                         bycolumn. = TRUE)
+            data <- data(y = as.matrix(data), S = as.matrix(ind), type = "discrete",
+                         r = 1, N = nrow(data), sim = TRUE,
+                         bycolumn = TRUE)
             return(data)
-        }
-        else {
-                data <- data(y. = as.matrix(data), type. = "discrete", r. = 1,
-                                N. = nrow(data), sim. = TRUE,
-                                bycolumn. = TRUE)
+        } else {
+                data <- data(y = as.matrix(data), type = "discrete", r = 1,
+                             N = nrow(data), sim = TRUE,
+                             bycolumn = TRUE)
                 return(data)
         }
 }
 
 ".setUp.model" <- function() {
-        model <- model(dist. = "poisson", K. = 2)
+        model <- model(dist = "poisson", K = 2)
         return(model)
 }
 
 ".setUp.mcmc" <- function() {
-        mcmc <- mcmc(burnin. = 0, M. = 100, startpar. = FALSE,
-                        storeS. = 2, storepost. = FALSE,
-                        ranperm. = FALSE)
+        mcmc <- mcmc(burnin = 0, M = 100, startpar = FALSE,
+                        storeS = 2, storepost = FALSE,
+                        ranperm = FALSE)
         return(mcmc)
 }
 
@@ -63,8 +62,7 @@ if(TRUE) {
     model <- .setUp.model()
     setK(model) <- 1
     setIndicfix(model) <- TRUE
-    prior <- prior(hier = FALSE)
-    prior <- priordefine(data, model, varargin = prior)
+    prior <- priordefine(data, model, varargin = prior(hier = FALSE))
     mcmc <- .setUp.mcmc()
     mcmcout <- mixturemcmc(data, model, prior, mcmc)
     mcmcoutperm <- mcmcpermute(mcmcout)

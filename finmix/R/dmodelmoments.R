@@ -34,19 +34,18 @@
 )
 
 ## Getters ##
-setGeneric("getOver", function(.Object) standardGeneric("getOver"))
-setMethod("getOver", "dmodelmoments", function(.Object) {
-						return(.Object@over)
+setMethod("getOver", "dmodelmoments", function(object) {
+						return(object@over)
 					}
 )
-setGeneric("getFactorial", function(.Object) standardGeneric("getFactorial"))
-setMethod("getFactorial", "dmodelmoments", function(.Object) {
-							return(.Object@factorial)
+
+setMethod("getFactorial", "dmodelmoments", function(object) {
+							return(object@factorial)
 						}
 )
-setGeneric("getZero", function(.Object) standardGeneric("getZero"))
-setMethod("getZero", "dmodelmoments", function(.Object) {
-						return(.Object@zero)
+
+setMethod("getZero", "dmodelmoments", function(object) {
+						return(object@zero)
 					}
 )
 

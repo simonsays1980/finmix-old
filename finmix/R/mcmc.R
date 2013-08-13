@@ -36,12 +36,14 @@ setClass("mcmc",
 		TRUE
 	}
 )	
-"mcmc" <- function(burnin. = 0, M. = 5000, startpar. = FALSE, storeS. = 1000, storepost. = TRUE,
-			ranperm. = TRUE) {
-		
-		mcmc <- new("mcmc", burnin = as.integer(burnin.), M = as.integer(M.), startpar = startpar., 
-				storeS = as.integer(storeS.), storepost = storepost., ranperm = ranperm.)
-
+"mcmc" <- function(burnin = 0, M = 5000, startpar = FALSE, 
+                   storeS = 1000, storepost = TRUE, 
+                   ranperm = TRUE) 
+{
+		mcmc <- new("mcmc", burnin = as.integer(burnin), 
+                    M = as.integer(M), startpar = startpar, 
+                    storeS = as.integer(storeS), storepost = storepost, 
+                    ranperm = ranperm)
 		return(mcmc)
 }
 

@@ -24,86 +24,51 @@ setClass("groupmoments",
          validity = function(object) {
              ## else: ok
 			 TRUE
-         }
+         },
+         prototype(NK   = array(),
+                   mean = matrix(),
+                   WK   = array(),
+                   var  = array(),
+                   data = data()
+                   )
 )
 
-"groupmoments" <- function(data) {
-    if(all(is.na(data@y))) {
+"groupmoments" <- function(value = data()) 
+{
+    if (all(is.na(value@y))) {
         stop("'data' object has no data. Slot 'y' is empty.")
     } else {
-        if(all(is.na(data@S))) {
+        if (all(is.na(value@S))) {
             stop("'data' object has no allocations. Slot 'S' is empty.")
+        } else {
+            object <- new("groupmoments", value = value)
         }
     }
-    object <- new("groupmoments", value = data)
     return(object)
 }
 
 ## initializes by immediately calling method ##
 ## 'generateMoments' ##
 setMethod("initialize", "groupmoments",
-          function(.Object, value) {
+          function(.Object, ..., value) 
+          {
               .Object@data <- value
-              .Object <- generateMoments(.Object)
-              return(.Object)
+              generateMoments(.Object)
           }
 )
 
-## Generic set in 'dmodelmoments.R' ##
 setMethod("generateMoments", "groupmoments",
-          function(object) {
-              if(all(is.na(object@data@S))) {
-                  return(object)
-              }
-            
-              ## Compute group sizes ##
-	          ## enforce column-wise ordering ##
-	          if (!object@data@bycolumn) {
-                  datam <- t(object@data@y)
-		          classm <- t(object@data@S)
-              } else {
-               	  datam <- object@data@y
-		          classm <- object@data@S
-              }		
-              ## Calculate group sizes and group means ##
-              ## 'NK' is an 1 x K vector ##
-	          ## 'groupmean' is an r x K matrix ##
-        	  level.set <- as.numeric(levels(factor(classm)))
-              K <- length(level.set)
-              r <- ncol(datam)
-              comp <- matrix(rep(classm, K), ncol = K) == matrix(seq(1,K), 
-                                                                 nrow = nrow(datam),
-                                                                 ncol = K,
-                                                                 byrow = TRUE)
-              object@NK <- as.array(apply(comp, 2, sum))
-              dimnames(object@NK) <- list(as.character(seq(1:K)))
-              gmeans <- matrix(NA, nrow = r, ncol = K)
-              for (i in seq(1,r)) {
-                  gmeans[i, ] <- (t(datam[,i]) %*% comp)/t(object@NK)
-              }
-              colnames(gmeans) <- as.character(seq(1,K))
-              rownames(gmeans) <- colnames(data)
-              object@mean <- gmeans
-              wkm <- array(NA, dim = c(r, r, K))
-              varm <- array(NA, dim = c(r, r, K))
-              for (k in seq(1, K)) {
-                  group.demeaned <- (datam - rep(gmeans[,k], each = nrow(datam))) * comp[, k]
-                  wkm[,, k] <- t(group.demeaned) %*% group.demeaned
-                  varm[,, k] <- wkm[,, k]/object@NK[k]
-              }
-              dimnames(wkm) <- list(colnames(datam), colnames(datam))
-              dimnames(varm) <- list(colnames(datam), colnames(datam))
-              object@WK <- wkm
-              object@var <- varm
-              return(object)
+          function(object) 
+          {
+              .generateGroupMoments(object)
           }
 )
 
 ## R usual 'show' function ##
 setMethod("show", "groupmoments", 
-          function(object) {
+          function(object) 
+          {
               cat("Object 'groupmoments'\n")
-              cat("     class       :", class(object), "\n")
               cat("     NK          : Vector of",
                   length(object@NK), "\n")
               cat("     mean        :",
@@ -116,30 +81,94 @@ setMethod("show", "groupmoments",
 )
  
 ## R usual Getters ##
-setGeneric("getNK", function(object) standardGeneric("getNK"))
-setMethod("getNK", "groupmoments", function(object) {
-						return(object@NK)					
-					}
+setMethod("getNK", "groupmoments", 
+          function(object) 
+          {
+              return(object@NK)					
+          }
 )
-## Generic set in 'modelmoments' class ##
-setMethod("getMean", "groupmoments", function(object) {
-						return(object@mean)	
-					}
+
+setMethod("getMean", "groupmoments", 
+          function(object) 
+          {
+              return(object@mean)	
+          }
 )
-setGeneric("getWK", function(object) standardGeneric("getWK"))
-setMethod("getWK", "groupmoments", function(object) {
-						return(object@WK)
-					}
+
+setMethod("getWK", "groupmoments", 
+          function(object) 
+          {
+              return(object@WK)
+          }
 )
-## Generic set in 'modelmoments' class ##
-setMethod("getVar", "groupmoments", function(object) {
-						return(object@var)
-					}
+
+setMethod("getVar", "groupmoments", 
+          function(object) 
+          {
+              return(object@var)
+          }
 )
-setGeneric("getData", function(object) standardGeneric("getData"))
-setMethod("getData", "groupmoments", function(object) {
-						return(object@data)		
-					}
+
+setMethod("getData", "groupmoments", 
+          function(object) 
+          {
+              return(object@data)		
+          }
 )
 ## No setters as user are not intended to manipulate this  ##
 ## object ##
+
+### Private functions
+### These functions are not exported
+".generateGroupMoments" <- function(object) 
+{
+    if(all(is.na(object@data@S))) {
+        return(object)
+    }
+
+    ## Compute group sizes ##
+    ## enforce column-wise ordering ##
+    if (!object@data@bycolumn) {
+        datam <- t(object@data@y)
+        classm <- t(object@data@S)
+    } else {
+        datam <- object@data@y
+        classm <- object@data@S
+    }		
+    ## Calculate group sizes and group means ##
+    ## 'NK' is an 1 x K vector ##
+    ## 'groupmean' is an r x K matrix ##
+    level.set <- as.numeric(levels(factor(classm)))
+    K <- length(level.set)
+    r <- ncol(datam)
+    comp <- matrix(rep(classm, K), ncol = K) == matrix(seq(1,K), 
+                                                       nrow = nrow(datam),
+                                                       ncol = K,
+                                                       byrow = TRUE)
+    names <- rep("", K)
+    for (k in seq(1, K)) {
+        names[k] <- paste("k=", k, sep = "")
+    }
+    object@NK <- as.array(apply(comp, 2, sum))
+    dimnames(object@NK) <- list(names)
+    gmeans <- matrix(NA, nrow = r, ncol = K)
+    for (i in seq(1,r)) {
+        gmeans[i, ] <- (t(datam[,i]) %*% comp)/t(object@NK)
+    }
+    colnames(gmeans) <- names
+    rownames(gmeans) <- colnames(data)
+    object@mean <- gmeans
+    wkm <- array(NA, dim = c(r, r, K))
+    varm <- array(NA, dim = c(r, r, K))
+    for (k in seq(1, K)) {
+        group.demeaned <- (datam - rep(gmeans[,k], each = nrow(datam))) * comp[, k]
+        wkm[,, k] <- t(group.demeaned) %*% group.demeaned
+        varm[,, k] <- wkm[,, k]/object@NK[k]
+    }
+    dimnames(wkm) <- list(colnames(datam), colnames(datam), names)
+    dimnames(varm) <- list(colnames(datam), colnames(datam), names)
+    object@WK <- wkm
+    object@var <- varm
+    return(object)
+}
+

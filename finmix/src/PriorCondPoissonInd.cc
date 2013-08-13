@@ -42,7 +42,6 @@ void PriorCondPoissonInd::update (const unsigned int& K, const arma::mat& y,
     arma::umat ind = (repS == compM);
     arma::mat indDouble = arma::conv_to<arma::mat>::from(ind);
     par_post = sum(indDouble);
-    par_post.print("par_post:");
     arma::rowvec tmp(K);
     for (unsigned int k = 1; k < K; ++k) {
         tmp = coef.row(k);

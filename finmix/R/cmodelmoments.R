@@ -34,20 +34,20 @@
 )
 
 ## Getters ##
-setGeneric("getHigher", function(object) standardGeneric("getHigher"))
 setMethod("getHigher", "cmodelmoments", function(object) {
 							return(object@higher)
 						}
 )
-setGeneric("getSkewness", function(object) standardGeneric("getSkewness"))
+
 setMethod("getSkewness", "cmodelmoments", function(object) {
 							return(object@skewness) 
 						}
 )
-setGeneric("getKurtosis", function(object) standardGeneric("getKurtosis"))
+
 setMethod("getKurtosis", "cmodelmoments", function(object) {
 							return(object@kurtosis)
 						}
 )
+
 ## Setters ##
 ## No setters as users should not manipulate a 'nsmodelmoments' object ##

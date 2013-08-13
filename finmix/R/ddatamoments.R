@@ -15,66 +15,46 @@
 # You should have received a copy of the GNU General Public License
 # along with Rcpp.  If not, see <http://www.gnu.org/licenses/>.
 
-setClass("ddatamoments",
-         representation(factorial   = "array",
-	                	over        = "vector",
-                		zero        = "vector",
-                        smoments    = "sdatamoments"),
-         contains = c("datamoments"),
-	     validity = function(object) {
-             ## else: ok
-		     TRUE
-         }
+.ddatamoments <- setClass("ddatamoments",
+                          representation(factorial   = "array",
+                                         over        = "vector",
+                                         zero        = "vector",
+                                         smoments    = "sdatamoments"),
+                          contains = c("datamoments"),
+                          validity = function(object) {
+                              ## else: ok
+                              TRUE
+                          },
+                          prototype(factorial   = array(),
+                                    over        = vector(),
+                                    zero        = vector(),
+                                    smoments    = new("sdatamoments")
+                                    )
 )
 
 setMethod("initialize", "ddatamoments", 
-          function(.Object, value) {
+          function(.Object, ..., value = data()) 
+          {
               .Object@data <- value
-              .Object <- generateMoments(.Object)
 			  if (!all(is.na(value@S))) {
                   .Object@smoments <- sdatamoments(value)
 			  }
-			  return(.Object)
+              generateMoments(.Object)
           }
 )
 
 ## Generic set in 'groupmoments.R' ##
 setMethod("generateMoments", "ddatamoments",
-          function(object) {
-              ## enforce column-wise ordering ##
-              if (!object@data@bycolumn) {
-                  datam <- t(object@data@y)
-              } else {
-		          datam <- object@data@y
-	          }
-           	  ## Compute factorial moments ##
-	          ## fact.moments is a L x r array (L = 4) ## 
-              momentsm <- array(NA, dim = c(4, object@data@r))
-	          means           <- apply(datam, 2, mean, na.rm = TRUE)
-              object@mean <- means
-              object@var    <- var(datam, na.rm = TRUE)
-              momentsm[1, ]   <- t(means)  
-              momentsm[2, ]   <- apply(datam * apply(datam - 1, 2, max, 0), 
-                                       2, mean, na.rm = TRUE)
-              momentsm[3, ]   <- apply(datam * apply(datam - 2, 2, max, 0),
-                                       2, mean, na.rm = TRUE)
-              momentsm[4, ]   <- apply(datam * apply(datam - 3, 2, max, 0),
-                                       2, mean, na.rm = TRUE)
-              dimnames(momentsm) <- list(c("1st", "2nd", "3rd", "4th"),
-                                         colnames(datam))
-              object@factorial <- momentsm
-              ## Overdispersions and fractions of zeros ##
-              ## over and zeros are r x 1 matrices ## 
-           	  object@over <- diag(var(datam)) - means
-              object@zero <- apply(apply(datam, 2, "==", 0), 2, sum)
-         	  return(object)
+          function(object) 
+          {
+              .generateDdatamoments(object)
           }
 )
 
 setMethod("show", "ddatamoments", 
-          function(object) {
+          function(object) 
+          {
               cat("Object 'datamoments'\n")
-              cat("     class       :", class(object), "\n")
               cat("     mean        : Vector of", 
                   length(object@mean), "\n")
               cat("     var         : Vector of",
@@ -95,39 +75,66 @@ setMethod("show", "ddatamoments",
 )
 
 ## Getters ##
-setMethod("getMean", "ddatamoments", function(object) {
-						return(object@mean)
-					}
-)
-setMethod("getVar", "ddatamoments", function(object) {
-						return(object@var)
-					}
+setMethod("getSmoments", "ddatamoments", 
+          function(object) 
+          {
+              return(object@smoments)
+          }
 )
 
-## Generic set in 'groupmoments.R' ##
-setMethod("getData", "ddatamoments", function(object) {
-				return(object@data)
-			}
+setMethod("getFactorial", "ddatamoments", 
+          function(object) 
+          {
+              return(object@factorial)
+          }
 )
-setMethod("getSmoments", "ddatamoments", function(object) {
-					return(object@smoments)
-				}
+
+setMethod("getOver", "ddatamoments", 
+          function(object) 
+          {
+              return(object@over)
+          }
 )
-setGeneric("getFactorial", function(object) standardGeneric("getFactorial"))
-setMethod("getFactorial", "ddatamoments", function(object) {
-						return(object@factorial)
-					}
-)
-setGeneric("getOver", function(object) standardGeneric("getOver"))
-setMethod("getOver", "ddatamoments", function(object) {
-						return(object@over)
-					}
-)
-setGeneric("getZero", function(object) standardGeneric("getZero"))
-setMethod("getZero", "ddatamoments", function(object) {
-						return(object@zero)
-					}
+
+setMethod("getZero", "ddatamoments", 
+          function(object) 
+          {
+              return(object@zero)
+          }
 )
 
 ## Setters ##
-## No setters as users should not manipulate a 'ddatamoments' object ## 
+## No setters as users should not manipulate a 'ddatamoments' object ##
+
+### Private functions
+### These functions are not exported
+".generateDdatamoments" <- function(object) 
+{
+    ## enforce column-wise ordering ##
+    if (!object@data@bycolumn) {
+        datam <- t(object@data@y)
+    } else {
+        datam <- object@data@y
+    }
+    ## Compute factorial moments ##
+    ## fact.moments is a L x r array (L = 4) ## 
+    momentsm <- array(NA, dim = c(4, object@data@r))
+    means           <- apply(datam, 2, mean, na.rm = TRUE)
+    object@mean <- means
+    object@var    <- var(datam, na.rm = TRUE)
+    momentsm[1, ]   <- t(means)  
+    momentsm[2, ]   <- apply(datam * apply(datam - 1, 2, max, 0), 
+                             2, mean, na.rm = TRUE)
+    momentsm[3, ]   <- apply(datam * apply(datam - 2, 2, max, 0),
+                             2, mean, na.rm = TRUE)
+    momentsm[4, ]   <- apply(datam * apply(datam - 3, 2, max, 0),
+                             2, mean, na.rm = TRUE)
+    dimnames(momentsm) <- list(c("1st", "2nd", "3rd", "4th"),
+                               colnames(datam))
+    object@factorial <- momentsm
+    ## Overdispersions and fractions of zeros ##
+    ## over and zeros are r x 1 matrices ## 
+    object@over <- diag(var(datam)) - means
+    object@zero <- apply(apply(datam, 2, "==", 0), 2, sum)
+    return(object)
+}

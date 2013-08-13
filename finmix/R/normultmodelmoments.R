@@ -1,3 +1,20 @@
+## Copyright (C) 2013 Lars Simon Zehnder
+#
+# This file is part of finmix.
+#
+# finmix is free software: you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# finmix is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Rcpp.  If not, see <http://www.gnu.org/licenses/>.
+
 .normultmodelmoments <- setClass("normultmodelmoments",
                                  representation(B   = "array",
                                                 W   = "array",
@@ -62,35 +79,30 @@ setMethod("show", "normultmodelmoments",
 )
 
 ## Getters ##
-setGeneric("getB", function(object) standardGeneric("getB"))
 setMethod("getB", "normultmodelmoments", 
           function(object) {
               return(object@B)
           }
 )
 
-setGeneric("getW", function(object) standardGeneric("getW"))
 setMethod("getW", "normultmodelmoments", 
           function(object) {
               return(object@W)
           }
 )
 
-setGeneric("getRdet", function(object) standardGeneric("getRdet"))
 setMethod("getRdet", "normultmodelmoments", 
           function(object) {
               return(object@B)
           }
 )
 
-setGeneric("getRtr", function(object) standardGeneric("getRtr"))
 setMethod("getRtr", "normultmodelmoments", 
           function(object) {
               return(object@B)
           }
 )
 
-setGeneric("getCorr", function(object) standardGeneric("getCorr"))
 setMethod("getCorr", "normultmodelmoments",
           function(object) {
               return(object@corr)

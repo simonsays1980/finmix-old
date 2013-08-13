@@ -27,24 +27,26 @@ setClass("sdatamoments",
 )
 
 ## mutual constructor for both types of sdatamoments ##
-"sdatamoments" <- function(data) {
-    if(all(is.na(data@y))) {
+"sdatamoments" <- function(value = data()) 
+{
+    if (all(is.na(value@y))) {
         stop("'data' object has no data. Slot 'y' is empty.")
     } else {
-        if(all(is.na(data@S))) {
+        if (all(is.na(value@S))) {
             stop("'data' object has no allocations. Slot 'S' is empty.")
         }
     }
-    if (data@type == "discrete") {
-        object <- new("sdatamoments", value = data)
+    if (value@type == "discrete") {
+        object <- new("sdatamoments", value = value)
     } else {
-        object <- new("csdatamoments", value = data)
+        object <- .csdatamoments(value = value)
     }
     return(object)
 }
 
 setMethod("initialize", "sdatamoments",
-          function(.Object, value = data()) {
+          function(.Object, ..., value = data()) 
+          {
               .Object@data <- value
               .Object@gmoments <- new("groupmoments", value = value)
               return(.Object)
@@ -52,7 +54,8 @@ setMethod("initialize", "sdatamoments",
 )
 
 setMethod("show", "sdatamoments", 
-          function(object) {
+          function(object) 
+          {
               cat("Object 'sdatamoments'\n")
               cat("     gmoments    : Object of class",
                   class(object@gmoments), "\n")
@@ -62,16 +65,16 @@ setMethod("show", "sdatamoments",
 )
 
 ## Getters ##
-setGeneric("getGmoments", function(object) standardGeneric("getGmoments"))
 setMethod("getGmoments", "sdatamoments", function(object) {
 							return(object@gmoments)
 						}
 )
-## Generic set in 'groupmoments.R' ##
+
 setMethod("getData", "sdatamoments", 
           function(object) {
               return(object@data)
           }
 )
+
 ## Setters ##
 ## No Setters, as it is adviced for users not to manipulate moment objects ##

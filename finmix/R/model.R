@@ -15,52 +15,70 @@
 # You should have received a copy of the GNU General Public License
 # along with Rcpp.  If not, see <http://www.gnu.org/licenses/>.
 
-setClass("model",
-         representation(dist        ="character",
-		                r           = "integer",
-		                K           = "integer",
-		                weight      = "matrix",
-		                par         = "list",
-		                indicmod    = "character",
-		                indicfix    = "logical"),
-         validity = function(object) {
-             choices <- c("normal", "normult", "exponential", 
-                          "student", "studmult", "poisson", 
-                          "cond.poisson", "binomial")
-             univ.choices <-  c("normal", "exponential", "student", 
-                                "poisson", "cond.poisson", "binomial")	
-			 multiv.choices <- c("normult", "studmult")
-			 indicmod.choices <- c("multinomial")
-			 if (!(object@dist %in% choices)) {
-                 stop("Unknown distribution.")
-             }
-			 if (object@K <= 0) {					
-                 stop("Number of components 'K' must be a positive integer.")
-             }
-			 if (object@indicmod != "multinomial") {
-                 stop("Distribution of the indicator model 'indicmod' must be 
-                      'multinomial'.")
-             }
-             if (object@K != 1 && object@K != ncol(object@weight)) {
-                 stop("Dimension of slot 'weight' does not match number of 
-                      components.")
-             }
-		     ## else: OK ##
-			 TRUE
-		 }
+.model <- setClass("model",
+                   representation(dist        ="character",
+                                  r           = "integer",
+                                  K           = "integer",
+                                  weight      = "matrix",
+                                  par         = "list",
+                                  indicmod    = "character",
+                                  indicfix    = "logical",
+                                  T           = "matrix"),
+                   validity = function(object) {
+                       choices <- c("normal", "normult", "exponential", 
+                                    "student", "studmult", "poisson", 
+                                    "cond.poisson", "binomial")
+                       univ.choices <-  c("normal", "exponential", "student", 
+                                          "poisson", "cond.poisson", "binomial")	
+                       multiv.choices <- c("normult", "studmult")
+                       indicmod.choices <- c("multinomial")
+                       if (!(object@dist %in% choices)) {
+                           stop("Unknown distribution.")
+                       }
+                       if (object@K <= 0) {					
+                           stop("Number of components 'K' must be a positive integer.")
+                       }
+                       if (object@indicmod != "multinomial") {
+                           stop("Distribution of the indicator model 'indicmod' must be 
+                                'multinomial'.")
+                       }
+                       if (object@K != 1 && object@K != ncol(object@weight)) {
+                           stop("Dimension of slot 'weight' does not match number of 
+                                components.")
+                       }
+                       if (object@dist == "binomial") {
+                           if (dim(model@T)[1] > 1 && dim(model@T)[2] > 1) {
+                               stop("Dimensions of repetitions 'T' for binomial mixture 
+                                    model do not match conditions. Only one dimensional
+                                    repetitions can be used in a binomial mixture model.")
+                           }
+                       }
+                       ## else: OK ##
+                       TRUE
+                   },
+                   prototype(dist     = character(),
+                             r        = integer(),
+                             K        = integer(),
+                             weight   = matrix(),
+                             par      = list(),
+                             indicmod = character(),
+                             indicfix = logical(),
+                             T        = matrix()
+                             )
 )
 
 ## Constructor for class 'model' ##
 "model" <- function(dist = "normal", r = as.integer(1), 
                     K = as.integer(1), weight = matrix(), 
                     par = list(), indicmod = "multinomial", 
-           			indicfix = FALSE) {
-    if(K > 1 && all(is.na(weight))) {
+           			indicfix = FALSE, T = matrix()) 
+{
+    if (K > 1 && all(is.na(weight))) {
 	    weight <- matrix(1/K, nrow = 1, ncol = K)
 	}
-	object <- new("model", dist = dist, r = as.integer(r), 
-                 K = as.integer(K), weight = weight, par = par, 
-				 indicmod = indicmod, indicfix = indicfix)
+	object <- .model(dist = dist, r = as.integer(r), 
+                     K = as.integer(K), weight = weight, par = par, 
+                     indicmod = indicmod, indicfix = indicfix, T = T)
     return(object)
 }
 
@@ -252,7 +270,8 @@ setMethod("plot", "model", function(x, y, ..., dis.grid = 1:10, persp.grid.x = s
 ## Marginal Mixture ##
 setGeneric("mixturemar", function(object, J) standardGeneric("mixturemar"))
 setMethod("mixturemar", "model", 
-          function(object, J) {
+          function(object, J) 
+          {
               if (object@dist == "normult") {	
                   dist <- ifelse(length(J) == 1, "normal", "normult")
                   r             <- length(J)
@@ -263,9 +282,10 @@ setMethod("mixturemar", "model",
                   par           <- list(mu = mu, sigma = sigma)
                   indicmod      <- "multinomial"
                   indicfix      <- TRUE
-                  margin.model  <- new("model", dist = dist, r = r, K = K, weight = weight, 
-                                       par = par, indicmod = indicmod, 
-                                       indicfix = indicfix)
+                  margin.model  <- .model(dist = dist, r = r, K = K, 
+                                          weight = weight, par = par, 
+                                          indicmod = indicmod, 
+                                          indicfix = indicfix)
                   validObject(margin.model)
                   return(margin.model)
               } else if (object@dist == "studmult") {
@@ -279,21 +299,23 @@ setMethod("mixturemar", "model",
                   par           <- list(mu = mu, sigma = sigma, df = df)
                   indicmod      <- "multinomial"
                   indicfix      <- TRUE
-                  margin.model  <- new("model", dist = dist, r = r, K = K, weight = weight, 
-                                       par = par, indicmod = indicmod,
-                                       indicfix = indicfix)
+                  margin.model  <- .model(dist = dist, r = r, K = K, 
+                                          weight = weight, par = par, 
+                                          indicmod = indicmod,
+                                          indicfix = indicfix)
                   validObject(margin.model)
                   return(margin.model)
               } else {
-                  stop("The marginal distribution can only be obtained from 
-                       multivariate distribution.")
+                  stop("A marginal distribution can only be obtained from 
+                       multivariate distributions.")
               }
           }
 )
 	
 ## Show ##
 setMethod("show", "model", 
-          function(object) {
+          function(object) 
+          {
               cat("Object 'model'\n")
               cat("     class       :", class(object), "\n")
               cat("     dist        :", object@dist, "\n")
@@ -308,95 +330,140 @@ setMethod("show", "model",
               }
               cat("     indicmod    :", object@indicmod, "\n")
               cat("     indicfix    :", object@indicfix, "\n")
+              if (object@dist == "binomial") {
+                  cat("     T           :",
+                      paste(dim(object@T), collapse = "x"), "\n")
+              }
           }
 )
 ## Getters ##
-setGeneric("getDist", function(object) standardGeneric("getDist"))
-setMethod("getDist", "model", function(object) {
-					return(object@dist)
-				}
+setMethod("getDist", "model", 
+          function(object) 
+          {
+              return(object@dist)
+          }
 )
-setGeneric("getR", function(object) standardGeneric("getR"))
-setMethod("getR", "model", function(object) {
-					return(object@r)
-				}
+
+setMethod("getR", "model", 
+          function(object) 
+          {
+              return(object@r)
+          }
 )
-setGeneric("getK", function(object) standardGeneric("getK"))
-setMethod("getK", "model", function(object) {
-					return(object@K)
-				}
+
+setMethod("getK", "model", 
+          function(object) 
+          {
+              return(object@K)
+          }
 )
-setGeneric("getWeight", function(object) standardGeneric("getWeight"))
-setMethod("getWeight", "model", function(object) {
-						return(object@weight)
-					}
+
+setMethod("getWeight", "model", 
+          function(object) 
+          {
+              return(object@weight)
+          }
 )
-setGeneric("getPar", function(object) standardGeneric("getPar"))
-setMethod("getPar", "model", function(object) {
-					return(object@par)
-				}
+
+setMethod("getPar", "model", 
+          function(object) 
+          {
+              return(object@par)
+          }
 )
-setGeneric("getIndicmod", function(object) standardGeneric("getIndicmod"))
-setMethod("getIndicmod", "model", function(object) {
-						return(object@indicmod)					
-					}
+
+setMethod("getIndicmod", "model", 
+          function(object) 
+          {
+              return(object@indicmod)					
+          }
 )
-setGeneric("getIndicfix", function(object) standardGeneric("getIndicfix"))
-setMethod("getIndicfix", "model", function(object) {
-						return(object@indicfix)
-					}
+
+setMethod("getIndicfix", "model", 
+          function(object) 
+          {
+              return(object@indicfix)
+          }
+)
+
+setMethod("getT", "model", 
+          function(object) 
+          {
+              return(object@T)
+          }
 )
 
 ## Setters ##
-setGeneric("setDist<-", function(object, value) standardGeneric("setDist<-"))
-setReplaceMethod("setDist", "model", function(object, value) {
-						object@dist <- value
-						validObject(object)
-						return(object)
-					}
-)
-setGeneric("setR<-", function(object, value) standardGeneric("setR<-"))
-setReplaceMethod("setR", "model", function(object, value){
-						object@r <- as.integer(value)
-						validObject(object)
-						return(object)
-					}
-)
-setGeneric("setK<-", function(object, value) standardGeneric("setK<-"))
-setReplaceMethod("setK", "model", function(object, value) {
-						object@K <- as.integer(value)
-						object@weight <- matrix(1/value, 
-							nrow = 1, ncol = value)
-						validObject(object)
-						return(object)
-					}
-)
-setGeneric("setWeight<-", function(object, value) standardGeneric("setWeight<-"))
-setReplaceMethod("setWeight", "model", function(object, value) {
-						object@weight <- value
-						validObject(object)
-						return(object)
-					}
-)
-setGeneric("setPar<-", function(object, value) standardGeneric("setPar<-"))
-setReplaceMethod("setPar", "model", function(object, value) {
-						object@par <- value
-						validObject(object)
-						return(object)
-					}
-)
-setGeneric("setIndicmod<-", function(object, value) standardGeneric("setIndicmod<-"))
-setReplaceMethod("setIndicmod", "model", function(object, value) {
-					object@indicmod <- value
-					validObject(object)
-					return(object)
-				}
-)
-setGeneric("setIndicfix<-", function(object, value) standardGeneric("setIndicfix<-"))
-setReplaceMethod("setIndicfix", "model", function(object, value) {
-							object@indicfix <- value
-							validObject(object)
-							return(object)
-						}
+setReplaceMethod("setDist", "model", 
+                 function(object, value) 
+                 {
+                     object@dist <- value
+                     validObject(object)
+                     return(object)
+                 }
 )
 
+setReplaceMethod("setR", "model", 
+                 function(object, value)
+                 {
+                     object@r <- as.integer(value)
+                     validObject(object)
+                     return(object)
+                 }
+)
+
+setReplaceMethod("setK", "model", 
+                 function(object, value) 
+                 {
+                     object@K <- as.integer(value)
+                     object@weight <- matrix(1/value, 
+                                             nrow = 1, ncol = value)
+                     validObject(object)
+                     return(object)
+                 }
+)
+
+setReplaceMethod("setWeight", "model", 
+                 function(object, value) 
+                 {
+                     object@weight <- value
+                     validObject(object)
+                     return(object)
+                 }
+)
+
+setReplaceMethod("setPar", "model", 
+                 function(object, value) 
+                 {
+                     object@par <- value
+                     validObject(object)
+                     return(object)
+                 }
+)
+
+setReplaceMethod("setIndicmod", "model", 
+                 function(object, value) 
+                 {
+                     object@indicmod <- value
+                     validObject(object)
+                     return(object)
+                 }
+)
+
+setReplaceMethod("setIndicfix", "model", 
+                 function(object, value) 
+                 {
+                     object@indicfix <- value
+                     validObject(object)
+                     return(object)
+                 }
+)
+
+setReplaceMethod("setT", "model",
+                 function(object, value) 
+                 {
+                     object@T <- as.matrix(value)
+                     validObject(object)
+                     return(object)
+                 }
+)

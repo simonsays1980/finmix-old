@@ -21,8 +21,6 @@ export( ## user-defined constructors
         "mcmcstart",
         "dataclass",
         "groupmoments",
-        "sdatamoments",
-        "datamoments",
     	"mixturemcmc",
         "swap_cc",          ## Rcpp::export
         "swapInteger_cc",   ## Rcpp::export
@@ -37,8 +35,6 @@ exportClasses( ## all classes
         "modelmoments",
         "data",
         "groupmoments",
-        "sdatamoments",
-        "datamoments",
         "prior",
         "mcmc",
         "dataclass",
@@ -103,15 +99,15 @@ exportMethods( ## name of the generic, as with other methods
         "getData",
 
         ## 'sdatamoments' class ##
-        "getGmoments",
+#        "getGmoments",
 
         ## 'csdatamoments' class ##
-        "getB",
-        "getW",
-        "getT",
+#        "getB",
+#        "getW",
+#        "getT",
 
         ## 'cdatamoments' class ##
-        "getSmoments",
+ #       "getSmoments",
  #   	"mixturemar",
 
         ## 'mcmc' class ##

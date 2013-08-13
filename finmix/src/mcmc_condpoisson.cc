@@ -70,6 +70,7 @@ RcppExport SEXP mcmc_condpoisson_cc(SEXP data_S4, SEXP model_S4,
 		LogCondPoissonFix, ParOutPoisson> CONDPOISSONFIX;
 	typedef IND<FIX<PriorCondPoissonInd, ParCondPoissonInd, 
 		LogCondPoissonInd, ParOutPoisson> > CONDPOISSONIND;
+    Rprintf("Line 73\n");
 	if (INDICFIX || K == 1) 
 	{ 
 		if (HIER_IND) {
@@ -103,9 +104,11 @@ RcppExport SEXP mcmc_condpoisson_cc(SEXP data_S4, SEXP model_S4,
 					(finData, finModel, finPrior, finMCMC,
 					mcmcOutputS4O);
 			} else {
-				ptr = new ADAPTER<HIER<CONDPOISSONIND, HierOutPoisson> >
+	                Rprintf("Line: 107\n");
+			ptr = new ADAPTER<HIER<CONDPOISSONIND, HierOutPoisson> >
 					(finData, finModel, finPrior, finMCMC,
 					mcmcOutputS4O);
+            Rprintf("Line 111\n");
 			} 
 		} else {
 			if (POST_IND) {
@@ -120,6 +123,7 @@ RcppExport SEXP mcmc_condpoisson_cc(SEXP data_S4, SEXP model_S4,
 	}
 	for(unsigned int i = 0; i < BURNIN + M; ++i) {
 		ptr->update();
+        Rprintf("Line: 125\n");
 		ptr->store(i);
 	}		
 		

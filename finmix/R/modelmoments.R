@@ -43,29 +43,32 @@ setClass("modelmoments",
         object <- .normalmodelmoments(model = model)
     } else if (dist == "exponential") {
         object <- .exponentialmodelmoments(model = model)
+    } else if (dist == "poisson") {
+        object <- .poissonmodelmoments(model = model)
+    } else if (dist == "binomial") {
+        object <- .binomialmodelmoments(model = model)
     }
     return(object)
 }
 
 ## Getters ##
-setGeneric("getMean", function(object) standardGeneric("getMean"))
 setMethod("getMean", "modelmoments", 
           function(object) {
               return(object@mean)
           }		
 )
-setGeneric("getVar", function(object) standardGeneric("getVar"))
+
 setMethod("getVar", "modelmoments", 
           function(object) {
               return(object@var)
           }
 )
 
-setGeneric("getModel", function(object) standardGeneric("getModel"))
 setMethod("getModel", "modelmoments",
           function(object) {
               return(object@model)
           }
 )
+
 ## Setters are not provided as users are not intended to manipulate ##
 ## this object ##

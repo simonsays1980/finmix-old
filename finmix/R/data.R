@@ -210,66 +210,57 @@ setMethod("show", "data",
 )
 ## Setters and Getters as a user interface to manipulate the slots ## 
 ## Combined Getter and Setter ##
-setGeneric("getY", function(object) standardGeneric("getY"))
 setMethod("getY", "data", function(object) {
 				return(object@y)
 			}
 )
  
-setGeneric("getN", function(object) standardGeneric("getN"))
 setMethod("getN", "data", function(object) {
 				return(object@N)
 			}
 )
 
-## Already set as generic in 'model.R' ##
 setMethod("getR", "data", function(object) {
 				return(object@r)
 			}
 )
 
-setGeneric("getS", function(object) standardGeneric("getS"))
 setMethod("getS", "data", function(object) {
 				return(object@S)
 			}
 )
 
-setGeneric("getBycolumn", function(object) standardGeneric("getBycolumn"))
 setMethod("getBycolumn", "data", function(object) {
 					return(object@bycolumn)
 				}
 )
 
-setGeneric("getName", function(object) standardGeneric("getName"))
 setMethod("getName", "data", function(object) {
 					return(object@name)
 				}
 )
 
-setGeneric("getType", function(object) standardGeneric("getType"))
 setMethod("getType", "data", function(object) {
 					return(object@type)
 				}
 )
 
-setGeneric("getSim", function(object) standardGeneric("getSim"))
 setMethod("getSim", "data", function(object) {
 					return(object@sim)
 				}
 )
-setGeneric("getExp", function(object) standardGeneric("getExp"))
+
 setMethod("getExp", "data", function(object) {
 					return(object@exp)
 				}
 )
-## Already set as Generic in 'model.R' ##
-setGeneric("getT", function(object) standardGeneric("getT"))
+
 setMethod("getT", "data", function(object) {
 					return(object@T)
 				}
 )
-## Explicit usual R setter ##
-setGeneric("setY<-", function(object, value) standardGeneric("setY<-"))
+
+## Setters ##
 setReplaceMethod("setY", "data", function(object, value) {
 					if(object@bycolumn && NROW(value) == 1) {
 						object@y <- t(value)
@@ -290,7 +281,6 @@ setReplaceMethod("setY", "data", function(object, value) {
 				}
 )
 
-setGeneric("setN<-", function(object, value) standardGeneric("setN<-"))
 setReplaceMethod("setN", "data", function(object, value) {
 					object@N <- as.integer(value)
 					validObject(object)
@@ -298,7 +288,6 @@ setReplaceMethod("setN", "data", function(object, value) {
 				}
 )
 
-## Already set as generic in 'model.R' ##
 setReplaceMethod("setR", "data", function(object, value) {
 					object@r <- as.integer(value)
 					validObject(object)
@@ -306,7 +295,6 @@ setReplaceMethod("setR", "data", function(object, value) {
 				}
 )
 
-setGeneric("setS<-", function(object, value) standardGeneric("setS<-"))
 setReplaceMethod("setS", "data", function(object, value) {
 					object@S <- value
 					validObject(object)
@@ -314,7 +302,6 @@ setReplaceMethod("setS", "data", function(object, value) {
 				}
 )
 
-setGeneric("setBycolumn<-", function(object, value) standardGeneric("setBycolumn<-"))
 setReplaceMethod("setBycolumn", signature(object = "data", value = "logical"), 
                  function(object, value) {						
 						.Object@bycolumn <- value
@@ -323,7 +310,6 @@ setReplaceMethod("setBycolumn", signature(object = "data", value = "logical"),
 					}
 )  
 
-setGeneric("setName<-", function(object, value) standardGeneric("setName<-"))
 setReplaceMethod("setName", "data", function(object, value) {
 						object@name <- value
 						validObject(object)
@@ -331,7 +317,6 @@ setReplaceMethod("setName", "data", function(object, value) {
 					}
 )
 
-setGeneric("setType<-", function(object, value) standardGeneric("setType<-"))
 setReplaceMethod("setType", "data", function(object, value) {
 						object@type <- value
 						validObject(object)
@@ -339,14 +324,13 @@ setReplaceMethod("setType", "data", function(object, value) {
 					}
 )
 
-setGeneric("setSim<-", function(object, value) standardGeneric("setSim<-"))
 setReplaceMethod("setSim", "data", function(object, value) {
 						object@sim <- value
 						validObject(object)
 						return(object)
 					}
 )
-setGeneric("setExp<-", function(object, value) standardGeneric("setExp<-"))
+
 setReplaceMethod("setExp", "data", function(object, value) {
 						storage.mode(value) <- "integer"
 						object@exp <- value
@@ -354,8 +338,7 @@ setReplaceMethod("setExp", "data", function(object, value) {
 						return(object)
 					}
 )
-## Already set as Generic in 'model.R' ##
-setGeneric("setT<-", function(object, value) standardGeneric("setT<-"))
+
 setReplaceMethod("setT", "data", function(object, value) {
 						storage.mode(value) <- "integer"
 						object@T <- value

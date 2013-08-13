@@ -32,14 +32,14 @@ setGeneric("getSmoments", function(object) standardGeneric("getSmoments"))
 ## No setters as users should not manipulate a 'datamoments' object ##
 
 ## mutual constructor for all type of datamoments ##
-"datamoments" <- function(data) {
-        if (all(is.na(data@y))) {
+"datamoments" <- function(value = data()) {
+        if (all(is.na(value@y))) {
             stop("'data' object has no data. Slot 'y' is empty.")
         }
-		if (data@type == "continuous") {
-			.Object <- new("cdatamoments", value = data)
+		if (value@type == "continuous") {
+			.Object <- .cdatamoments(value = value)
         } else { 
-			.Object <- new("ddatamoments", value = data)
+			.Object <- .ddatamoments(value = value)
         }
 		return(.Object)
 }

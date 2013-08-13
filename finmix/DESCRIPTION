@@ -16,6 +16,7 @@ Collate:
     RcppExports.R
     graphic_func.R 
     distributions.R
+    AllGenerics.R
     model.R
     mixturemoments.R
     modelmoments.R
@@ -26,14 +27,16 @@ Collate:
     studentmodelmoments.R
     normalmodelmoments.R
     exponentialmodelmoments.R
+    poissonmodelmoments.R
+    binomialmodelmoments.R
     data.R
-        groupmoments.R
-        sdatamoments.R
-        csdatamoments.R
-        datamoments.R
-        ddatamoments.R
-        cdatamoments.R
-        prior.R
+    groupmoments.R
+    sdatamoments.R
+    csdatamoments.R
+    datamoments.R
+    cdatamoments.R
+    ddatamoments.R
+    prior.R
         mcmc.R
 	unass.R
         mcmcstart.R
