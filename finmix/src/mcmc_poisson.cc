@@ -107,7 +107,7 @@ RcppExport SEXP mcmc_poisson_cc(SEXP data_S4, SEXP model_S4,
 					mcmcOutputS4O);
 			}
 			else {
-				ptr = new ADAPTER<HIER<POISSONIND, HierOutPoisson> >
+   				ptr = new ADAPTER<HIER<POISSONIND, HierOutPoisson> >
 					(finData, finModel, finPrior, finMCMC,
 					mcmcOutputS4O);
 			} 

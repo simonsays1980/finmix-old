@@ -459,12 +459,12 @@ setReplaceMethod("setHier", "prior",
 ".generatePriorWeight" <- function(object, model) 
 {
     K   <- model@K
-    if(K > 1) {
+    if(K > 1 && !model@indicfix) {
         e0 <- 4
-        weight <- matrix(e0, nrow = 1, ncol = K)
+        object@weight <- matrix(e0, nrow = 1, ncol = K)
     }
     else { ## K = 1
-        weight <- matrix()
+        object@weight <- matrix()
     }
     return(object)
 }

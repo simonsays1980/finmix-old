@@ -33,5 +33,5 @@ void PriorPoissonInd::update (const unsigned int& K, const arma::mat& y,
 
 {
 	PriorPoissonFix::update(K, y, S, par);
-	weightPost = posterior_multinomial(K, S, weightStart);	
+	weightPost = posterior_multinomial(K, S, weightStart);
 }
