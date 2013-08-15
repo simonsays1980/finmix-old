@@ -7,8 +7,10 @@ importFrom(graphics, persp)
 importFrom(graphics, contour)
 importFrom(graphics, pairs)
 importFrom(KernSmooth, bkde2D)
-importFrom(mnormt, dmnorm)
-importFrom(mnormt, dmt)
+importFrom(mvtnorm, dmvnorm)
+importFrom(mvtnorm, qmvnorm)
+importFrom(mvtnorm, dmvt)
+importFrom(mvtnorm, qmvt)
 export( ## user-defined constructors
         "dstud",
         "model",

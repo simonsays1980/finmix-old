@@ -39,7 +39,7 @@
 "prior" <- function(weight = matrix(), par = list(), 
                     type = "independent", hier = TRUE) 
 {
-    object <- new("prior", weight = weight, par = par, 
+    object <- .prior(weight = weight, par = par, 
                   type = type, hier = hier)
     return(object)
 }

@@ -163,9 +163,10 @@ setMethod("plot", "data",
                       persp(d$x1, d$x2, d$fhat, main = "",
                             xlab = col.names[1], ylab = col.names[2], 
                             zlab = "", col = "gray65", 
-                            border = "gray47", theta = 120, phi = 30, 
-                            cex = 0.7, cex.axis = 0.7, cex.lab = 0.7, 
-                            ticktype = "detailed", cex.axis = 0.7)                   
+                            border = "gray47", theta = 55, phi = 30,
+                            expand = 0.5, lphi = 190, ltheta = 90,
+                            r = 40, d = 0.1, cex = 0.7, cex.axis = 0.7, 
+                            cex.lab = 0.7, ticktype = "detailed")                   
                   } else { ## multivariate distribution
                       .symmetric.Hist(datam, colnames(datam))
                       if (.check.grDevice() && dev) {

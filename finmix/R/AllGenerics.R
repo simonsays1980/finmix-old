@@ -32,6 +32,8 @@ setGeneric("getIndicmod", function(object) standardGeneric("getIndicmod"))
 
 setGeneric("getIndicfix", function(object) standardGeneric("getIndicfix"))
 
+setGeneric("getT", function(object) standardGeneric("getT"))
+
 setGeneric("setDist<-", function(object, value) standardGeneric("setDist<-"))
 
 setGeneric("setR<-", function(object, value) standardGeneric("setR<-"))
@@ -45,6 +47,8 @@ setGeneric("setPar<-", function(object, value) standardGeneric("setPar<-"))
 setGeneric("setIndicmod<-", function(object, value) standardGeneric("setIndicmod<-"))
 
 setGeneric("setIndicfix<-", function(object, value) standardGeneric("setIndicfix<-"))
+
+setGeneric("setT<-", function(object, value) standardGeneric("setT<-"))
 
 ## Class 'modelmoments' --------------------------------------------
 
@@ -106,8 +110,6 @@ setGeneric("getSim", function(object) standardGeneric("getSim"))
 
 setGeneric("getExp", function(object) standardGeneric("getExp"))
 
-setGeneric("getT", function(object) standardGeneric("getT"))
-
 setGeneric("setY<-", function(object, value) standardGeneric("setY<-"))
 
 setGeneric("setN<-", function(object,  value) standardGeneric("setN<-"))
@@ -123,8 +125,6 @@ setGeneric("setType<-", function(object, value) standardGeneric("setType<-"))
 setGeneric("setSim<-", function(object, value) standardGeneric("setSim<-"))
 
 setGeneric("setExp<-", function(object, value) standardGeneric("setExp<-"))
-
-setGeneric("setT<-", function(object, value) standardGeneric("setT<-"))
 
 ## Class 'groupmoments' ----------------------------------------------
 
@@ -150,15 +150,35 @@ setGeneric("generatePrior", function(object, data, model, varargin, coef.mat)
            }
 )
 
+setGeneric("getHier", function(object) standardGeneric("getHier"))
 
+setGeneric("setHier<-", function(object, value) standardGeneric("setHier<-"))
 
+## Class 'mcmc' -------------------------------------------------------
 
+setGeneric("getBurnin", function(object) standardGeneric("getBurnin"))
 
+setGeneric("getM", function(object) standardGeneric("getM"))
 
+setGeneric("getStartpar", function(object) standardGeneric("getStartpar"))
 
+setGeneric("getStoreS", function(object) standardGeneric("getStoreS"))
 
+setGeneric("getStorepost", function(object) standardGeneric("getStorepost"))
 
+setGeneric("getRanperm", function(object) standardGeneric("getRanperm"))
 
+setGeneric("setBurnin<-", function(object, value) standardGeneric("setBurnin<-"))
+
+setGeneric("setM<-", function(object, value) standardGeneric("setM<-"))
+
+setGeneric("setStartpar<-", function(object, value) standardGeneric("setStartpar<-"))
+
+setGeneric("setStoreS<-", function(object, value) standardGeneric("setStoreS<-"))
+
+setGeneric("setStorepost<-", function(object, value) standardGeneric("setStorepost<-"))
+
+setGeneric("setRanperm<-", function(object, value) standardGeneric("setRanperm<-"))
 
 
 
