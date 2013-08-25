@@ -13,31 +13,27 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with Rcpp.  If not, see <http://www.gnu.org/licenses/>.
+# along with finmix. If not, see <http://www.gnu.org/licenses/>.
 
-## 'datamoments' is a virtual classes from which the corresponding      ##
-## datamoments for 'continuous' and 'discrete' inherit	 		## 
-setClass("sdatamoments",
-         representation(gmoments    = "groupmoments",
-                        data        = "data"),
-         validity = function(object) {
-             ## else: OK
-		     TRUE
-         }
+.sdatamoments <- setClass("sdatamoments",
+                          representation(gmoments    = "groupmoments",
+                                         fdata       = "fdata"),
+                          validity = function(object) 
+                          {
+                              ## else: OK
+                              TRUE
+                          }
 )
 
+setClassUnion("sdatamomentsOrNULL", members = c("sdatamoments", "NULL"))
+
 ## mutual constructor for both types of sdatamoments ##
-"sdatamoments" <- function(value = data()) 
+"sdatamoments" <- function(value = fdata()) 
 {
-    if (all(is.na(value@y))) {
-        stop("'data' object has no data. Slot 'y' is empty.")
-    } else {
-        if (all(is.na(value@S))) {
-            stop("'data' object has no allocations. Slot 'S' is empty.")
-        }
-    }
+    hasY(value, verbose = TRUE)
+    hasS(value, verbose = TRUE)
     if (value@type == "discrete") {
-        object <- new("sdatamoments", value = value)
+        object <- .sdatamoments(value = value)
     } else {
         object <- .csdatamoments(value = value)
     }
@@ -45,10 +41,10 @@ setClass("sdatamoments",
 }
 
 setMethod("initialize", "sdatamoments",
-          function(.Object, ..., value = data()) 
+          function(.Object, ..., value = fdata()) 
           {
-              .Object@data <- value
-              .Object@gmoments <- new("groupmoments", value = value)
+              .Object@fdata     <- value
+              .Object@gmoments  <- .groupmoments(value = value)
               return(.Object)
           }
 )
@@ -59,20 +55,23 @@ setMethod("show", "sdatamoments",
               cat("Object 'sdatamoments'\n")
               cat("     gmoments    : Object of class",
                   class(object@gmoments), "\n")
-              cat("     data        : Object of class",
-                  class(object@data), "\n")
+              cat("     fdata       : Object of class",
+                  class(object@fdata), "\n")
           }
 )
 
 ## Getters ##
-setMethod("getGmoments", "sdatamoments", function(object) {
-							return(object@gmoments)
-						}
+setMethod("getGmoments", "sdatamoments", 
+          function(object) 
+          {
+              return(object@gmoments)
+          }
 )
 
-setMethod("getData", "sdatamoments", 
-          function(object) {
-              return(object@data)
+setMethod("getFdata", "sdatamoments", 
+          function(object) 
+          {
+              return(object@fdata)
           }
 )
 

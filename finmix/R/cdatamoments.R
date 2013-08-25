@@ -13,17 +13,18 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with Rcpp.  If not, see <http://www.gnu.org/licenses/>.
+# along with finmix. If not, see <http://www.gnu.org/licenses/>.
 
 .cdatamoments <- setClass("cdatamoments",
                           representation(higher      = "array",
                                          skewness    = "vector",
                                          kurtosis    = "vector",
                                          corr        = "matrix",
-                                         smoments    = "csdatamoments"
+                                         smoments    = "csdatamomentsOrNULL"
                                          ),
                           contains = c("datamoments"),
-                          validity = function(object) {
+                          validity = function(object) 
+                          {
                               ## else: ok
                               TRUE
                           },
@@ -36,17 +37,18 @@
 )
 
 setMethod("initialize", "cdatamoments", 
-          function(.Object, ..., value = data()) 
+          function(.Object, ..., value = fdata()) 
           {
-              .Object@data <- value
-			  if (!all(is.na(value@S))) {
-                  .Object@smoments <- sdatamoments(value = value)
+              .Object@fdata <- value
+			  if (hasS(value)) {
+                  .Object@smoments  <- sdatamoments(value = value)
+              } else {
+                  .Object@smoments  <- NULL
               }
               generateMoments(.Object)
           }
 )
 
-## Generic set in 'groupmoments.R' ##
 setMethod("generateMoments", "cdatamoments",
           function(object) 
           {
@@ -72,12 +74,12 @@ setMethod("show", "cdatamoments",
                   cat("     corr        :",
                       paste(dim(object@corr), collapse = "x"), "\n")
               }
-              if (!all(is.na(object@data@S))) {
+              if (hasS(object@fdata)) {
                   cat("     smoments    : Object of class", 
                       class(object@smoments), "\n")
               }
-              cat("     data        : Object of class",
-                  class(object@data), "\n")
+              cat("     fdata        : Object of class",
+                  class(object@fdata), "\n")
           }
 )
 
@@ -124,18 +126,15 @@ setMethod("getCorr", "cdatamoments",
 ".generateCdatamoments" <- function(object) 
 {
     ## enforce column-wise ordering ##
-    if (!object@data@bycolumn) {
-        datam <- t(object@data@y)
-    } else {
-        datam <- object@data@y
-    }
+    hasY(object@fdata, verbose = TRUE)
+    datam   <- getColY(object@fdata)
     ## Compute higher moments ##
     ## higher.moments is a r x L matrix (L = 4) ##
     means <- apply(datam, 2, mean, na.rm = TRUE)
     object@mean <- means
     object@var <- var(datam, na.rm = TRUE)
     d <- datam - rep(means, each = nrow(datam)) 
-    momentsm <- array(0, dim = c(4, object@data@r))
+    momentsm <- array(0, dim = c(4, object@fdata@r))
     momentsm[2,] <- apply(d^2, 2, mean, na.rm = TRUE)
     momentsm[3,] <- apply(d^3, 2, mean, na.rm = TRUE)
     momentsm[4,] <- apply(d^4, 2, mean, na.rm = TRUE)
@@ -152,7 +151,7 @@ setMethod("getCorr", "cdatamoments",
     object@kurtosis <- kurtm
     ## Compute corr matrix in case of r > 1 ##
     ## corr is a r x r matrix ##
-    if(object@data@r  > 1) {
+    if(object@fdata@r  > 1) {
         object@corr <- cor(datam)			
     } else {
         object@corr <- matrix()

@@ -117,26 +117,26 @@ void IND <Super>::Output::store (const unsigned int& m,
 	Node& node)
 {
 	Super::Output::store(m,node);
-	if(m >= node.BURNIN) {
+	if (m >= node.BURNIN) {
 		const unsigned int index = m - node.BURNIN;
 		(*weight).row(index) = node.par.weight;
 		(*cdpost)(index) = node.log.cdpost;
 		(*entropy)(index) = node.log.entropy;
 		(*ST)(index) = node.S(node.N - 1);
 		if(index >= node.M - node.STORES) {
-			if(node.STARTPAR && index != node.M - 1) {
+			if (!node.STARTPAR && index != node.M - 1) {
 				(*S).col(index - (node.M - node.STORES) + 1) = node.S;
 			}
-			if (!node.STARTPAR){
+			if (node.STARTPAR){
 				(*S).col(index - (node.M - node.STORES)) = node.S;
 			}
 		}
 		(*NK).row(index) = arma::conv_to<arma::irowvec>::from
 			(node.hyperPar.weightPost - node.hyperPar.weightStart);
-		if(m == node.BURNIN) {
+		if (m == node.BURNIN) {
 			node.log.maxcdpost = node.log.cdpost - 1;		
 		}
-		if(node.log.cdpost > node.log.maxcdpost) {
+		if (node.log.cdpost > node.log.maxcdpost) {
 			(*clust) = node.S;
 		}
 	}

@@ -33,7 +33,7 @@ PriorPoissonFix::PriorPoissonFix (const FinmixPrior& prior) :
 	bPost(Rcpp::as<arma::rowvec>((SEXP) prior.par["b"])),
 	HIER(prior.hier) 
 {
-	if(HIER){
+	if (HIER){
 		g = Rcpp::as<double>((SEXP) prior.par["g"]);
 		G = Rcpp::as<double>((SEXP) prior.par["G"]); 
 	}
@@ -42,7 +42,7 @@ PriorPoissonFix::PriorPoissonFix (const FinmixPrior& prior) :
 void PriorPoissonFix::update (const unsigned int& K, const arma::mat& y,
 			arma::ivec& S, const ParPoissonFix& par)  
 {
-	if(K == 1) {
+	if (K == 1) {
 		aPost(0) = aStart(0) + arma::accu(y);
 		bPost(0) = bStart(0) + y.n_rows; 
 	}

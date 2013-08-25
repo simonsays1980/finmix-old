@@ -13,7 +13,7 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with Rcpp.  If not, see <http://www.gnu.org/licenses/>.
+# along with finmix. If not, see <http://www.gnu.org/licenses/>.
 
 .model <- setClass("model",
                    representation(dist        ="character",
@@ -25,20 +25,7 @@
                                   indicfix    = "logical",
                                   T           = "matrix"),
                    validity = function(object) {
-                       dist <- object@dist
-                       .valid.Dist(object)
-                       .valid.Weight(object)
-                       if (object@K <= 0) {					
-                           stop("Number of components 'K' must be a 
-                                positive integer.")
-                       }
-                       if (dist == "poisson") {
-                           object <- .valid.Poisson.Model(object)
-                       } else if (dist == "binomial") {
-                           .valid.Binomial.Model(object)
-                       } else {
-
-                       }
+                       .valid.Model(object)
                        ## else: OK ##
                        TRUE
                    },
@@ -54,22 +41,91 @@
 )
 
 ## Constructor for class 'model' ##
-"model" <- function(dist = "poisson", r = as.integer(1), 
-                    K = as.integer(1), weight = matrix(), 
-                    par = list(), indicmod = "multinomial", 
+"model" <- function(dist = "poisson", r, K, 
+                    weight = matrix(), par = list(), 
+                    indicmod = "multinomial", 
            			indicfix = FALSE, T = matrix()) 
 {
-    if (K > 1 && all(is.na(weight))) {
-	    weight <- matrix(1/K, nrow = 1, ncol = K)
-	} 	
-    object <- .model(dist = dist, r = as.integer(r), 
-                     K = as.integer(K), weight = weight, par = par, 
-                     indicmod = indicmod, indicfix = indicfix, T = T)
-    return(object)
+    if (missing(K)) {
+        K <- .check.K.Model(weight)
+    } else {
+        K <- as.integer(K)
+    }
+    if (missing(r)) {
+        r <- .check.r.Model(dist) 
+    } else {
+        r <- as.integer(r)
+    }
+    if (missing(weight) && K > 1) {
+        weight <- .check.weight.Model(K)
+    } else {
+        weight <- as.matrix(weight)
+    }
+    if (!missing(T)) {
+        T <- .check.T.Model(T)
+    }
+    .model(dist = dist, r = r, K = K, weight = weight, 
+           par = par, indicmod = indicmod, 
+           indicfix = indicfix, T = T)
 }
 
+setMethod("hasWeight", "model",
+          function(object, verbose = FALSE) 
+          {
+              if (!all(is.na(object@weight))) {
+                  if (ncol(object@weight) == object@K) {                      
+                      return(TRUE)
+                  } else {
+                      if (verbose) {
+                          stop(paste("Wrong dimension of ",
+                                     "slot 'weight' of ",
+                                     "'model' object." ,
+                                     "Weights must be of ",
+                                     "dimension 1 x K.",
+                                     sep = ""))
+                      } else {
+                          return(FALSE)
+                      }
+                  }
+              } else {
+                  if (verbose) {
+                      stop(paste("Slot 'weight' of 'model' ",
+                                 "object is empty.",
+                                 sep = ""))                      
+                  } else {                      
+                      return(FALSE)
+                  }
+              }
+          }
+)
+
+setMethod("hasT", "model",
+          function(object, verbose = FALSE) 
+          {
+              if (!all(is.na(object@T))) {
+                  return(TRUE)
+              } else {
+                  if (verbose) {
+                      stop(paste("Slot 'T' of 'model' ",
+                                 "object is empty.", 
+                                 sep = ""))
+                  } else {
+                      return(FALSE)
+                  }
+              }
+          }
+)
+
+setMethod("hasPar", "model",
+          function(object, verbose = FALSE) 
+          {
+              .haspar.Model(object, verbose)
+          }
+)
+
+## plot ##
 setMethod("plot", "model", 
-          function(x, y, ..., dev = TRUE) 
+          function(x, y, dev = TRUE, ...) 
           {
               dist    <- x@dist
               if(dist == "normal") {
@@ -82,7 +138,7 @@ setMethod("plot", "model",
                   .plot.Student.Model(x, dev, ...)
               } else if (dist == "studmult") {
                   .plot.Studmult.Model(x, dev, ...)
-              }	else if (dist == "poisson" || dist == "cond.poisson") {
+              }	else if (dist %in% c("poisson", "cond.poisson")) {
                   .plot.Poisson.Model(x, dev, ...)
               } else if (dist == "binomial") {
                   if(length(x@T) != 1) {
@@ -94,48 +150,23 @@ setMethod("plot", "model",
           }
 )
 
+setMethod("plotPointProc", signature(x      = "model",
+                                     dev    = "ANY"),
+          function(x, dev = TRUE, ...) 
+          {
+              hasPar(x, verbose = TRUE)
+              hasWeight(x, verbose = TRUE)
+              if (x@dist == "poisson") {
+                  .plotpointproc.Poisson(x, dev)
+              }
+          }
+)
+
 ## Marginal Mixture ##
-setGeneric("mixturemar", function(object, J) standardGeneric("mixturemar"))
 setMethod("mixturemar", "model", 
           function(object, J) 
           {
-              if (object@dist == "normult") {	
-                  dist <- ifelse(length(J) == 1, "normal", "normult")
-                  r             <- length(J)
-                  K             <- object@K
-                  weight        <- object@weight
-                  mu            <- object@par$mu[J, ]
-                  sigma         <- object@par$sigma[J, J, ]
-                  par           <- list(mu = mu, sigma = sigma)
-                  indicmod      <- "multinomial"
-                  indicfix      <- TRUE
-                  margin.model  <- .model(dist = dist, r = r, K = K, 
-                                          weight = weight, par = par, 
-                                          indicmod = indicmod, 
-                                          indicfix = indicfix)
-                  validObject(margin.model)
-                  return(margin.model)
-              } else if (object@dist == "studmult") {
-                  dist <- ifelse(length(J) == 1, "student", "studmult")
-                  r             <- length(J)
-                  K             <- object@K
-                  weight        <- object@weight
-                  mu            <- object@par$mu[J, ]
-                  sigma         <- object@par$sigma[J, J, ] 
-                  df            <- object@par$df
-                  par           <- list(mu = mu, sigma = sigma, df = df)
-                  indicmod      <- "multinomial"
-                  indicfix      <- TRUE
-                  margin.model  <- .model(dist = dist, r = r, K = K, 
-                                          weight = weight, par = par, 
-                                          indicmod = indicmod,
-                                          indicfix = indicfix)
-                  validObject(margin.model)
-                  return(margin.model)
-              } else {
-                  stop("A marginal distribution can only be obtained from 
-                       multivariate distributions.")
-              }
+              .mixturemar.Model(object, J)
           }
 )
 	
@@ -148,21 +179,24 @@ setMethod("show", "model",
               cat("     dist        :", object@dist, "\n")
               cat("     r           :", object@r, "\n")
               cat("     K           :", object@K, "\n")
-              if (!all(is.na(object@par))) {
-                 cat("     weight      :", 
-                      paste(dim(object@weight), collapse = "x"), 
-                      "\n")
+              if (hasPar(object)) {
                  cat("     par         : List of",
                       length(object@par), "\n")
               }
+              if (!object@indicfix) {
+                  cat("     weight      :", 
+                      paste(dim(object@weight), collapse = "x"), 
+                      "\n")
+              }
               cat("     indicmod    :", object@indicmod, "\n")
               cat("     indicfix    :", object@indicfix, "\n")
-              if (object@dist == "binomial") {
+              if (object@dist == "binomial" && !all(is.na(object@T))) {
                   cat("     T           :",
                       paste(dim(object@T), collapse = "x"), "\n")
               }
           }
 )
+
 ## Getters ##
 setMethod("getDist", "model", 
           function(object) 
@@ -225,7 +259,7 @@ setReplaceMethod("setDist", "model",
                  function(object, value) 
                  {
                      object@dist <- value
-                     validObject(object)
+                     .valid.dist.Model(object)
                      return(object)
                  }
 )
@@ -242,11 +276,15 @@ setReplaceMethod("setR", "model",
 setReplaceMethod("setK", "model", 
                  function(object, value) 
                  {
-                     object@K       <- as.integer(value)
-                     object@weight  <- matrix(1/value, 
-                                              nrow = 1, 
-                                              ncol = object@K)
-                     validObject(object)
+                     object@K           <- as.integer(value)
+                     .init.valid.K.Model(object)
+                     if (object@K > 1) {
+                         object@weight  <- .check.weight.Model(object@K)                   
+                     } else {
+                         weight                 <- matrix()
+                         storage.mode(weight)   <- "numeric"
+                         object@weight          <- weight
+                     }
                      return(object)
                  }
 )
@@ -254,8 +292,9 @@ setReplaceMethod("setK", "model",
 setReplaceMethod("setWeight", "model", 
                  function(object, value) 
                  {
-                     object@weight <- value
-                     validObject(object)
+                     object@weight  <- as.matrix(value)
+                     object@K       <- ncol(object@weight)
+                     .init.valid.weight.Model(object)
                      return(object)
                  }
 )
@@ -264,7 +303,7 @@ setReplaceMethod("setPar", "model",
                  function(object, value) 
                  {
                      object@par <- value
-                     validObject(object)
+                     .init.valid.par.Model(object)                     
                      return(object)
                  }
 )
@@ -273,7 +312,6 @@ setReplaceMethod("setIndicmod", "model",
                  function(object, value) 
                  {
                      object@indicmod <- value
-                     validObject(object)
                      return(object)
                  }
 )
@@ -282,24 +320,148 @@ setReplaceMethod("setIndicfix", "model",
                  function(object, value) 
                  {
                      object@indicfix <- value
-                     validObject(object)
                      return(object)
                  }
 )
 
 setReplaceMethod("setT", "model",
                  function(object, value) 
-                 {
-                     object@T <- as.matrix(value)
-                     validObject(object)
+                 {                     
+                     object@T <- matrix(value)                    
+                     .valid.T.Model(object)
                      return(object)
                  }
 )
 
 ### Private functions
 ### These functions are not exported
+
+### Checking.
+### Checking is used for in the constructor. 
+### Arguments for the slots are checked for validity and
+### if missing are given by default values. Altogether the
+### constructor tries to construct a fully specified model
+### object with consistent slots.
+
+### Check K: If weights are provided by the user, the number
+### of components is set to the number of columns of the weights.
+### If argument 'weight' is missing from the call, the number of
+### components is assumed to be one. 
+".check.K.Model" <- function(weight)
+{
+    if (!all(is.na(weight))) {
+        return(NCOL(weight))
+    } else {
+        return(as.integer(1))
+    }
+}
+
+### Check r: The dimension of the model is determined in regard to 
+### the defined distribution in argument 'dist' (if missing the 
+### default is 'poisson'). For univariate distributions it is set
+### to one and for multivariate distribution as a default to two.
+".check.r.Model" <- function(dist) 
+{
+    univ    <- .get.univ.Model()
+    multiv  <- .get.multiv.Model()
+    if (dist %in% univ) {
+        return(as.integer(1))
+    } else if (dist %in% multiv) {
+        return(as.integer(2))
+    } else {
+        stop(paste("Unknown distribution in slot ",
+                   "'dist' of 'model' object.", 
+                   sep = ""))
+    }
+}
+
+### Check weight: If argument 'weight' is missing from the call 
+### equally balanced weights are given as a default. 
+".check.weight.Model" <- function(K) 
+{
+    weight <- matrix(1/K, nrow = 1, ncol = K)
+    return(weight)
+} 
+
+### Check T: If repetitions are given they are checked in regard
+### to validity. In case of non-numeric objects an error is thrown.
+### In case of objects of type 'numeric' it is implicitly converted 
+### to type 'integer'.
+".check.T.Model" <- function(T)
+{
+    if (!all(is.na(T))) {
+        if (!is.numeric(T)) {
+            stop(paste("Wrong specification of slot 'T' in ",
+                       "'model' object. Repetitions must be of ",
+                       "type 'integer'.", sep = ""))
+        } else {
+            storage.mode(T) <- "integer"
+            return(T)
+        }
+    }
+}
+
+### Marginal model
+".mixturemar.Model" <- function(obj, J)
+{
+    if (object@dist == "normult") {
+        .mixturemar.normult.Model(obj, J)
+    } else if (object@dist == "studmult") {
+        .mixturemar.studmult.Model(obj, J)
+    } else {
+        stop("A marginal distribution can only be obtained from 
+             multivariate distributions.")
+    }
+}
+
+".mixturemar.normult.Model" <- function(obj, J)
+{
+    dist <- ifelse(length(J) == 1, "normal", "normult")
+    r             <- length(J)
+    K             <- obj@K
+    weight        <- obj@weight
+    mu            <- obj@par$mu[J, ]
+    sigma         <- obj@par$sigma[J, J, ]
+    par           <- list(mu = mu, sigma = sigma)
+    indicmod      <- "multinomial"
+    indicfix      <- TRUE
+    margin.model  <- .model(dist = dist, r = r, K = K, 
+                            weight = weight, par = par, 
+                            indicmod = indicmod, 
+                            indicfix = indicfix)
+    validObject(margin.model)
+    return(margin.model)
+}
+
+".mixturemar.studmult.Model" <- function(obj, J)
+{
+    dist <- ifelse(length(J) == 1, "student", "studmult")
+    r             <- length(J)
+    K             <- obj@K
+    weight        <- obj@weight
+    mu            <- obj@par$mu[J, ]
+    sigma         <- obj@par$sigma[J, J, ] 
+    df            <- obj@par$df
+    par           <- list(mu = mu, sigma = sigma, df = df)
+    indicmod      <- "multinomial"
+    indicfix      <- TRUE
+    margin.model  <- .model(dist = dist, r = r, K = K, 
+                            weight = weight, par = par, 
+                            indicmod = indicmod,
+                            indicfix = indicfix)
+    validObject(margin.model)
+    return(margin.model)
+}
+
+### Plotting
+### Plot Poisson models: Poisson models are discrete
+### models and a barplot is used. 
+### The range for the x-axis is determined via the 
+### quantiles of the largest and smallest Poisson model
+### in the mixture. 
 ".plot.Poisson.Model" <- function(model.obj, dev, ...)
 {
+
     if (.check.grDevice() && dev) {
         dev.new(title = "Model plot")
     }
@@ -323,6 +485,10 @@ setReplaceMethod("setT", "model",
     mtext(side = 2, "P(x)", cex = .7, cex.axis = .7, line = 3)
 }
 
+### Plot Binomial models: Binomial models are discrete 
+### models and line model is used. 
+### The grid for the x-axis is determined by taking 
+### the 
 ".plot.Binomial.Model" <- function(model.obj, dev, ...)
 {
     if (.check.grDevice() && dev) {
@@ -564,70 +730,418 @@ setReplaceMethod("setT", "model",
     return(grid.list)
 }
 
+### plotPointProc
+".plotpointproc.Poisson" <- function(x, dev) 
+{
+    K   <- x@K
+    if (.check.grDevice() && dev) {
+        dev.new(title = "Point Process Representation")
+    }
+    if (min(x@par$lambda) < 1) {
+        lambda <- log(x@par$lambda)
+    } else {
+        lambda <- x@par$lambda
+    } 
+    y.grid      <- rep(0, K)
+    size.grid   <- as.vector(x@weight * 4)
+    col.grid    <- gray.colors(K, start = 0.2,
+                               end = 0.5)
+    plot(lambda, y.grid, pch = 20, col = col.grid, 
+         cex = size.grid, cex.lab = .7, cex.axis = .7, 
+         main = "", ylab = "", xlab = "")
+    mtext(side = 1, bquote(lambda), cex = .7, cex.lab = .7, 
+          line = 3)
+    legend.names    <- list("", K)
+    for (k in seq(1, K)) {
+        legend.names[[k]]   <- bquote(lambda[.(k)])
+    }
+    legend("topright", legend = do.call(expression, legend.names), 
+           col = col.grid, fill = col.grid)
+}
+
+### Has
+### Checks if a 'model' object has specified parameters.
+".haspar.Model" <- function(obj, verbose) 
+{
+    if (length(obj@par) > 0) {
+        if (obj@dist %in% c("poisson", "cond.poisson")) {
+            .haspar.poisson.Model(obj, verbose)
+        }
+    } else {
+        if (verbose) {
+            stop(paste("Slot 'par' of 'model' object is ",
+                       "empty.", sep = ""))
+        } else {
+            return(FALSE)
+        }
+    }
+}
+
+### Checks if a Poisson model has fully specified parameters.
+### If verbose is set to TRUE an error is thrown. 
+".haspar.poisson.Model" <- function(obj, verbose) 
+{
+    if ("lambda" %in% names(obj@par)) {
+        if (length(obj@par$lambda) != obj@K) {
+            if (verbose) {
+                stop(paste("Wrong specification of slot 'par' of ",
+                           "'model' object. Number of Poisson ",
+                           "parameters in 'par$lambda' must match ",
+                           "number of components in slot 'K'.", 
+                           sep = ""))
+            } else {
+                return(FALSE)
+            }
+        } else {
+            return(TRUE)
+        }
+    } else {
+        if (verbose) 
+        {
+            stop(paste("Wrong specification of slot 'par' of ",
+                       "'model' object. Poisson parameters must be ",
+                       "names 'lambda'.", sep = ""))
+        } else {
+            return(FALSE)
+        }
+    }
+}
+    
 ### Validity
-### Valid.dist: @dist must be a distribution which
-### is implemented
-".valid.Dist" <- function(model.obj)
+### Validity checking of model objects is implemented
+### in two versions: an initializing version relying partly
+### on warnings and amore restrictive version relying exclusively
+### on errors. 
+### The less restrictive validity check is used in setters and
+### and the fully restrictive version in the constructor and later
+### usage of model object (e.g. see 'mcmcstart()').
+".init.valid.Model" <- function(obj) 
+{
+    .valid.dist.Model(obj)
+    .init.valid.K.Model(obj) 
+    .init..valid.r.Model(obj)
+    .init.valid.par.Model(obj)
+    .init.valid.weight.Model(obj)
+    .valid.T.Model(obj)
+}
+
+".valid.Model" <- function(obj) 
+{
+    .valid.dist.Model(obj)
+    .valid.K.Model(obj)
+    .valid.r.Model(obj)
+    .valid.par.Model(obj)
+    .valid.weight.Model(obj)
+    .valid.T.Model(obj)
+}
+
+### Valid dist: @dist must be a distribution which
+### is implemented.
+### Furthermore: @indicmod must be an indicator 
+### model that is implemented.
+".valid.dist.Model" <- function(obj)
 {
     dists            <- c("normal", "normult", "exponential", 
                           "student", "studmult", "poisson", 
                           "cond.poisson", "binomial")
     indicmod.dists   <- c("multinomial")
-    if (length(model.obj@dist) > 0) {
-        if (!(model.obj@dist %in% dists)) {
-            stop("Unknown distribution in slot 'dist'.")
+    if (length(obj@dist) > 0) {
+        if (!(obj@dist %in% dists)) {
+            stop(paste("Unknown distribution in slot 'dist' ",
+                          "of 'model' object.", sep = ""))            
         } else {
-            if (!(model.obj@indicmod) %in% indicmod.dists) {
-            stop(paste("Unknown indicator distribution in slot", 
-                 "'indicmod'"), sep = "")
+            if (!(obj@indicmod %in% indicmod.dists)) {
+            stop(paste("Unknown indicator distribution in slot ", 
+                          "'indicmod' of 'model' object."), sep = "")
             }
         }
     }
 }
 
-### valid.Weight: The weights must be positive and add to one.
-".valid.Weight" <- function(model.obj)
+### Valid K: The number of components @K must be a positive 
+### integer with no exclusion.
+".init.valid.K.Model" <- function(obj) 
 {
-    if (!all(is.na(model.obj@weight))) {
-        if (ncol(model.obj@weight) != model.obj@K) {
-            warning(paste("Number of weights in slot 'weight' do not", 
-                    "match number of components in slot 'K'."), sep = "")
+    if (obj@K < 1) {
+        stop(paste("Wrong specification of slot 'K' of ",
+                   "'model' object. Number of components ",
+                   "must be a positive integer.", sep = ""))
+    } else {
+        if (!all(is.na(obj@weight))) {            
+            if (obj@K != ncol(obj@weight)) {
+                warning(paste("Dimension of slot 'weight' in ",
+                              "'model' object does not match ",
+                              "number of components in slot 'K'.",
+                              sep = ""))
+            }
+        }
+        .init.valid.par.Model(obj)            
+     }
+
+}
+
+".valid.K.Model" <- function(obj) 
+{
+     if (obj@K < 1) {
+        stop(paste("Wrong specification of slot 'K' of ",
+                   "'model' object. Number of components ",
+                   "must be a positive integer.", sep = ""))
+    } else {
+        if (!all(is.na(obj@weight))) {            
+            if (obj@K != ncol(obj@weight)) {
+                stop(paste("Dimension of slot 'weight' in ",
+                           "'model' object does not match ",
+                           "number of components in slot 'K'.",
+                           sep = ""))
+            }
+        }
+        .valid.par.Model(obj)            
+     }
+}
+   
+### Valid r: @r must be a positive integer. It must be one for
+### univariate distributions and must be greater one for 
+### multivariate distributions.
+".init.valid.r.Model" <- function(obj)
+{
+    univ    <- .get.univ.Model()
+    multiv  <- .get.multiv.Model()
+    if (obj@r < 1) {
+        warning(paste("Wrong specification of slot 'r' ",
+                      "in 'model' object. Dimension of ",
+                      "variables must be a positive integer.", 
+                      sep =""))
+    } else {
+        if ((obj@dist %in% univ) && obj@r > 1) {
+            warning(paste("Wrong specification of slot 'r' ",
+                          "in 'model' object. Univariate ",
+                          "distributions can only have one ",
+                          "dimension.", sep = ""))
+        } else if ((obj@dist %in% multiv) && obj@r < 2) {
+            warning(paste("Wrong specification of slot 'r' ",
+                          "in 'model' object. Multivariate ",
+                          "distributions must have dimension ",
+                          "greater one.", sep =""))
+        }
+    }
+}
+
+".valid.r.Model" <- function(obj)
+{
+    univ    <- .get.univ.Model()
+    multiv  <- .get.multiv.Model() 
+    if (obj@r < 1) {
+        stop(paste("Wrong specification of slot 'r' ",
+                   "in 'model' object. Dimension of ",
+                   "variables must be positive.", 
+                      sep =""))
+    } else {
+        if ((obj@dist %in% univ) && obj@r > 1) {
+            stop(paste("Wrong specification of slot 'r' ",
+                       "in 'model' object. Univariate ",
+                       "distributions can only have one ",
+                       "dimension.", sep = ""))
+        } else if ((obj@dist %in% multiv) && obj@r < 2) {
+            stop(paste("Wrong specification of slot 'r' ",
+                       "in 'model' object. Multivariate ",
+                       "distributions must have dimension ",
+                       "greater one.", sep =""))
+        }
+    }
+}
+
+### Valid weight: The weights must be positive and add to one.
+### Furthermore, @weight must be matrix of dimension 1 x K.
+".init.valid.weight.Model" <- function(obj)
+{
+    if (!all(is.na(obj@weight))) {
+        if (nrow(obj@weight) > 1) {
+            warning(paste("Wrong dimension of slot 'weight' in ",
+                          "'model' object. Dimension of slot ",
+                          "'weight' must be 1 x K.", sep = ""))
         } else {
-            if (any(model.obj@weight <= 0)) {
-                stop("Weights in slot 'weight' must be positive.")
+            if (ncol(obj@weight) != obj@K) {
+                warning(paste("Wrong number of weights in slot 'weight' of ",
+                              "'model' object. Number of weights does not ",
+                              "match number of components in slot 'K'.", sep = ""))
             } else {
-                if (sum(model.obj@weight) != 1) {
-                    stop("Weights in slot 'weight' must sum to one.")
+                if (is.integer(obj@weight)) {
+                    stop(paste("Wrong specification of slot 'weight' of ",
+                                  "'model' object. Weights must be of type ",
+                                  "'numeric'.", sep = ""))
+                }
+                if (!is.numeric(obj@weight)) {
+                     stop(paste("Wrong specification of slot 'weight' of ",
+                                  "'model' object. Weights must be of type ",
+                                  "'numeric'.", sep = ""))
+                }
+                if (any(obj@weight <= 0)) {
+                    warning(paste("Weights in slot 'weight' of 'model' ",
+                                  "object must be positive.", sep = ""))
+                } else {
+                    if (sum(obj@weight) != 1) {
+                        warning(paste("Weights in slot 'weight' of 'model' ",
+                                      "object must sum to one.", sep = ""))
+                    }
                 }
             }
         }
     }
 }
-### valid.Poisson: The Poisson parameters must be positive.
+
+".valid.weight.Model" <- function(obj)
+{
+    if (!all(is.na(obj@weight))) {
+        if (nrow(obj@weight) > 1) {
+            stop(paste("Wrong dimension of slot 'weight' in ",
+                          "'model' object. Dimension of slot ",
+                          "'weight' must be 1 x K.", sep = ""))
+        } else {
+            if (ncol(obj@weight) != obj@K) {
+                stop(paste("Wrong number of weights in slot 'weight' of ",
+                              "'model' object. Number of weights does not ",
+                              "match number of components in slot 'K'.", sep = ""))
+            } else {
+                if (is.integer(obj@weight)) {
+                    stop(paste("Wrong specification of slot 'weight' of ",
+                                  "'model' object. Weights must be of type ",
+                                  "'numeric'.", sep = ""))
+                }
+                if (!is.numeric(obj@weight)) {
+                     stop(paste("Wrong specification of slot 'weight' of ",
+                                  "'model' object. Weights must be of type ",
+                                  "'numeric'.", sep = ""))
+                }
+                if (any(obj@weight <= 0)) {
+                    stop(paste("Weights in slot 'weight' of 'model' ",
+                                  "object must be positive.", sep = ""))
+                } else {
+                    if (sum(obj@weight) != 1) {
+                        stop(paste("Weights in slot 'weight' of 'model' ",
+                                      "object must sum to one.", sep = ""))
+                    }
+                }
+            }
+        }
+    }
+}
+
+### Valid repetitions: Repetitions for Binomial models in @T must
+### be a matrix of dimension N x 1.
+### Repetitions must positive integers or NA.
+".valid.T.Model" <- function(obj) 
+{
+    if (!all(is.na(obj@T))) {
+        if (!is.integer(obj@T)) {
+            stop(paste("Wrong type of slot 'T' in 'model' object ",
+                       "Repetitions must be of type 'integer'.",
+                       sep = ""))
+        } 
+        if (nrow(obj@T) > 1 && ncol(obj@T) > 1) {
+            stop(paste("Wrong dimension of slot 'T' in 'model' ",
+                       "object. Repetitions can only be ",
+                       "one-dimensional", sep = ""))
+        }
+        if (any(obj@T < 1)) {
+            stop(paste("Wrong specification of slot 'T' in 'model' ",
+                       "object. Repetitions must be positive integers ",
+                       "or NA.", sep = ""))
+        }
+    }
+}
+
+### Valid parameters: If @par is specified, parameters are checked
+### for correcteness in regard to the specified model @dist.
+### During initializing ('validObject()') the validity check 
+### relies exclusively on errors, as it is assumed that the user
+### knows what arguments have been provided to the constructor 
+### 'model()'. The same is true for later usage of model objects.
+### In case the user calls the setters of the model class it is 
+### assumed, that the user intends to change the model object 
+### slot by slot. In this case the validity check relies more on
+### warnings.
+".init.valid.par.Model" <- function(obj) 
+{
+    if (length(obj@par) > 0) {
+        if (obj@dist %in% c("poisson", "cond.poisson")) {
+            .init.valid.Poisson.Model(obj) 
+        } else if (obj@dist == "binomial") {
+
+        }
+    }
+}
+
+".valid.par.Model" <- function(obj) 
+{
+    if (length(obj@par) > 0) {
+        if (obj@dist %in% c("poisson", "cond.poisson")) {
+            .valid.Poisson.Model(obj) 
+        } else if (obj@dist == "binomial") {
+
+        }
+    }
+}
+
+### Valid Poisson: The Poisson parameters must be positive.
 ### Furthermore, the list element in @par must be named 
 ### 'lambda'. If model parameters are provided, the length
 ### of the object must be equal to @K.
-".valid.Poisson.Model" <- function(model.obj)
+### In case, that the user only modifies slots in the object
+### it is relied on warnings instead of errors. Only in the
+### case that parameters lambda in @par are specified and 
+### are negative an error is thrown: Neither Poisson nor
+### Exponential distributions allow negative- or zero-valued 
+### parameters.
+".init.valid.Poisson.Model" <- function(obj)
 {
-    if (length(model.obj@par) > 0) {
-        if ("lambda" %in% names(model.obj@par)) {
-            model.obj@par$lambda <- as.vector(model.obj@par$lambda)
-            if (length(model.obj@par$lambda) != model.obj@K) {
-                warning(paste("Number of Poisson parameters in slot 'par'", 
-                        "do not match number of components in slot", 
-                        "'K'."), sep = "")
-            } else {
-                if (any(model.obj@par$lambda <= 0)) {
-                    stop(paste("Poisson parameters 'lambda' in slot", 
-                            "'par' must be positive."), sep = "")
-                }
-            }
-        } else {
-            warning(paste("Poisson parameters in slot 'par' must be", 
-                    "named 'lambda'."), sep = "")
+    if ("lambda" %in% names(obj@par)) {
+        obj@par$lambda <- as.vector(obj@par$lambda)
+        if (!is.numeric(obj@par$lambda) && !is.integer(obj@par$lambda)) {
+            stop(paste("Wrong specification in slot 'par' of 'model' object. ",
+                       "Parameters must be of type 'numeric' or 'integer'.",
+                       sep = ""))
         }
-    }
-    return(model.obj)
+        if (length(obj@par$lambda) != obj@K) {
+            warning(paste("Wrong specification of slot 'par' of 'model' object. ", 
+                          "Number of Poisson parameter in 'par$lambda' must ",
+                          "match number of components in slot 'K'."), sep = "")
+        } else {
+            if (any(obj@par$lambda <= 0)) {
+                stop(paste("Wrong specification of slot 'par' of 'model' ",
+                              "object. Poisson parameters in 'par$lambda' ", 
+                              "must be positive.", sep = ""))               
+            }
+        }
+    } else {
+        warning(paste("Wrong specification of slot 'par' in 'model' object. ",
+                      "Poisson parameters must be named 'lambda'."), sep = "")
+    }   
+}
+
+".valid.Poisson.Model" <- function(obj)
+{
+    if ("lambda" %in% names(obj@par)) {
+        obj@par$lambda <- as.vector(obj@par$lambda)
+        if (!is.numeric(obj@par$lambda) && !is.integer(obj@par$lambda)) {
+            stop(paste("Wrong specification in slot 'par' of 'model' object. ",
+                       "Parameters must be of type 'numeric' or 'integer'.",
+                       sep = ""))
+        }
+        if (length(obj@par$lambda) != obj@K) {
+            stop(paste("Wrong specification of slot 'par' of 'model' object. ", 
+                       "Number of Poisson parameter in 'par$lambda' must ",
+                       "match number of components in slot 'K'."), sep = "")
+        } else {
+            if (any(obj@par$lambda <= 0)) {
+                stop(paste("Wrong specification of slot 'par' of 'model' ",
+                           "object. Poisson parameters in 'par$lambda' ", 
+                           "must be positive.", sep = ""))               
+            }
+        }
+    } else {
+        stop(paste("Wrong specification of slot 'par' in 'model' object. ",
+                   "Poisson parameters must be named 'lambda'."), sep = "")
+    }   
 }
 
 ### valid.Binomial
@@ -639,4 +1153,19 @@ setReplaceMethod("setT", "model",
              "repetitions can be used in a binomial mixture model."), sep ="")
     }
     
+}
+
+### Additional functions
+".get.univ.Model" <- function()
+{
+    univ <- c("poisson", "cond.poisson",
+              "binomial", "exponential",
+              "normal", "student")
+    return(univ)
+}
+
+".get.multiv.Model" <- function()
+{
+    multiv <- c("normult", "studmult")
+    return(multiv)
 }

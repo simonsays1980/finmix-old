@@ -13,38 +13,31 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with Rcpp.  If not, see <http://www.gnu.org/licenses/>.
+# along with finmix. If not, see <http://www.gnu.org/licenses/>.
 
-setClass("groupmoments", 
-         representation(NK          = "array",
-                        mean        = "matrix",
-                        WK          = "array",
-                        var         = "array",
-                        data        = "data"), 
-         validity = function(object) {
-             ## else: ok
-			 TRUE
-         },
-         prototype(NK   = array(),
-                   mean = matrix(),
-                   WK   = array(),
-                   var  = array(),
-                   data = data()
-                   )
+.groupmoments <- setClass("groupmoments", 
+                          representation(NK          = "array",
+                                         mean        = "matrix",
+                                         WK          = "array",
+                                         var         = "array",
+                                         fdata       = "fdata"), 
+                          validity = function(object) {
+                              ## else: ok
+                              TRUE
+                          },
+                          prototype(NK       = array(),
+                                    mean     = matrix(),
+                                    WK       = array(),
+                                    var      = array(),
+                                    fdata    = fdata()
+                                    )
 )
 
-"groupmoments" <- function(value = data()) 
+"groupmoments" <- function(value = fdata()) 
 {
-    if (all(is.na(value@y))) {
-        stop("'data' object has no data. Slot 'y' is empty.")
-    } else {
-        if (all(is.na(value@S))) {
-            stop("'data' object has no allocations. Slot 'S' is empty.")
-        } else {
-            object <- new("groupmoments", value = value)
-        }
-    }
-    return(object)
+    hasY(value, verbose = TRUE)
+    hasS(value, verbose = TRUE)
+    .groupmoments(value = value)
 }
 
 ## initializes by immediately calling method ##
@@ -52,7 +45,7 @@ setClass("groupmoments",
 setMethod("initialize", "groupmoments",
           function(.Object, ..., value) 
           {
-              .Object@data <- value
+              .Object@fdata <- value
               generateMoments(.Object)
           }
 )
@@ -77,6 +70,8 @@ setMethod("show", "groupmoments",
                   paste(dim(object@WK), collapse = "x"), "\n")
               cat("     var         :",
                   paste(dim(object@var), collapse = "x"), "\n")
+              cat("     fdata       : Object of class",
+                  class(object@fdata), "\n")
           }
 )
  
@@ -109,10 +104,10 @@ setMethod("getVar", "groupmoments",
           }
 )
 
-setMethod("getData", "groupmoments", 
+setMethod("getFdata", "groupmoments", 
           function(object) 
           {
-              return(object@data)		
+              return(object@fdata)		
           }
 )
 ## No setters as user are not intended to manipulate this  ##
@@ -122,19 +117,15 @@ setMethod("getData", "groupmoments",
 ### These functions are not exported
 ".generateGroupMoments" <- function(object) 
 {
-    if(all(is.na(object@data@S))) {
+    if(!hasS(object@fdata)) {
         return(object)
     }
 
     ## Compute group sizes ##
     ## enforce column-wise ordering ##
-    if (!object@data@bycolumn) {
-        datam <- t(object@data@y)
-        classm <- t(object@data@S)
-    } else {
-        datam <- object@data@y
-        classm <- object@data@S
-    }		
+
+    datam   <- getColY(object@fdata)
+    classm  <- getColS(object@fdata)
     ## Calculate group sizes and group means ##
     ## 'NK' is an 1 x K vector ##
     ## 'groupmean' is an r x K matrix ##
@@ -156,7 +147,7 @@ setMethod("getData", "groupmoments",
         gmeans[i, ] <- (t(datam[,i]) %*% comp)/t(object@NK)
     }
     colnames(gmeans) <- names
-    rownames(gmeans) <- colnames(data)
+    rownames(gmeans) <- colnames(datam)
     object@mean <- gmeans
     wkm <- array(NA, dim = c(r, r, K))
     varm <- array(NA, dim = c(r, r, K))

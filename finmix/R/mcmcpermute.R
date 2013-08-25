@@ -13,39 +13,15 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with Rcpp.  If not, see <http://www.gnu.org/licenses/>.
+# along with finmix. If not, see <http://www.gnu.org/licenses/>.
 
 "mcmcpermute" <- function(mcmcout) {
     ## Check arguments ##
-    if (!inherits(mcmcout, c("mcmcoutput", "mcmcoutputperm"))) {
-        stop("Argument 'mcmcout' must inherit either from class
-             'mcmcoutput' or from class 'mcmcoutputperm'.")
-    }
+    .check.args.Mcmcpermute(mcmcout)
     if (mcmcout@model@K == 1) {
         return(mcmcout)
     }
-    ## If object is of class 'mcmcoutputperm' coerce it 
-    ## to an object of class 'mcmcoutput' 
-    if(inherits(mcmcout, "mcmcoutputperm")) {
-        if (class(mcmcout) == "mcmcoutputpermfix") {
-            mcmcout <- as(mcmcout, "mcmcoutputfix")
-        } else if (class(mcmcout) == "mcmcoutputpermfixhier") {
-            mcmcout <- as(mcmcout, "mcmcoutputfixhier") 
-        } else if (class(mcmcout) == "mcmcoutputpermfixpost") {
-            mcmcout <- as(mcmcout, "mcmcoutputfixpost")
-        } else if (class(mcmcout) == "mcmcoutputpermfixhierpost") {
-            mcmcout <- as(mcmcout, "mcmcoutputfixhierpost")
-        } else if (class(mcmcout) == "mcmcoutputpermbase") {
-            mcmcout <- as(mcmcout, "mcmcoutputbase")
-        } else if (class(mcmcout) == "mcmcoutputpermhier") {
-            mcmcout <- as(mcmcout, "mcmcoutputhier")
-        } else if (class(mcmcout) == "mcmcoutputpermpost") {
-            mcmcout <- as(mcmcout, "mcmcoutputpost")
-        } else {
-            mcmcout <- as(mcmcout, "mcmcoutputhierpost")
-        }
-    }
-
+    mcmcout <- .mcmcpermute.Coerce(mcmcout)
     ## Constants ##
     K           <- mcmcout@model@K
     M           <- mcmcout@M
@@ -79,160 +55,143 @@
         mcmcout.swap <- swapElements(mcmcout.subseq, perm.index[is.perm,])
 
         ## Create 'mcmcoutputperm' objects ##
-        if (class(mcmcout) == "mcmcoutputfix") {
-            mcmcoutperm <- new("mcmcoutputpermfix", mcmcout, 
-                               Mperm        = mcmcout.swap@M,
-                               parperm      = mcmcout.swap@par,
-                               logperm      = mcmcout.swap@log)
-            return(mcmcoutperm)
-        } else if (class(mcmcout) == "mcmcoutputfixhier") {
-            mcmcoutperm <- new("mcmcoutputpermfixhier", mcmcout, 
-                               Mperm        = mcmcout.swap@M,
-                               parperm      = mcmcout.swap@par,
-                               logperm      = mcmcout.swap@log)
-            return(mcmcoutperm)
-        } else if (class(mcmcout) == "mcmcoutputfixpost") {
-            mcmcoutperm <- new("mcmcoutputpermfixpost", mcmcout,
-                               Mperm        = mcmcout.swap@M,
-                               parperm      = mcmcout.swap@par,
-                               logperm      = mcmcout.swap@log,
-                               postperm     = mcmcout.swap@post)
-            return(mcmcoutperm)
-        } else if (class(mcmcout) == "mcmcoutputfixhierpost") {
-            mcmcoutperm <- new("mcmcoutputpermfixhierpost", mcmcout,
-                               Mperm        = mcmcout.swap@M,
-                               parperm      = mcmcout.swap@par,
-                               logperm      = mcmcout.swap@log,
-                               postperm     = mcmcout.swap@post)
-            return(mcmcoutperm)
-        } else if (class(mcmcout) == "mcmcoutputbase") {
-            mcmcoutperm <- new("mcmcoutputpermbase", mcmcout,
-                               Mperm        = mcmcout.swap@M,
-                               parperm      = mcmcout.swap@par,
-                               weightperm   = mcmcout.swap@weight,
-                               logperm      = mcmcout.swap@log,
-                               entropyperm  = mcmcout.swap@entropy,
-                               STperm       = mcmcout.swap@ST,
-                               Sperm        = mcmcout.swap@S,
-                               NKperm       = mcmcout.swap@NK)
-            return(mcmcoutperm)
-        } else if (class(mcmcout) == "mcmcoutputhier") {
-            mcmcoutperm <- new("mcmcoutputpermhier", mcmcout,
-                               Mperm        = mcmcout.swap@M,
-                               parperm      = mcmcout.swap@par,
-                               weightperm   = mcmcout.swap@weight,
-                               logperm      = mcmcout.swap@log,
-                               entropyperm  = mcmcout.swap@entropy,
-                               STperm       = mcmcout.swap@ST,
-                               Sperm        = mcmcout.swap@S,
-                               NKperm       = mcmcout.swap@NK)
-            return(mcmcoutperm)
-        } else if (class(mcmcout) == "mcmcoutputpost") {
-            mcmcoutperm <- new("mcmcoutputpermpost", mcmcout,
-                               Mperm        = mcmcout.swap@M,
-                               parperm      = mcmcout.swap@par,
-                               weightperm   = mcmcout.swap@weight,
-                               logperm      = mcmcout.swap@log,
-                               postperm     = mcmcout.swap@post,
-                               entropyperm  = mcmcout.swap@entropy,
-                               STperm       = mcmcout.swap@ST,
-                               Sperm        = mcmcout.swap@S,
-                               NKperm       = mcmcout.swap@NK)
-            return(mcmcoutperm)
-        } else {
-            mcmcoutperm <- new("mcmcoutputpermhierpost", mcmcout,
-                               Mperm        = mcmcout.swap@M,
-                               parperm      = mcmcout.swap@par,
-                               weightperm   = mcmcout.swap@weight,
-                               logperm      = mcmcout.swap@log,
-                               postperm     = mcmcout.swap@post,
-                               entropyperm  = mcmcout.swap@entropy,
-                               STperm       = mcmcout.swap@ST,
-                               Sperm        = mcmcout.swap@S,
-                               NKperm       = mcmcout.swap@NK)
-            return(mcmcoutperm)
-        }
+        .process.Output(mcmcout, mcmcout.swap)
     } else {
-        Mperm <- 0
-        warning("Not a single draw is a permutation in the function 
-                'mcmcpermute()'.")
-         ## Create 'mcmcoutputperm' objects ##
-        if (class(mcmcout) == "mcmcoutputfix") {
-            mcmcoutperm <- new("mcmcoutputpermfix", mcmcout, 
-                               Mperm        = Mperm,
-                               parperm      = list(),
-                               logperm      = list())
-            return(mcmcoutperm)
-        } else if (class(mcmcout) == "mcmcoutputfixhier") {
-            mcmcoutperm <- new("mcmcoutputpermfixhier", mcmcout, 
-                               Mperm        = Mperm,
-                               parperm      = list(),
-                               logperm      = list())
-            return(mcmcoutputperm)
-        } else if (class(mcmcout) == "mcmcoutputfixpost") {
-            mcmcoutperm <- new("mcmcoutputpermfixpost", mcmcout,
-                               Mperm        = Mperm,
-                               parperm      = list(),
-                               logperm      = list(),
-                               postperm     = list())
-            return(mcmcoutperm)
-        } else if (class(mcmcout) == "mcmcoutputfixhierpost") {
-            mcmcoutperm <- new("mcmcoutputpermfixhierpost", mcmcout,
-                               Mperm        = Mperm,
-                               parperm      = list(),
-                               logperm      = list(),
-                               postperm     = list())
-            return(mcmcoutperm)
-        } else if (class(mcmcout) == "mcmcoutputbase") {
-            mcmcoutperm <- new("mcmcoutputpermbase", mcmcout,
-                               Mperm        = MPerm,
-                               parperm      = list(),
-                               weightperm   = array(),
-                               logperm      = list(),
-                               entropyperm  = array(),
-                               STperm       = array(),
-                               Sperm        = array(),
-                               NKperm       = array())
-            return(mcmcoutperm)
-        } else if (class(mcmcout) == "mcmcoutputhier") {
-            mcmcoutperm <- new("mcmcoutputpermhier", mcmcout,
-                               Mperm        = Mperm,
-                               parperm      = list(),
-                               weightperm   = array(),
-                               logperm      = list(),
-                               entropyperm  = array(),
-                               STperm       = array(),
-                               Sperm        = array(),
-                               NKperm       = array())
-            return(mcmcoutperm)
-        } else if (class(mcmcout) == "mcmcoutputpost") {
-            mcmcoutperm <- new("mcmcoutputpermpost", mcmcout,
-                               Mperm        = Mperm,
-                               parperm      = list(),
-                               weightperm   = array(),
-                               logperm      = list(),
-                               postperm     = list(),
-                               entropyperm  = array(),
-                               STperm       = array(),
-                               Sperm        = array(),
-                               NKperm       = array())
-            return(mcmcoutperm)
-        } else {
-            mcmcoutperm <- new("mcmcoutputpermhierpost", mcmcout,
-                               Mperm        = Mperm,
-                               parperm      = list(),
-                               weightperm   = array(),
-                               logperm      = list(),
-                               postperm     = list(),
-                               entropyperm  = array(),
-                               STperm       = array(),
-                               Sperm        = array(),
-                               NKperm       = array())
-            return(mcmcoutperm)
-        }
-       
+        .process.Output.Empty(mcmcout)
     }
 }
 
+### Private functions.
+### These functions are not exported.
 
+### Checking
+### Check arguments: Arguments must inherit either from the 
+### 'mcmcoutput' class or from the 'mcmcoutputperm' class.
+"check.args.Mcmcpermute" <- function(obj)
+{
+    if (!inherits(obj, c("mcmcoutput", "mcmcoutputperm"))) {
+        stop(paste("Argument 'mcmcout' must inherit either from",
+                   "class 'mcmcoutput' or from class 'mcmcoutputperm'.",
+                   sep = ""))
+    }
+}
 
+".mcmcpermute.Coerce" <- function(obj)
+{
+    ## If object is of class 'mcmcoutputperm' coerce it 
+    ## to an object of class 'mcmcoutput' 
+    if(inherits(obj, "mcmcoutputperm")) {
+        if (class(obj) == "mcmcoutputpermfix") {
+            obj <- as(obj, "mcmcoutputfix")
+        } else if (class(obj) == "mcmcoutputpermfixhier") {
+            obj <- as(obj, "mcmcoutputfixhier") 
+        } else if (class(obj) == "mcmcoutputpermfixpost") {
+            obj <- as(obj, "mcmcoutputfixpost")
+        } else if (class(obj) == "mcmcoutputpermfixhierpost") {
+            obj <- as(obj, "mcmcoutputfixhierpost")
+        } else if (class(obj) == "mcmcoutputpermbase") {
+            obj <- as(obj, "mcmcoutputbase")
+        } else if (class(obj) == "mcmcoutputpermhier") {
+            obj <- as(obj, "mcmcoutputhier")
+        } else if (class(obj) == "mcmcoutputpermpost") {
+            obj <- as(obj, "mcmcoutputpost")
+        } else {
+            obj <- as(obj, "mcmcoutputhierpost")
+        }
+    }
+    return(obj)
+}
+
+".process.Output" <- function(obj, obj.swap)
+{
+    ## Create 'mcmcoutputperm' objects ##
+    if (class(obj) == "mcmcoutputfix") {
+        .mcmcoutputpermfix(obj, 
+                           Mperm        = obj.swap@M,
+                           parperm      = obj.swap@par,
+                           logperm      = obj.swap@log)
+    } else if (class(obj) == "mcmcoutputfixhier") {
+        .mcmcoutputpermfixhier(obj, 
+                               Mperm        = obj.swap@M,
+                               parperm      = obj.swap@par,
+                               logperm      = obj.swap@log)
+    } else if (class(obj) == "mcmcoutputfixpost") {
+        .mcmcoutputpermfixpost(obj,
+                               Mperm        = obj.swap@M,
+                               parperm      = obj.swap@par,
+                               logperm      = obj.swap@log,
+                               postperm     = obj.swap@post)
+    } else if (class(obj) == "mcmcoutputfixhierpost") {
+        .mcmcoutputpermfixhierpost(obj,
+                                   Mperm        = obj.swap@M,
+                                   parperm      = obj.swap@par,
+                                   logperm      = obj.swap@log,
+                                   postperm     = obj.swap@post)
+    } else if (class(obj) == "mcmcoutputbase") {
+        .mcmcoutputpermbase(obj,
+                            Mperm        = obj.swap@M,
+                            parperm      = obj.swap@par,                            
+                            weightperm   = obj.swap@weight,
+                            logperm      = obj.swap@log,
+                            entropyperm  = obj.swap@entropy,
+                            STperm       = obj.swap@ST,
+                            Sperm        = obj.swap@S,
+                            NKperm       = obj.swap@NK)          
+    } else if (class(obj) == "mcmcoutputhier") {
+        .mcmcoutputpermhier(obj,
+                            Mperm        = obj.swap@M,
+                            parperm      = obj.swap@par,
+                            weightperm   = obj.swap@weight,
+                            logperm      = obj.swap@log,
+                            entropyperm  = obj.swap@entropy,
+                            STperm       = obj.swap@ST,
+                            Sperm        = obj.swap@S,
+                            NKperm       = obj.swap@NK)
+    } else if (class(obj) == "mcmcoutputpost") {
+        .mcmcoutputpermpost(obj,
+                            Mperm        = obj.swap@M,
+                            parperm      = obj.swap@par,
+                            weightperm   = obj.swap@weight,
+                            logperm      = obj.swap@log,
+                            postperm     = obj.swap@post,
+                            entropyperm  = obj.swap@entropy,
+                            STperm       = obj.swap@ST,
+                            Sperm        = obj.swap@S,
+                            NKperm       = obj.swap@NK)           
+    } else {
+        .mcmcoutputpermhierpost(obj,
+                                Mperm        = obj.swap@M,
+                                parperm      = obj.swap@par,
+                                weightperm   = obj.swap@weight,
+                                logperm      = obj.swap@log,
+                                postperm     = obj.swap@post,
+                                entropyperm  = obj.swap@entropy,
+                                STperm       = obj.swap@ST,
+                                Sperm        = obj.swap@S,
+                                NKperm       = obj.swap@NK)           
+    }
+}
+
+".process.Output.Empty" <- function(obj)
+{
+    warning(paste("Not a single draw is a permutation in the",
+                  "function 'mcmcpermute()'.", sep = ""))
+    ## Create 'mcmcoutputperm' objects ##
+    if (class(obj) == "mcmcoutputfix") {
+        .mcmcoutputpermfix(obj) 
+    } else if (class(obj) == "mcmcoutputfixhier") {
+        .mcmcoutputpermfixhier(obj) 
+    } else if (class(obj) == "mcmcoutputfixpost") {
+        .mcmcoutputpermfixpost(obj)
+    } else if (class(obj) == "mcmcoutputfixhierpost") {
+        .mcmcoutputpermfixhierpost(obj)
+    } else if (class(obj) == "mcmcoutputbase") {
+        .mcmcoutputpermbase(obj)
+    } else if (class(obj) == "mcmcoutputhier") {
+        .mcmcoutputpermhier(obj,)
+    } else if (class(obj) == "mcmcoutputpost") {
+        .mcmcoutputpermpost(obj) 
+    } else {
+        .mcmcoutputpermhierpost(obj)
+    }
+}

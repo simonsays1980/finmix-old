@@ -15,50 +15,59 @@
 # You should have received a copy of the GNU General Public License
 # along with Rcpp.  If not, see <http://www.gnu.org/licenses/>.
 
-setClass("mcmcpermind", 
-         representation(weightperm  = "array",
-                        entropyperm = "array",
-                        STperm      = "array",
-                        Sperm       = "array",
-                        NKperm      = "array"
-                        ),
-         contains = c("mcmcpermfix"),
-         validity = function(object) {
-             ## else: OK
-             TRUE
-         }
+.mcmcpermind <- setClass("mcmcpermind", 
+                         representation(weightperm  = "array",
+                                        entropyperm = "array",
+                                        STperm      = "array",
+                                        Sperm       = "array",
+                                        NKperm      = "array"
+                                        ),
+                         contains = c("mcmcpermfix"),
+                         validity = function(object) 
+                         {
+                             ## else: OK
+                             TRUE
+                         },
+                         prototype(weightperm   = array(),
+                                   entropyperm  = array(),
+                                   STperm       = array(),
+                                   Sperm        = array(),
+                                   NKperm       = array()
+                                   )
 )
 
 ## Getters ##
-setGeneric("getWeightperm", function(object) standardGeneric("getWeightperm"))
-setMethod("getWeightperm", "mcmcpermind", function(object) {
-          return(object@weightperm)
-})
+setMethod("getWeightperm", "mcmcpermind", 
+          function(object) 
+          {
+              return(object@weightperm)
+          }
+)
 
-setGeneric("getEntropyperm", function(object) standardGeneric("getEntropyperm"))
 setMethod("getEntropyperm", "mcmcpermind", 
-          function(object) {
+          function(object) 
+          {
               return(object@entropyperm)
           }
 )
 
-setGeneric("getSTperm", function(object) standardGeneric("getSTperm"))
 setMethod("getSTperm", "mcmcpermind", 
-          function(object) {
+          function(object) 
+          {
               return(object@STperm)
           }
 )
 
-setGeneric("getSperm", function(object) standardGeneric("getSperm"))
 setMethod("getSperm", "mcmcpermind", 
-          function(object) {
+          function(object) 
+          {
               return(object@STperm)
           }
 )
 
-setGeneric("getNKperm", function(object) standardGeneric("getNKperm"))
 setMethod("getNKperm", "mcmcpermind", 
-          function(object) {
+          function(object) 
+          {
               return(object@STperm)
           }
 )

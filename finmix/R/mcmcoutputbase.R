@@ -13,24 +13,33 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with Rcpp.  If not, see <http://www.gnu.org/licenses/>.
+# along with finmix. If not, see <http://www.gnu.org/licenses/>.
 
-setClass("mcmcoutputbase", 
-         representation(weight 	= "array",
-		                entropy	= "array",
-                		ST 	    = "array",
-                		S 	    = "array",
-                		NK 	    = "array",
-                		clust 	= "array"),
-                    	contains = c("mcmcoutputfix"),
-       	 validity = function(object) {
-		    ## else: OK
-		    TRUE
-	     }
+.mcmcoutputbase <- setClass("mcmcoutputbase", 
+                            representation(weight 	= "array",
+                                           entropy	= "array",
+                                           ST 	    = "array",
+                                           S 	    = "array",
+                                           NK 	    = "array",
+                                           clust 	= "array"),
+                            contains = c("mcmcoutputfix"),
+                            validity = function(object) 
+                            {
+                                ## else: OK
+                                TRUE
+                            },
+                            prototype(weight    = array(),
+                                      entropy   = array(),
+                                      ST        = array(),
+                                      S         = array(),
+                                      NK        = array(),
+                                      clust     = array()
+                                      )
 )
 
 setMethod("show", "mcmcoutputbase", 
-          function(object){
+          function(object)
+          {
               cat("Object 'mcmcoutput'\n")
               cat("     class       :", class(object), "\n")
               cat("     M           :", object@M, "\n")
@@ -41,8 +50,10 @@ setMethod("show", "mcmcoutputbase",
                   length(object@log), "\n")
               cat("     ST          :", 
                   paste(dim(object@ST), collapse = "x"), "\n")
-              cat("     S           :", 
-                  paste(dim(object@S), collapse = "x"), "\n")
+              if (!all(is.na(object@S))) {
+                  cat("     S           :", 
+                      paste(dim(object@S), collapse = "x"), "\n")
+              }
               cat("     NK          :",
                   paste(dim(object@NK), collapse = "x"), "\n")
               cat("     clust       :",
@@ -55,178 +66,266 @@ setMethod("show", "mcmcoutputbase",
 )
 
 setMethod("plot", signature(x = "mcmcoutputbase", 
-	y = "ANY"), function(x, yi = TRUE, ...) {
-	if (x@model@dist == "poisson") {
-		K <- x@model@K
-		trace.n <- K * 2 - 1
-		if (.check.grDevice() && y) {
-			dev.new(title = "Traceplots")
-		}
-		par(mfrow = c(trace.n, 1), mar = c(1, 0, 0, 0),
-			oma = c(4, 5, 4, 4))
-		lambda <- x@par$lambda
-		for (k in 1:K) {
-			plot(lambda[, k], type = "l", axes = F, 
-				col = "gray20", xlab = "", ylab = "")
-			axis(2, las = 2, cex.axis = 0.7)
-			mtext(side = 2, las = 2, bquote(lambda[k = .(k)]),
-				cex = 0.6, line = 3)
-		}
-		weight <- x@weight
-		for (k in 1:(K - 1)) {
-			plot(weight[, k], type = "l", axes = F, 
-				col = "gray47", xlab = "", ylab = "")
-			axis(2, las = 2, cex.axis = 0.7)
-			mtext(side = 2, las = 2, bquote(eta[k = .(k)]),
-				cex = 0.6, line = 3)
-		}
-		axis(1)
-		mtext(side = 1, "Iterations", cex = 0.7, line = 3)
-		
-		## log ##
-		if (.check.grDevice() && y) {
-			dev.new(title = "Log Likelihood Traceplots")
-		}
-		par(mfrow = c(2, 1), mar = c(1, 0, 0, 0),
-			oma = c(4, 5, 4, 4))
-		mixlik <- x@log$mixlik
-		plot(mixlik, type = "l", axes = F,
-			col = "gray20", xlab = "", ylab = "")
-		axis(2, las = 2, cex.axis = 0.7)
-		mtext(side = 2, las = 3, "mixlik", cex = 0.6,
-			line = 3)
-		mixprior <- x@log$mixprior
-		plot(mixprior, type = "l", axes = F,
-			col = "gray47", xlab = "", ylab = "")
-		axis(2, las = 2, cex.axis = 0.7)
-		mtext(side = 2, las = 3, "mixprior", cex = 0.6,
-			line = 3)
-		axis(1)
-		mtext(side = 1, "Iterations", cex = 0.7, line = 3)
+                            y = "ANY"), 
+          function(x, y = TRUE, ...) 
+          {
+              if (x@model@dist == "poisson") {
+                  .traces.Poisson.Base(x, y)
+              }
+              ## log ##
+              .traces.Log.Base(x, y)
+          }
+)
 
-	}	
-})
+setMethod("plotHist", signature(x   = "mcmcoutputbase", 
+                                dev = "ANY"), 
+          function(x, dev = TRUE, ...) 
+          {
+              if (x@model@dist == "poisson") {
+                  .hist.Poisson.Base(x, dev)
+              }
+          }
+)
 
-setMethod("plotHist", signature(x = "mcmcoutputbase", dev = "ANY"), 
-	function(x, dev = TRUE, ...) {
-	if(x@model@dist == "poisson") {
-		K <- x@model@K 
-		if (.check.grDevice() && dev) {
-			dev.new(title = "Histograms")
-		}
-		lambda <- x@par$lambda
-        weight <- x@weight		
-        vars <- cbind(lambda, weight[, seq(1:(K - 1))])
-        lab.names <- vector("list", 2 * K - 1)
-        for (k in 1:K) {
-            lab.names[[k]] <- bquote(lambda[.(k)])
-        }
-        for (k in (K + 1):(2 * K - 1)) {
-            lab.names[[k]] <- bquote(eta[.(k - K)])
-        }
-        .symmetric.Hist(vars, lab.names)
-	}
-	
-})
+setMethod("plotDens", signature(x   = "mcmcoutputbase",
+                                dev = "ANY"),
+          function(x, dev = TRUE, ...)
+          {
+              if (x@model@dist == "poisson") {
+                  .dens.Poisson.Base(x, dev)
+              }
+          }
+)
 
-## Generic defined in 'mcmcoutputfix.R' ##
 setMethod("subseq", signature(object = "mcmcoutputbase", 
                               index = "array"), 
-          function(object, index) {
-              ## TODO: Check arguments via .validObject ##
-              if (dim(index)[1] != object@M) {
-                  stop("Argument 'index' has wrong dimension.")
-              }
-              if (typeof(index) != "logical") {
-                  stop("Argument 'index' must be of type 'logical'.")
-              }
-              M <- object@M
+          function(object, index) 
+          {
               ## Call 'subseq()' method from 'mcmcoutputfix'
-              object <- callNextMethod(object, index)
+              as(object, "mcmcoutputfix") <- callNextMethod(object, index)
               ## Change owned slots ##
-              object@log$cdpost     <- matrix(object@log$cdpost[index],
-                                              nrow = object@M, ncol = 1)
-              object@weight         <- object@weight[index, ]
-              object@entropy        <- matrix(object@entropy[index],
-                                               nrow = object@M, ncol = 1)
-              object@ST             <- matrix(object@ST[index], 
-                                              nrow = object@M, ncol = 1) 
-              ## Check which S stay ##
-              stores <- dim(object@S)[2]
-              ms <- M - stores
-              index.S <- index[(ms + 1):M]
-              if(any(index.S) && stores != 0) {
-                  object@S <- object@S[,index.S]
-              }
-              object@NK             <- object@NK[index,]
-              return(object)
+              .subseq.Base(object, index)
           }
 )
 
-## Generic defined in 'mcmcoutputfix.R' ##
 setMethod("swapElements", signature(object = "mcmcoutputbase", 
                                     index = "array"),
-          function(object, index) {
-              ## Check arguments, TODO: .validObject ##
-              if (dim(index)[1] != object@M || dim(index)[2] != object@model@K) {
-                  stop("Argument 'index' has wrong dimension.")
+          function(object, index) 
+          {              
+              if (object@model@K == 1) {
+                  return(object)
+              } else {
+                  ## Call method 'swapElements()' from 'mcmcoutputfix' 
+                  as(object, "mcmcoutputfix") <- callNextMethod(object, index)
+                  .swapElements.Base(object, index)
               }
-              if (typeof(index) != "integer") {
-                  stop("Argument 'index' must be of type 'integer'.") 
-              }
-              if (!all(index > 0) || any(index > object@model@K)) {
-                  stop("Elements of argument 'index' must be greater 0 
-                       and must not exceed its number of columns.")
-              }
-              dist          <- object@model@dist
-              ## Call method 'swapElements()' from 'mcmcoutputfix' 
-              object        <- callNextMethod(object, index)
-              ## Rcpp::export 'swap_cc()'
-              object@weight <- swap_cc(object@weight, index)
-              ## Rcpp::export 'swapInd_cc()'
-              M             <- object@M
-              storeS        <- dim(object@S)[2]
-              if (storeS != 0) {
-                  index.S       <- index[(M - storeS + 1):M, ]
-                  object@S      <- swapInd_cc(object@S, index.S)
-              }
-              ## Rcpp::export 'swapST_cc()'
-              object@ST     <- swapST_cc(object@ST, index)
-              ## Rcpp::export 'swap_cc()'
-              object@NK     <- swapInteger_cc(object@NK, index)
-              return(object)
           }
 )
 
-setGeneric("getWeight", function(object) standardGeneric("getWeight"))
-setMethod("getWeight", "mcmcoutputbase", function(object) {
-							return(object@weight)
-						}
-)
-setGeneric("getEntropy", function(object) standardGeneric("getEntropy"))
-setMethod("getEntropy", "mcmcoutputbase", function(object) {
-							return(object@entropy)	
-						}
-)
-setGeneric("getST", function(object) standardGeneric("getST"))
-setMethod("getST", "mcmcoutputbase", function(object) {
-							return(object@ST)	
-						}
-)
-setGeneric("getS", function(object) standardGeneric("getS"))
-setMethod("getS", "mcmcoutputbase", function(object) {
-							return(object@S)	
-						}
-)
-## Generic set in 'groupmoments.R' ##
-setMethod("getNK", "mcmcoutputbase", function(object) {
-							return(object@NK)	
-						}
-)
-setGeneric("getClust", function(object) standardGeneric("getClust"))
-setMethod("getClust", "mcmcoutputbase", function(object) {
-							return(object@clust)	
-						}
+setMethod("getWeight", "mcmcoutputbase", 
+          function(object) 
+          {
+              return(object@weight)
+          }
 )
 
+setMethod("getEntropy", "mcmcoutputbase", 
+          function(object) 
+          {
+              return(object@entropy)	
+          }
+)
 
+setMethod("getST", "mcmcoutputbase", 
+          function(object) 
+          {
+              return(object@ST)	
+          }
+)
+
+setMethod("getS", "mcmcoutputbase", 
+          function(object) 
+          {
+              return(object@S)	
+          }
+)
+
+setMethod("getNK", "mcmcoutputbase", 
+          function(object) 
+          {
+              return(object@NK)	
+          }
+)
+
+setMethod("getClust", "mcmcoutputbase", 
+          function(object) 
+          {
+              return(object@clust)	
+          }
+)
+
+## No setters as users are not intended to manipulate ##
+## this object. ##
+
+### Private functions.
+### These functions are not exported.
+
+### Plot
+### Plot traces
+### Plot traces Poisson: Plots the traces for the sampled 
+### Poisson parameters and the weights.
+".traces.Poisson.Base" <- function(x, dev)
+{
+    K <- x@model@K
+    trace.n <- K * 2 - 1
+    if (.check.grDevice() && dev) {
+        dev.new(title = "Traceplots")
+    }
+    par(mfrow = c(trace.n, 1), mar = c(1, 0, 0, 0),
+        oma = c(4, 5, 4, 4))
+    lambda <- x@par$lambda
+    for (k in 1:K) {
+        plot(lambda[, k], type = "l", axes = F, 
+             col = "gray20", xlab = "", ylab = "")                      
+        axis(2, las = 2, cex.axis = 0.7)
+        mtext(side = 2, las = 2, bquote(lambda[k = .(k)]),
+              cex = 0.6, line = 3)
+    }
+    weight <- x@weight
+    for (k in 1:(K - 1)) {
+        plot(weight[, k], type = "l", axes = F, 
+             col = "gray47", xlab = "", ylab = "")
+        axis(2, las = 2, cex.axis = 0.7)
+        mtext(side = 2, las = 2, bquote(eta[k = .(k)]),
+              cex = 0.6, line = 3)
+    }
+    axis(1)
+    mtext(side = 1, "Iterations", cex = 0.7, line = 3)                  
+}
+
+### Plot traces log-likelihood: Plots the traces of the 
+### sampled log-likelihoods.
+".traces.Log.Base" <- function(x, dev)
+{
+    if (.check.grDevice() && dev) {
+        dev.new(title = "Log Likelihood Traceplots")
+    }
+    par(mfrow = c(3, 1), mar = c(1, 0, 0, 0),
+        oma = c(4, 5, 4, 4))
+    mixlik      <- x@log$mixlik
+    plot(mixlik, type = "l", axes = F,
+         col = "gray20", xlab = "", ylab = "")
+    axis(2, las = 2, cex.axis = 0.7)
+    mtext(side = 2, las = 3, "mixlik", cex = 0.6,
+          line = 3)
+    mixprior    <- x@log$mixprior
+    plot(mixprior, type = "l", axes = F,
+         col = "gray47", xlab = "", ylab = "")
+    axis(2, las = 2, cex.axis = 0.7)
+    mtext(side = 2, las = 3, "mixprior", cex = 0.6,
+          line = 3)
+    axis(1)
+    mtext(side = 1, "Iterations", cex = 0.7, line = 3)
+    cdpost      <- x@log$cdpost
+    plot(cdpost, type = "l", axes = F,
+         col = "gray47", xlab = "", ylab = "")
+    axis(2, las = 2, cex.axis = 0.7)
+    mtext(side = 2, las = 3, "cdpost", cex = 0.6,
+          line = 3)
+    axis(1)
+    mtext(side = 1, "Iterations", cex = 0.7, line = 3)
+}
+
+### Histograms
+### Histograms Poisson: Plots the histograms for the Poisson
+### parameters and the weights. 
+".hist.Poisson.Base" <- function(x, dev)
+{
+    K <- x@model@K 
+    if (.check.grDevice() && dev) {
+        dev.new(title = "Histograms")
+    }
+    lambda <- x@par$lambda
+    weight <- x@weight		
+    vars <- cbind(lambda, weight[, seq(1, K - 1)])
+    lab.names <- vector("list", 2 * K - 1)
+    for (k in seq(1, K)) {
+        lab.names[[k]] <- bquote(lambda[.(k)])
+    }
+    for (k in seq(K + 1, 2 * K - 1)) {
+        lab.names[[k]] <- bquote(eta[.(k - K)])
+    }  
+    .symmetric.Hist(vars, lab.names)
+}
+
+### Densities
+### Densities Poisson: Plots Kernel densities for the Poisson
+### parameters and the weights.
+".dens.Poisson.Base" <- function(x, dev)
+{
+    K   <- x@model@K
+    if (.check.grDevice() && dev) {
+        dev.new(title = "Densities")
+    }
+    lambda      <- x@par$lambda
+    weight      <- x@weight
+    vars        <- cbind(lambda, weight[, seq(1, K - 1)])
+    lab.names   <- vector("list", 2 * K - 1)
+    for (k in seq(1, K)) {
+        lab.names[[k]]  <- bquote(lambda[.(k)])
+    }
+    for (k in seq(K + 1, 2 * K - 1)) {
+        lab.names[[k]]  <- bquote(eta[.(k - K)])
+    }
+    .symmetric.Dens(vars, lab.names)
+}
+
+### Subseq: Creates a subsequence of an MCMC sample.
+".subseq.Base" <- function(obj, index)
+{
+    M               <- dim(obj@weight)[1]
+    newM            <- sum(index)
+    obj@log$cdpost  <- array(obj@log$cdpost[index],
+                              dim = c(newM,1))
+    obj@weight      <- obj@weight[index, ]
+    obj@entropy     <- array(obj@entropy[index],
+                              dim = c(newM, 1))
+    obj@ST          <- array(obj@ST[index],
+                              dim = c(newM, 1)) 
+    ## Check which S stay ##
+    stores  <- dim(obj@S)[2]
+    if (stores != 0) {
+        ms      <- M - stores
+        index.S <- index[(ms + 1):M]
+        if (any(index.S)) {
+            obj@S       <- obj@S[,index.S]
+        } else {
+            obj@S       <- as.array(NA)
+        }
+    }
+    obj@NK          <- array(obj@NK[index,],
+                             dim = c(newM, 1))
+    return(obj)
+}
+
+### swapElements: Permutes the elements in an MCMC sample
+### for each row.
+".swapElements.Base" <- function(obj, index)
+{
+    ## Rcpp::export 'swap_cc()'
+    obj@weight      <- swap_cc(obj@weight, index)
+    ## Rcpp::export 'swapInd_cc()'
+    M               <- obj@M
+    K               <- ncol(index)
+    storeS          <- dim(obj@S)[2]
+    if (storeS != 0) {
+        index.S     <- matrix(index[(M - storeS + 1):M, ], 
+                              ncol = K, byrow = TRUE)
+        obj@S       <- swapInd_cc(obj@S, index.S)
+    }
+    ## Rcpp::export 'swapST_cc()'
+    obj@ST          <- swapST_cc(obj@ST, index)
+    ## Rcpp::export 'swap_cc()'
+    obj@NK          <- swapInteger_cc(obj@NK, index)
+    return(obj)
+}

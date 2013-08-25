@@ -16,6 +16,15 @@
 # along with Rcpp.  If not, see <http://www.gnu.org/licenses/>.
 
 ## Class 'model' --------------------------------------------------
+
+setGeneric("plotPointProc", function(x, dev = TRUE, ...) standardGeneric("plotPointProc"))
+
+setGeneric("hasWeight", function(object, verbose = FALSE) standardGeneric("hasWeight"))
+
+setGeneric("hasT", function(object, verbose = FALSE) standardGeneric("hasT"))
+
+setGeneric("hasPar", function(object, verbose = FALSE) standardGeneric("hasPar"))
+
 setGeneric("mixturemar", function(object, J) standardGeneric("mixturemar"))
 
 setGeneric("getDist", function(object) standardGeneric("getDist"))
@@ -92,15 +101,39 @@ setGeneric("getCorr", function(object) standardGeneric("getCorr"))
 
 setGeneric("getExtrabinvar", function(object) standardGeneric("getExtrabinvar"))
 
-## Class 'data' ----------------------------------------------------
+## Class 'fdata' ----------------------------------------------------
+
+setGeneric("hasY", function(object, verbose = FALSE) standardGeneric("hasY"))
+
+setGeneric("hasS", function(object, verbose = FALSE) standardGeneric("hasS"))
+
+setGeneric("hasExp", function(object, verbose = FALSE) standardGeneric("hasExp"))
+
+setGeneric("hasT", function(object, verbose = FALSE) standardGeneric("hasT"))
+
+setGeneric("getColY", function(object) standardGeneric("getColY"))
+
+setGeneric("getRowY", function(object) standardGeneric("getRowY"))
+
+setGeneric("getColS", function(object) standardGeneric("getColS"))
+
+setGeneric("getRowS", function(object) standardGeneric("getRowS"))
+
+setGeneric("getColExp", function(object) standardGeneric("getColExp"))
+
+setGeneric("getRowExp", function(object) standardGeneric("getRowExp"))
+
+setGeneric("getColT", function(object) standardGeneric("getColT"))
+
+setGeneric("getRowT", function(object) standardGeneric("getRowT"))
 
 setGeneric("getY", function(object) standardGeneric("getY"))
+
+setGeneric("getBycolumn", function(object) standardGeneric("getBycolumn"))
 
 setGeneric("getN", function(object) standardGeneric("getN"))
 
 setGeneric("getS", function(object) standardGeneric("getS"))
-
-setGeneric("getBycolumn", function(object) standardGeneric("getBycolumn"))
 
 setGeneric("getName", function(object) standardGeneric("getName"))
 
@@ -132,19 +165,23 @@ setGeneric("getNK", function(object) standardGeneric("getNK"))
 
 setGeneric("getWK", function(object) standardGeneric("getWK"))
 
-setGeneric("getData", function(object) standardGeneric("getData"))
+setGeneric("getFdata", function(object) standardGeneric("getFdata"))
 
 ## Class 'sdatamoments' ----------------------------------------------
 
 setGeneric("getGmoments", function(object) standardGeneric("getGmoments"))
 
-## Class 'csdatamoments' ---------------------------------------------
+## Class 'cdatamoments' ---------------------------------------------
 
 setGeneric("getSmoments", function(object) standardGeneric("getSmoments"))
 
 ## Class 'prior' -----------------------------------------------------
 
-setGeneric("generatePrior", function(object, data, model, varargin, coef.mat)
+setGeneric("hasPriorPar", function(object, model, verbose = FALSE) standardGeneric("hasPriorPar"))
+
+setGeneric("hasPriorWeight", function(object, model, verbose = FALSE) standardGeneric("hasPriorWeight"))
+
+setGeneric("generatePrior", function(object, fdata, model, varargin, coef.mat)
            {
                standardGeneric("generatePrior")
            }
@@ -179,6 +216,79 @@ setGeneric("setStoreS<-", function(object, value) standardGeneric("setStoreS<-")
 setGeneric("setStorepost<-", function(object, value) standardGeneric("setStorepost<-"))
 
 setGeneric("setRanperm<-", function(object, value) standardGeneric("setRanperm<-"))
+
+## Class 'dataclass' ----------------------------------------------------
+
+setGeneric("getLogpy", function(object) standardGeneric("getLogpy"))
+
+setGeneric("getProb", function(object) standardGeneric("getProb"))
+
+setGeneric("getMixlik", function(object) standardGeneric("getMixlik"))
+
+setGeneric("getEntropy", function(object) standardGeneric("getEntropy"))
+
+setGeneric("getPostS", function(object) standardGeneric("getPostS"))
+
+setGeneric("getLoglikcd", function(object) standardGeneric("getLoglikcd"))
+
+## Class 'mcmcoutputfix' ------------------------------------------------
+
+setGeneric("plotHist", function(x, dev = TRUE, ...) standardGeneric("plotHist"))
+
+setGeneric("plotDens", function(x, dev = TRUE, ...) standardGeneric("plotDens"))
+
+setGeneric("plotSampRep", function(x, dev = TRUE, ...) standardGeneric("plotSampRep"))
+
+setGeneric("plotPostDens", function(x, dev = TRUE, ...) standardGeneric("plotPostDens"))
+
+setGeneric("subseq", function(object, index) standardGeneric("subseq"))
+
+setGeneric("swapElements", function(object, index) standardGeneric("swapElements"))
+
+setGeneric("getLog", function(object) standardGeneric("getLog"))
+
+setGeneric("getPrior", function(object) standardGeneric("getPrior"))
+
+## Class 'mcmcoutputhier' -----------------------------------------------
+
+setGeneric("getHyper", function(object) standardGeneric("getHyper"))
+
+## Class 'mcmcoutputpost' -----------------------------------------------
+
+setGeneric("getPost", function(object) standardGeneric("getPost"))
+
+## Class 'mcmcoutputbase' -----------------------------------------------
+
+setGeneric("getST", function(object) standardGeneric("getST"))
+
+setGeneric("getClust", function(object) standardGeneric("getClust"))
+
+## Class 'mcmcpermfix' ---------------------------------------------------
+
+setGeneric("getMperm", function(object) standardGeneric("getMperm"))
+
+setGeneric("getParperm", function(object) standardGeneric("getParperm"))
+
+setGeneric("getLogperm", function(object) standardGeneric("getLogperm"))
+
+## Class 'mcmcpermfixpost' -----------------------------------------------
+
+setGeneric("getPostperm", function(object) standardGeneric("getPostperm"))
+
+## Class 'mcmcpermind' ---------------------------------------------------
+
+setGeneric("getWeightperm", function(object) standardGeneric("getWeightperm"))
+
+setGeneric("getEntropyperm", function(object) standardGeneric("getEntropyperm"))
+
+setGeneric("getSTperm", function(object) standardGeneric("getSTperm"))
+
+setGeneric("getSperm", function(object) standardGeneric("getSperm"))
+
+setGeneric("getNKperm", function(object) standardGeneric("getNKperm"))
+
+
+
 
 
 

@@ -25,7 +25,7 @@
 ParPoissonFix::ParPoissonFix (const bool& STARTPAR, 
 		const FinmixModel& model) : lambda(model.K) 
 {
-	if(STARTPAR && model.K > 1) {
+	if(!STARTPAR && model.K > 1) {
 		arma::rowvec tmp = Rcpp::as<arma::rowvec>
 				((SEXP) model.par["lambda"]);
 		lambda = tmp;

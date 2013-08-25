@@ -13,7 +13,7 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with Rcpp.  If not, see <http://www.gnu.org/licenses/>.
+# along with finmix. If not, see <http://www.gnu.org/licenses/>.
 
 .csdatamoments <- setClass("csdatamoments",
                            representation(B       = "vector",
@@ -23,7 +23,8 @@
                                           Rtr     = "numeric",
                                           Rdet    = "numeric"),
                            contains = c("sdatamoments"),
-                           validity = function(object) {
+                           validity = function(object) 
+                           {
                                ## else: ok
                                TRUE
                            },
@@ -36,11 +37,13 @@
                                      )
 )
 
+setClassUnion("csdatamomentsOrNULL", members = c("csdatamoments", "NULL"))
+
 setMethod("initialize", "csdatamoments",
-          function(.Object, ..., value = data()) 
+          function(.Object, ..., value = fdata()) 
           {
               .Object <- callNextMethod(.Object, ..., value = value)
-              if(!all(is.na(value@S)) && !all(is.na(value@y))) {
+              if(hasY(value) && hasS(value)) {
                   .Object <- generateMoments(.Object)
               }
               return(.Object)
@@ -64,14 +67,14 @@ setMethod("show", "csdatamoments",
                   length(object@W), "\n")
               cat("     T           : Vector of",
                   length(object@T), "\n")
-              if (object@data@r > 1) {
+              if (object@fdata@r > 1) {
                   cat("     Rdet        :", object@Rdet, "\n")
                   cat("     Rtr         :", object@Rtr, "\n")
               }
               cat("     gmoments    : Object of class", 
                   class(object@gmoments), "\n")
-              cat("     data        : Object of class", 
-                  class(object@data), "\n")
+              cat("     fdata        : Object of class", 
+                  class(object@fdata), "\n")
           }
 )
 
@@ -139,10 +142,10 @@ setMethod("getRdet", "csdatamoments",
           }
 )
 
-setMethod("getData", "csdatamoments", 
+setMethod("getFdata", "csdatamoments", 
           function(object) 
           {
-              return(object@data)				
+              return(object@fdata)				
           }
 )
 
@@ -154,13 +157,8 @@ setMethod("getData", "csdatamoments",
 ".generateCsdatamoments" <- function(object)
 {
     ## enforce column.wise ordering ##
-    if (!object@data@bycolumn) {
-        datam     <- t(object@data@y)
-        classm    <- t(object@data@S)
-    } else {
-        datam     <- object@data@y
-        classm    <- object@data@S
-    }
+    datam   <- getColY(object@fdata)
+    classm  <- getColS(object@fdata)
     ## Calculate the between-group variance ##
     ## 'B' is an r x r matrix ##
     gmeans <- object@gmoments@mean

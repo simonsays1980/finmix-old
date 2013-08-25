@@ -13,9 +13,9 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with Rcpp.  If not, see <http://www.gnu.org/licenses/>.
+# along with finmix. If not, see <http://www.gnu.org/licenses/>.
 
-"likelihood.normal" <- function(y, mu, sigma){
+".likelihood.normal" <- function(y, mu, sigma){
 	N <- nrow(y)
 	K <- ncol(mu)
 	y <- matrix(y, nrow = N, ncol = K)
@@ -37,7 +37,7 @@
 	return(result)
 }
 
-"likelihood.student" <- function(y, mu, sigma, df) {
+".likelihood.student" <- function(y, mu, sigma, df) {
 	N <- nrow(y)
 	K <- ncol(mu)
 	y <- matrix(y, nrow = N, ncol = K)
@@ -63,7 +63,7 @@
 
 }
 
-"likelihood.exponential" <- function(y, lambda) {
+".likelihood.exponential" <- function(y, lambda) {
 	
 	N <- nrow(y) 
 	K <- ncol(lambda)
@@ -82,7 +82,7 @@
 	
 }
 
-"likelihood.poisson" <- function(y, lambda) {
+".likelihood.poisson" <- function(y, lambda) {
 
 	N <- nrow(y)
 	K <- ncol(lambda)
@@ -91,9 +91,9 @@
 	y <- matrix(y, nrow = N, ncol = K)
 
 	if(nst == 1) {
-		lambda <- t(apply(matrix(1, nrow = N, ncol = K), 1, "*", lambda))
+		lambda <- matrix(lambda, nrow = N, ncol = K, byrow = TRUE)
 	}
-	lambda <- apply(lambda, c(1,2), max, 0.0001, na.rm = TRUE)
+	lambda <- apply(lambda, c(1, 2), max, 10e-5, na.rm = TRUE)
 
 	loglik <- y * log(lambda) - lambda - lgamma(y + 1)
 
@@ -105,7 +105,7 @@
 	return(result) 
 }
 
-"likelihood.binomial" <- function(y, T, p) {
+".likelihood.binomial" <- function(y, T, p) {
 
 	N <- nrow(y)
 	K <- ncol(p)
@@ -125,7 +125,7 @@
 	return(result)
 }
 
-"likelihood.normult" <- function(y, mu, sigmainv, logdet) {
+".likelihood.normult" <- function(y, mu, sigmainv, logdet) {
 	
 	N <- nrow(y)
 	r <- ncol(y)
@@ -145,7 +145,7 @@
 	return(results)
 }
 
-"likelihood.studmult" <- function(y, mu, sigmainv, logdet, df) {
+".likelihood.studmult" <- function(y, mu, sigmainv, logdet, df) {
 
 	N <- nrow(y)
 	K <- ncol(mu)

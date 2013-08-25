@@ -30,12 +30,12 @@ FinmixModel::FinmixModel(const Rcpp::S4& classS4) {
 	 * decomposed in main code.
 	 *
 	 */ 
-	par  = classS4.slot("par");
-	weight  = Rcpp::as<arma::mat>(classS4.slot("weight"));
+	par         = classS4.slot("par");
+	weight      = Rcpp::as<arma::mat>(classS4.slot("weight"));
 
-	indicFix = Rcpp::as<bool>(classS4.slot("indicfix"));
-	K 	 = Rcpp::as<unsigned int>(classS4.slot("K"));
-	r 	 = Rcpp::as<unsigned int>(classS4.slot("r"));	
+	indicFix    = Rcpp::as<bool>(classS4.slot("indicfix"));
+	K 	        = Rcpp::as<unsigned int>(classS4.slot("K"));
+	r 	        = Rcpp::as<unsigned int>(classS4.slot("r"));	
 }
 
 FinmixModel::~FinmixModel(){}

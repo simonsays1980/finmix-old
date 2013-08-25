@@ -1,15 +1,37 @@
-setClass("mcmcoutputpermpost",
-         contains = c("mcmcpermindpost", "mcmcoutputpost"),
-         validity = function(object) {
-             ## else: OK
-             TRUE
-         }
+## Copyright (C) 2013 Lars Simon Zehnder
+#
+# This file is part of finmix.
+#
+# finmix is free software: you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# finmix is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with finmix. If not, see <http://www.gnu.org/licenses/>.
+
+.mcmcoutputpermpost <- setClass("mcmcoutputpermpost",
+                                contains = c("mcmcpermindpost", 
+                                             "mcmcoutputpost"),
+                                validity = function(object) 
+                                {
+                                    ## else: OK
+                                    TRUE
+                                }
 )
 
 setMethod("initialize", "mcmcoutputpermpost",
-          function(.Object, mcmcoutput, Mperm, parperm,
-                   weightperm, logperm, postperm, 
-                   entropyperm, STperm, Sperm, NKperm) {
+          function(.Object, mcmcoutput, Mperm = integer(), 
+                   parperm = list(), weightperm = array(), 
+                   logperm = list(), postperm = list(), 
+                   entropyperm = array(), STperm = array(), 
+                   Sperm = array(), NKperm = array()) 
+          {
               .Object@M             <- mcmcoutput@M
               .Object@ranperm       <- mcmcoutput@ranperm
               .Object@par           <- mcmcoutput@par
@@ -36,7 +58,8 @@ setMethod("initialize", "mcmcoutputpermpost",
 )
 
 setMethod("show", "mcmcoutputpermpost", 
-          function(object){
+          function(object)
+          {
               cat("Object 'mcmcoutputperm'\n")
               cat("     class       :", class(object), "\n")
               cat("     M           :", object@M, "\n")
@@ -51,8 +74,10 @@ setMethod("show", "mcmcoutputpermpost",
                   length(object@post), "\n")
               cat("     ST          :", 
                   paste(dim(object@ST), collapse = "x"), "\n")
-              cat("     S           :", 
-                  paste(dim(object@S), collapse = "x"), "\n")
+              if (!all(is.na(object@S))) {
+                  cat("     S           :", 
+                      paste(dim(object@S), collapse = "x"), "\n")
+              }
               cat("     NK          :",
                   paste(dim(object@NK), collapse = "x"), "\n")
               cat("     clust       :",
@@ -70,8 +95,10 @@ setMethod("show", "mcmcoutputpermpost",
                   paste(dim(object@entropyperm), collapse = "x"), "\n")
               cat("     STperm      :",
                   paste(dim(object@STperm), collapse = "x"), "\n")
-              cat("     Sperm       :",
-                  paste(dim(object@Sperm), collapse = "x"), "\n")
+              if (!all(is.na(object@Sperm))) {
+                  cat("     Sperm       :",
+                      paste(dim(object@Sperm), collapse = "x"), "\n")
+              }
               cat("     NKperm      :", 
                   paste(dim(object@NKperm), collapse = "x"), "\n")
               cat("     model       : Object of class", 
@@ -82,77 +109,63 @@ setMethod("show", "mcmcoutputpermpost",
 )
 
 setMethod("plot", signature(x = "mcmcoutputpermpost", 
-	y = "missing"), function(x, y, ...) {
-	if (x@model@dist == "poisson") {
-		K <- x@model@K
-		trace.n <- K * 2 -1
-		if (.check.grDevice()) {
-			dev.new(title = "Traceplots")
-		}
-		par(mfrow = c(trace.n, 1), mar = c(1, 0, 0, 0),
-			oma = c(4, 5, 4, 4))
-		lambda <- x@parperm$lambda
-		for (k in 1:K) {
-			plot(lambda[, k], type = "l", axes = F, 
-				col = "gray20", xlab = "", ylab = "")
-			axis(2, las = 2, cex.axis = 0.7)
-			mtext(side = 2, las = 2, bquote(lambda[k = .(k)]),
-				cex = 0.6, line = 3)
-		}
-		weight <- x@weightperm
-		for (k in 1:(K - 1)) {
-			plot(weight[, k], type = "l", axes = F, 
-				col = "gray47", xlab = "", ylab = "")
-			axis(2, las = 2, cex.axis = 0.7)
-			mtext(side = 2, las = 2, bquote(eta[k = .(k)]),
-				cex = 0.6, line = 3)
-		}
-		axis(1)
-		mtext(side = 1, "Iterations", cex = 0.7, line = 3)
+                            y = "missing"), 
+          function(x, y, ...) 
+          {
+              if (x@model@dist == "poisson") {
+                  .permtraces.Poisson.Base(x, y)
+              }
+              ## log ##
+              .permtraces.Log.Base(x, y)              
+          }
+)
 
-		## log ##
-		if(.check.grDevice()) {
-			dev.new(title = "Log Likelihood Traceplots")
-		}
-		par(mfrow = c(2, 1), mar = c(1, 0, 0, 0),
-			oma = c(4, 5, 4, 4))
-		mixlik <- x@log$mixlik
-		plot(mixlik, type = "l", axes = F,
-			col = "gray20", xlab = "", ylab = "")
-		axis(2, las = 2, cex.axis = 0.7)
-		mtext(side = 2, las = 3, "mixlik", cex = 0.6,
-			line = 3)
-		mixprior <- x@log$mixprior
-		plot(mixprior, type = "l", axes = F,
-			col = "gray47", xlab = "", ylab = "")
-		axis(2, las = 2, cex.axis = 0.7)
-		mtext(side = 2, las = 3, "mixprior", cex = 0.6,
-			line = 3)
-		axis(1)
-		mtext(side = 1, "Iterations", cex = 0.7, line = 3)
+setMethod("plotHist", signature(x   = "mcmcoutputpermpost", 
+                                dev = "ANY"), 
+          function(x, dev = TRUE, ...) 
+          {
+              if(x@model@dist == "poisson") {
+                  .permhist.Poisson.Base(x, dev)
+              }		
+          }
+)
 
-	}
-})
+setMethod("plotDens", signature(x   = "mcmcoutputpermpost", 
+                                dev = "ANY"), 
+          function(x, dev = TRUE, ...) 
+          {
+              if(x@model@dist == "poisson") {
+                  .permdens.Poisson.Base(x, dev)
+              }		
+          }
+)
 
-setMethod("plotHist", signature(x = "mcmcoutputpermpost", dev = "ANY"), 
-	function(x, dev = TRUE, ...) {
-	if(x@model@dist == "poisson") {
-		K <- x@model@K 
-		if (.check.grDevice() && dev) {
-			dev.new(title = "Histograms (permuted)")
-		}
-		lambda <- x@parperm$lambda
-        weight <- x@weightperm
-        vars        <- cbind(lambda, weight[, seq(1:(K - 1))])
-        lab.names   <- vector("list", 2 * K - 1)
-        for (k in 1:K) {
-            lab.names[[k]] <- bquote(lambda[.(k)])
-        }
-        for (k in (K + 1):(2 * K - 1)) {
-            lab.names[[k]] <- bquote(eta[.(k - K)])
-        }
-        .symmetric.Hist(vars, lab.names)
-	}
-	
-})
+setMethod("plotPointProc", signature(x      = "mcmcoutputpermpost",
+                                     dev    = "ANY"),
+          function(x, dev = TRUE, ...)
+          {
+              if (x@model@dist == "poisson") {
+                  .permpointproc.Poisson(x, dev)
+              }
+          }
+)
 
+setMethod("plotSampRep", signature(x    = "mcmcoutputpermpost",
+                                   dev  = "ANY"),
+          function(x, dev, ...) 
+          {
+              if (x@model@dist == "poisson") {
+                  .permsamprep.Poisson(x, dev)
+              }
+          }
+)
+
+setMethod("plotPostDens", signature(x   = "mcmcoutputpermpost",
+                                    dev = "ANY"),
+          function(x, dev = TRUE, ...) 
+          {
+              if (x@model@dist == "poisson") {
+                  .permpostdens.Poisson(x, dev)
+              }
+          }
+)

@@ -13,166 +13,151 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with Rcpp.  If not, see <http://www.gnu.org/licenses/>.
+# along with finmix. If not, see <http://www.gnu.org/licenses/>.
 
-setClass("mcmcoutputfixpost",
-	representation(
-		post 	= "list"),
-	contains = c("mcmcoutputfix"),
-	validity = function(object) {
-		## else: OK
-		TRUE
-	}
+.mcmcoutputfixpost <- setClass("mcmcoutputfixpost",
+                               representation(post  = "list"),
+                               contains = c("mcmcoutputfix"),
+                               validity = function(object) {
+                                   ## else: OK
+                                   TRUE
+                               },
+                               prototype(post   = list())
 )
 
-setMethod("show", "mcmcoutputfixpost", function(object) {
-	cat("Object 'mcmcoutputfixpost\n")
-	cat("	class		:", class(object), "\n")
-	cat("	M		    :", object@M, "\n")
-	cat("	ranperm		:", object@ranperm, "\n")
-	cat("	par		    : List of", 
-		length(object@par), "\n")
-	cat("	log		    : List of",
-		length(object@log), "\n")
-	cat("	post		: List of",
-		length(object@post), "\n")
-	cat("	model		: Object of class",
-		class(object@model), "\n")
-	cat("	prior		: Object of class",
-		class(object@prior), "\n")
-})
-
-setMethod("plot", signature(x = "mcmcoutputfixpost", 
-	y = "ANY"), function(x, y = TRUE, ...) {
-	if (x@model@dist == "poisson") {
-		K <- x@model@K
-		trace.n <- K
-		if (.check.grDevice() && y) {
-			dev.new(title = "Traceplots")
-		}
-		par(mfrow = c(trace.n, 1), mar = c(1, 0, 0, 0),
-			oma = c(4, 5, 4, 4))
-		lambda <- x@par$lambda
-		for (k in 1:K) {
-			plot(lambda[, k], type = "l", axes = F, 
-				col = "gray20", xlab = "", ylab = "")
-			axis(2, las = 2, cex.axis = 0.7)
-			mtext(side = 2, las = 2, bquote(lambda[k = .(k)]),
-				cex = 0.6, line = 3)
-		}
-		axis(1)
-		mtext(side = 1, "Iterations", cex = 0.7, line = 3)
-	
-		## log ##
-		if (.check.grDevice() && y) {
-			dev.new(title = "Log Likelihood Traceplots")
-		}
-		par(mfrow = c(2, 1), mar = c(1, 0, 0, 0),
-			oma = c(4, 5, 4, 4))
-		mixlik <- x@log$mixlik
-		plot(mixlik, type = "l", axes = F,
-			col = "gray20", xlab = "", ylab = "")
-		axis(2, las = 2, cex.axis = 0.7)
-		mtext(side = 2, las = 3, "mixlik", cex = 0.6,
-			line = 3)
-		mixprior <- x@log$mixprior
-		plot(mixprior, type = "l", axes = F,
-			col = "gray47", xlab = "", ylab = "")
-		axis(2, las = 2, cex.axis = 0.7)
-		mtext(side = 2, las = 3, "mixprior", cex = 0.6,
-			line = 3)
-		axis(1)
-		mtext(side = 1, "Iterations", cex = 0.7, line = 3)
-	}	
-})
-
-setMethod("plotHist", signature(x = "mcmcoutputfixpost", dev = "ANY"), 
-	function(x, dev = TRUE, ...) {
-	if(x@model@dist == "poisson") {
-		K <- x@model@K 
-		if (.check.grDevice() && dev) {
-			dev.new(title = "Histograms")
-		}
-		lambda <- x@par$lambda
-        if (K == 1) {
-            .symmetric.Hist(lambda, list(bquote(lambda)))
-        } else {
-            lab.names <- vector("list", K)
-            for (k in 1:K) {
-                lab.names[[k]] <- bquote(lambda[.(k)])
-            }
-            .symmetric.Hist(lambda, lab.names)
-        }
-	}	
-})
-
-## Generic defined in 'mcmcoutputfix.R' ##
-setMethod("subseq", signature(object = "mcmcoutputfixpost",
-                              index = "array"), 
-          function(object, index) {
-              ## TODO: Check arguments via .validObject ##
-              if (dim(index)[1] != object@M) {
-                  stop("Argument 'index' has wrong dimension.")
-              }
-              if (typeof(index) != "logical") {
-                  stop("Argument 'index' must be of type 'logical'.")
-              } 
-              dist <- object@model@dist
-        
-              ## Call 'subseq()' from 'mcmcoutputfix'
-              object <- callNextMethod(object, index)
-              
-              ## post ##
-              if (dist == "poisson") {
-                  if (object@model@K == 1) {
-                      object@post$par$a <- matrix(object@post$par$a[index],
-                                                  nrow = object@M, ncol = 1)
-                      object@post$par$b <- matrix(object@post$par$b[index],
-                                                  nrow = object@M, ncol = 1)
-                  } else {
-                      object@post$par$a <- object@post$par$a[index, ]
-                      object@post$par$b <- object@post$par$b[index, ]
-                  }
-              }
-              return(object)
+setMethod("show", "mcmcoutputfixpost", 
+          function(object) 
+          {
+              cat("Object 'mcmcoutputfixpost\n")
+              cat("     class       :", class(object), "\n")
+              cat("     M           :", object@M, "\n")
+              cat("     ranperm     :", object@ranperm, "\n")
+              cat("     par         : List of",
+                  length(object@par), "\n")
+              cat("     log         : List of",
+                  length(object@log), "\n")
+              cat("     post        : List of",
+                  length(object@post), "\n")
+              cat("     model       : Object of class",
+                  class(object@model), "\n")
+              cat("     prior       : Object of class",
+                  class(object@prior), "\n")
           }
 )
 
-## Generic defined in 'mcmcoutputfix.R' ##
+setMethod("plot", signature(x = "mcmcoutputfixpost", 
+                            y = "ANY"), 
+          function(x, y = TRUE, ..., dev = TRUE) {
+              ## Call 'plot()' from 'mcmcoutputfix
+              callNextMethod(x, y, ..., dev)
+          }
+)
+
+setMethod("plotHist", signature(x   = "mcmcoutputfixpost", 
+                                dev = "ANY"), 
+          function(x, dev = TRUE, ...) 
+          {
+              ## Call 'plotHist()' from 'mcmcoutputfix'
+              callNextMethod(x, dev, ...)
+          }
+)
+
+setMethod("plotDens", signature(x   = "mcmcoutputfixpost",
+                                dev = "ANY"),
+          function(x, dev = TRUE, ...)
+          {
+              ## Call 'plotDens()' from 'mcmcoutputfix'
+              callNextMethod(x, dev, ...)
+          }
+)
+
+setMethod("plotPointProc", signature(x      = "mcmcoutputfixpost",
+                                     dev    = "ANY"),
+          function(x, dev = TRUE, ...)
+          {
+              ## Call 'plotPointProc()' from 'mcmcoutputfix'
+              callNextMethod(x, dev, ...)
+          }
+)
+
+setMethod("plotSampRep", signature(x    = "mcmcoutputfixpost",
+                                   dev  = "ANY"),
+          function(x, dev = TRUE, ...) 
+          {
+              ## Call 'plotSampRep()' from 'mcmcoutputfix'
+              callNextMethod(x, dev, ...)
+          }
+)
+
+setMethod("plotPostDens", signature(x   = "mcmcoutputfixpost",
+                                    dev = "ANY"),
+          function(x, dev = TRUE, ...)
+          {
+              ## Call 'plotPostDens()' from 'mcmcoutputfix'
+              callNextMethod(x, dev, ...)
+          }
+)
+
+setMethod("subseq", signature(object = "mcmcoutputfixpost",
+                              index  = "array"), 
+          function(object, index) 
+          {
+              ## Call 'subseq()' from 'mcmcoutputfix'
+              callNextMethod(object, index)
+              dist <- object@model@dist                     
+              ## post ##
+              if (dist == "poisson") {
+                  .subseq.Poisson.Post(object, index)
+              }
+          }
+)
+
 setMethod("swapElements", signature(object = "mcmcoutputfixpost", 
                                     index = "array"),
-          function(object, index) {
-              ## Check arguments, TODO: .validObject ##
-              if (dim(index)[1] != object@M || dim(index)[2] != object@model@K) {
-                  stop("Argument 'index' has wrong dimension.")
-              }
-              if (typeof(index) != "integer") {
-                  stop("Argument 'index' must be of type 'integer'.")
-              } 
-              if (!all(index > 0) || any(index > object@model@K)) {
-                  stop("Elements of argument 'index' must be greater 0 
-                       and must not exceed its number of columns.")
-              }
+          function(object, index) 
+          {
               if (object@model@K == 1) {
                   return(object)
               } else {
-                  dist <- object@model@dist
                   ## Call method 'swapiElements()' from 'mcmcoutputfix' 
                   object <- callNextMethod()
+                  dist <- object@model@dist
                   if (dist == "poisson") {
-                      ## Rcpp::export 'swap_cc' 
-                      object@post$par$a <- swap_cc(object@post$par$a, index)
-                      object@post$par$b <- swap_cc(object@post$par$b, index)
+                      .swapElements.Poisson(object, index)
                   }
-                  return(object)
-             }                 
-         }
+              }
+          }                 
+         
 )
 
-setGeneric("getPost", function(object) standardGeneric("getPost"))
-setMethod("getPost", "mcmcoutputfixpost", function(object) {
-							return(object@post)	
-						}
+setMethod("getPost", "mcmcoutputfixpost", 
+          function(object) 
+          {
+              return(object@post)	
+          }
 )
 
+## No setters as users are not intended to manipulate ##
+## this object. ##
 
+".subseq.Poisson.Post" <- function(obj, index)
+{
+    if (obj@model@K == 1) {
+        obj@post$par$a <- array(obj@post$par$a[index],
+                                 dim = c(obj@M, 1))
+        obj@post$par$b <- array(obj@post$par$b[index],
+                                 dim = c(obj@M, 1))
+    } else {
+        obj@post$par$a <- obj@post$par$a[index, ]
+        obj@post$par$b <- obj@post$par$b[index, ]
+    }
+    return(obj)
+}
+
+".swapElements.Poisson.Post" <- function(obj, index)
+{
+    ## Rcpp::export 'swap_cc' 
+    obj@post$par$a <- swap_cc(obj@post$par$a, index)
+    obj@post$par$b <- swap_cc(obj@post$par$b, index)
+    return(obj)
+}

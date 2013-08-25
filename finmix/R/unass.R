@@ -6,14 +6,15 @@
 # and is used in package 'finmix' to assign several modified objects 
 # to a list. 
 
-unsass <- function(lhs,rhs){
+unsass <- function(lhs,rhs)
+{
   nvalues = length(rhs)
   lhss = getFormulaNames(lhs)
-  if(length(lhss)!=nvalues){
+  if (length(lhss)!=nvalues) {
     stop("Wrong number of values to unpack")
   }
  
-  for(i in 1:nvalues){
+  for (i in 1:nvalues) {
     eval(substitute(target <- value,
                     list(target=lhss[[i]],value=rhs[[i]])),
          envir=parent.frame())
@@ -23,17 +24,18 @@ unsass <- function(lhs,rhs){
  
 assign("%=%",unsass)
 
-getFormulaNames <- function(formula){
+getFormulaNames <- function(formula)
+{
   ## extract elements from a~b[1]~c~d
   ## recursive - might be an easier way...
   ##
-  if(is.name(formula)){
+  if (is.name(formula)) {
     return(formula)
-  }else{
-    if(is.call(formula)){
-      if(formula[[1]]=="~"){
+  } else {
+    if (is.call(formula)) {
+      if (formula[[1]]=="~") {
         return(c(getFormulaNames(formula[[2]]),getFormulaNames(formula[[3]])))
-      }else{
+      } else {
         return(formula)
       }
     }

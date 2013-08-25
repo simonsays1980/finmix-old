@@ -13,39 +13,45 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with Rcpp.  If not, see <http://www.gnu.org/licenses/>.
+# along with finmix. If not, see <http://www.gnu.org/licenses/>.
 
-setClass("mcmcpermfix", 
-         representation(
-                        Mperm       = "integer",
-                        parperm     = "list",
-                        logperm     = "list"),
-         validity = function(object) {
-             ## else: OK
-             TRUE
-         }
+.mcmcpermfix <- setClass("mcmcpermfix", 
+                         representation(
+                                        Mperm       = "integer",
+                                        parperm     = "list",
+                                        logperm     = "list"),
+                         validity = function(object) 
+                         {
+                             ## else: OK
+                             TRUE
+                         },
+                         prototype(Mperm    = integer(),
+                                   parperm  = list(),
+                                   logperm  = list()
+                                   )
 )
 
 ## Getters ##
-setGeneric("getMperm", function(object) standardGeneric("getMperm"))
 setMethod("getMperm", "mcmcpermfix", 
-          function(object) {
+          function(object) 
+          {
               return(object@Mperm)
           }
 )
 
-setGeneric("getParperm", function(object) standardGeneric("getParperm"))
 setMethod("getParperm", "mcmcpermfix", 
-          function(object) {
+          function(object) 
+          {
               return(object@parperm)
           }
 )
 
-setGeneric("getLogperm", function(object) standardGeneric("getLogperm"))
 setMethod("getLogperm", "mcmcpermfix", 
-          function(object) {
+          function(object) 
+          {
               return(object@logperm)
           }
 )
+
 ## No setters as users are not intended to modify these ##
 ## obect.                                               ##

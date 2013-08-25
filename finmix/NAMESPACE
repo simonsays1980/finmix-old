@@ -7,85 +7,94 @@ importFrom(graphics, persp)
 importFrom(graphics, contour)
 importFrom(graphics, pairs)
 importFrom(KernSmooth, bkde2D)
-importFrom(mvtnorm, dmvnorm)
-importFrom(mvtnorm, qmvnorm)
-importFrom(mvtnorm, dmvt)
-importFrom(mvtnorm, qmvt)
 export( ## user-defined constructors
-        "dstud",
         "model",
         "modelmoments",
-        "data",
+        "fdata",
+        "groupmoments",
+        "sdatamoments",
+        "datamoments",
         "prior",
         "priordefine",
         "mcmc",
-    	"%=%",
+        "%=%",
         "mcmcstart",
-        "dataclass",
-        "groupmoments",
-    	"mixturemcmc",
-        "swap_cc",          ## Rcpp::export
-        "swapInteger_cc",   ## Rcpp::export
-        "swapInd_cc",       ## Rcpp::export
-        "swapST_cc",        ## Rcpp::export
-        "mcmcpermute",
-        "mcmcestimate"
+        "dataclass"
 )
 
 exportClasses( ## all classes
         "model",
-        "modelmoments",
-        "data",
-        "groupmoments",
+        "fdata",
         "prior",
-        "mcmc",
-        "dataclass",
-        "mcmcoutput"
+        "mcmc"
 )
 
 exportMethods( ## name of the generic, as with other methods
         ## 'model' class ##
+        "plotPointProc",
+        "hasWeight",
+        "hasPar",
+        "hasExp",
+        "hasT",
         "getDist",
-        "setDist<-",
+        "getR", 
         "getK",
-        "setK<-",
-        "getR",
-        "setR<-",
         "getWeight",
-        "setWeight<-",
         "getPar",
-        "setPar<-",
         "getIndicmod",
-        "setIndicmod<-",
         "getIndicfix",
-        "setIndicfix<-",
+        "getExp",
         "getT",
+        "setDist<-", 
+        "setR<-",
+        "setK<-",
+        "setWeight<-",
+        "setPar<-",
+        "setIndicmod<-",
+        "setIndicfix<-",
+        "setExp<-",
         "setT<-",
 
         ## 'modelmoments' class ##
         "getMean",
         "getVar",
-
-        ## 'nsmodelmoments' class ##
+        "getModel",
+        
+        ## 'cmodelmoments' class ##
         "getHigher",
         "getSkewness",
         "getKurtosis",
-        "getRtr",
-        "getRdet",
-        "getCorr",
 
         ## 'dmodelmoments' class ##
         "getOver",
         "getFactorial",
         "getZero",
+        
+        ## 'normultmodelmoments' class ##
+        "getB",
+        "getW",
+        "getRdet",
+        "getRtr",
+        "getCorr",
 
-        ## 'data' class ##
+        ## 'exponentialmodelmoments' class ##
+        "getExtrabinvar",
+        
+        ## 'fdata' class ##
+        "hasY",
+        "hasS",
+        "hasExp",
+        "hasT",
         "getY",
         "setY<-",
+        "getColY",
+        "getRowY",
     	"getN",
     	"setN<-",
         "getS",
         "setS<-",
+        "getColS",
+        "getRowS",
         "getBycolumn",
         "setBycolumn<-",
         "getName",
@@ -94,70 +103,54 @@ exportMethods( ## name of the generic, as with other methods
         "setType<-",
         "getSim",
         "setSim<-",
+        "getColExp",
+        "getRowExp",
+        "getColT",
+        "getRowT",
 
         ## 'groupmoments' class ##
         "getNK",
         "getWK",
-        "getData",
-
+        "getFdata",
+       
         ## 'sdatamoments' class ##
-#        "getGmoments",
-
-        ## 'csdatamoments' class ##
-#        "getB",
-#        "getW",
-#        "getT",
+        "getGmoments",
 
         ## 'cdatamoments' class ##
- #       "getSmoments",
- #   	"mixturemar",
+        "getSmoments",
+
+        ## 'prior' class ##
+        "getHier",
+        "setHier<-",
 
         ## 'mcmc' class ##
         "getBurnin",
+        "setBurnin<-",
         "getM",
-        "getStartpar",
+        "setM<-",
         "getStoreS",
+        "setStoreS<-",
+        "getStartpar",
+        "setStartpar<-",
+        "getStorepost",
+        "setStorepost<-",
         "getRanperm",
+        "setRanperm<-",
+
+        ## 'dataclass' class ##
+        "getLogpy",
+        "getProb",
+        "getMixlik",
+        "getLoglikcd",
+        "getPostS",
 
         ## 'mcmcoutputfix' class ##
-        "getLog",
-        "getModel",
-        "getPrior",
         "plotHist",
+        "plotDens",
+        "plotSampRep",
+        "plotPostDens",
         "subseq",
         "swapElements",
-
-        ## 'mcmcouputfixhier' class ##
-        "getHyper",
-
-        ## 'mcmcoutputfixpost' class ##
-        "getPost",
-
-        ## 'mcmcoutputbase' class ##
-        "getEntropy",
-        "getST",
-        "getClust",
-
-        ## 'mcmcpermfix' class ##
-        "getMperm",
-        "getParperm",
-        "getLogperm",
-        
-        ## 'mcmcpermfixpost' class ##
-        "getPostperm",
-
-        ## 'mcmcpermind'  class ##
-        "getWeightperm",
-        "getEntropyperm",
-        "getSTperm",
-        "getSperm",
-        "getNKperm",
-
-        ## 'mcmcestfix' class ##
-        "getMap",
-        "getBml",
-        "getIeavg",
-        
-        ## 'mcmcestind' class ##
-        "getEavg"
+        "getLog",
+        "getPrior"
 )

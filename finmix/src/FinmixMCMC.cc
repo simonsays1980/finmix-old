@@ -24,14 +24,12 @@
 
 FinmixMCMC::FinmixMCMC(const Rcpp::S4& classS4) {
 
-	burnIn 	  = Rcpp::as<unsigned int>(classS4.slot("burnin"));
-	M  	  = Rcpp::as<unsigned int>(classS4.slot("M"));
-	startPar  = Rcpp::as<bool>(classS4.slot("startpar"));
-	storeS 	  = Rcpp::as<unsigned int>(classS4.slot("storeS"));
-	storePost = Rcpp::as<bool>(classS4.slot("storepost"));
-	ranPerm   = Rcpp::as<bool>(classS4.slot("ranperm"));	
+	burnIn 	    = Rcpp::as<unsigned int>(classS4.slot("burnin"));
+	M  	        = Rcpp::as<unsigned int>(classS4.slot("M"));
+	startPar    = Rcpp::as<bool>(classS4.slot("startpar"));
+	storeS 	    = Rcpp::as<unsigned int>(classS4.slot("storeS"));
+	storePost   = Rcpp::as<bool>(classS4.slot("storepost"));
+	ranPerm     = Rcpp::as<bool>(classS4.slot("ranperm"));	
 }
 
 FinmixMCMC::~FinmixMCMC(){}
-
-

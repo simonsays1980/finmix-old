@@ -13,20 +13,21 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with Rcpp.  If not, see <http://www.gnu.org/licenses/>.
+# along with finmix. If not, see <http://www.gnu.org/licenses/>.
 
-setClass("mcmcoutputfixhier",
-    representation(
-	    hyper = "list"),
-	contains = c("mcmcoutputfix"),
-	validity = function(object) {
-		## else: OK
-		TRUE
-	}
+.mcmcoutputfixhier <- setClass("mcmcoutputfixhier",
+                            representation(hyper = "list"),
+                            contains = c("mcmcoutputfix"),
+                            validity = function(object) {
+                                ## else: OK
+                                TRUE
+                            },
+                            prototype(hyper = list())
 )
 
 setMethod("show", "mcmcoutputfixhier", 
-          function(object) {
+          function(object) 
+          {
               cat("Object 'mcmcoutput'\n")
               cat("     class       :", class(object), 
                   "\n")
@@ -46,134 +47,195 @@ setMethod("show", "mcmcoutputfixhier",
           }
 )
 
-setMethod("plot", signature(x = "mcmcoutputfixhier", 
-	y = "ANY"), function(x, y = TRUE, ...) {
-	if (x@model@dist == "poisson") {
-		K <- x@model@K
-		trace.n <- K + 1
-		if (.check.grDevice() && y) {
-			dev.new(title = "Traceplots")
-		}
-		par(mfrow = c(trace.n, 1), mar = c(1, 0, 0, 0),
-			oma = c(4, 5, 4, 4))
-		lambda <- x@par$lambda
-		for (k in 1:K) {
-			plot(lambda[, k], type = "l", axes = F, 
-				col = "gray20", xlab = "", ylab = "")
-			axis(2, las = 2, cex.axis = 0.7)
-			mtext(side = 2, las = 2, bquote(lambda[k = .(k)]),
-				cex = 0.6, line = 3)
-		}
-		b <- x@hyper$b
-		plot(b, type = "l", axes = F, 
-			col = "gray68", xlab = "", ylab = "")
-		axis(2, las = 2, cex.axis = 0.7)
-		mtext(side = 2, las = 2, "b", cex = 0.6, line = 3)
-		axis(1)
-		mtext(side = 1, "Iterations", cex = 0.7, line = 3)
-	
-		## log ##
-		if (.check.grDevice() && y) {
-			dev.new(title = "Log Likelihood Traceplots")
-		}
-		par(mfrow = c(2, 1), mar = c(1, 0, 0, 0),
-			oma = c(4, 5, 4, 4))
-		mixlik <- x@log$mixlik
-		plot(mixlik, type = "l", axes = F,
-			col = "gray20", xlab = "", ylab = "")
-		axis(2, las = 2, cex.axis = 0.7)
-		mtext(side = 2, las = 3, "mixlik", cex = 0.6,
-			line = 3)
-		mixprior <- x@log$mixprior
-		plot(mixprior, type = "l", axes = F,
-			col = "gray47", xlab = "", ylab = "")
-		axis(2, las = 2, cex.axis = 0.7)
-		mtext(side = 2, las = 3, "mixprior", cex = 0.6,
-			line = 3)
-		axis(1)
-		mtext(side = 1, "Iterations", cex = 0.7, line = 3)
-	}	
-})
-
-setMethod("plotHist", signature(x = "mcmcoutputfixhier", dev = "ANY"), 
-	function(x, dev = TRUE, ...) {
-	if(x@model@dist == "poisson") {
-		K <- x@model@K
-		if (.check.grDevice() && dev) {
-			dev.new(title = "Histograms")
-		}
-		lambda  <- x@par$lambda
-        b       <- x@hyper$b
-        vars    <- cbind(lambda, b)
-        if (K == 1) {
-            lab.names <- list(bquote(lambda), "b")
-            .symmetric.Hist(vars, lab.names)
-        } else {
-            lab.names <- vector("list", K + 1)
-            for (k in 1:K) {
-                lab.names[[k]] <- bquote(lambda[.(k)])
-            }
-            lab.names[[K + 1]] <- "b"
-            .symmetric.Hist(vars, lab.names)
-        }
-	}
-})
-
-## Generic defined int 'mcmcoutputfix.R' ##
-setMethod("subseq", signature(object = "mcmcoutputfixhier",
-                              index = "array"), 
-          function(object, index) {
-              ## TODO: Check arguments via .validObject ##
-              if (dim(index)[1] != object@M) {
-                  stop("Argument 'index' has wrong dimension.")
-              }
-              if (typeof(index) != "logical") {
-                  stop("Argument 'index' must be of type 'logical'.")
-              }
-              dist <- object@model@dist
-              
-              ## Call 'subseq()' from 'mcmcoutputfix'
-              object <- callNextMethod(object, index)
-              
-              ## hyper ##
-              if (dist == "poisson") {
-                  object@hyper$b <- matrix(object@hyper$b[index], 
-                                           nrow = object@M, ncol = 1)
-              }
-              return(object)
+setMethod("plot", signature(x = "mcmcoutputfixhier", 	
+                            y = "ANY"), 
+          function(x, y = TRUE, ...) 
+          {
+              if (x@model@dist == "poisson") {
+                  .traces.Poisson.Hier(x, dev)
+                  ## log ##
+                  .traces.Log(x, dev)
+              }	
           }
 )
 
-## Generic defined in 'mcmcoutputfix.R' ##
+setMethod("plotHist", signature(x = "mcmcoutputfixhier", 
+                                dev = "ANY"), 
+          function(x, dev = TRUE, ...) 
+          {
+              if(x@model@dist == "poisson") {
+                  .hist.Poisson.Hier(x, dev)
+              }
+          }
+)
+
+setMethod("plotDens", signature(x   = "mcmcoutputfixhier",
+                                dev = "ANY"),
+          function(x, dev = TRUE, ...)
+          {
+              if (x@model@dist == "poisson") {
+                  .dens.Poisson.Hier(x, dev)
+              }
+          }
+)
+
+setMethod("plotPointProc", signature(x      = "mcmcoutputfixhier",
+                                     dev    = "ANY"),
+          function(x, dev = TRUE, ...) 
+          {
+              ## Call 'plotPointProc()' from 'mcmcoutputfix'
+              callNextMethod(x, dev, ...)
+          }
+)
+
+setMethod("plotSampRep", signature(x    = "mcmcoutputfixhier",
+                                   dev  = "ANY"),
+          function(x, dev = TRUE, ...) 
+          {
+              ## Call 'plotSampRep()' from 'mcmcoutputfix'
+              callNextMethod(x, dev, ...)
+          }
+)
+
+setMethod("plotPostDens", signature(x   = "mcmcoutputfixhier",
+                                    dev = "ANY"),
+          function(x, dev = TRUE, ...)
+          {
+              ## Call 'plotPostDens()' from 'mcmcoutputfix'
+              callNextMethod(x, dev, ...)
+          }
+)
+
+setMethod("subseq", signature(object = "mcmcoutputfixhier",
+                              index = "array"), 
+          function(object, index) 
+          {
+              ## Call 'subseq()' from 'mcmcoutputfix'
+              callNextMethod(object, index)
+              dist <- object@model@dist             
+              ## hyper ##
+              if (dist == "poisson") {
+                  .subseq.Poisson.Hier(object, index)
+              }
+          }
+)
+
 setMethod("swapElements", signature(object = "mcmcoutputfixhier", 
                                     index = "array"),
-          function(object, index) {
+          function(object, index) 
+          {
               ## Check arguments, TODO: .validObject ##
-              if (dim(index)[1] != object@M || dim(index)[2] != object@model@K) {
-                  stop("Argument 'index' has wrong dimension.")
-              }
-              if (typeof(index) != "integer") {
-                  stop("Argument 'index' must be of type 'integer'")
-              }
-              if (!all(index > 0) || any(index > object@model@K)) {
-                  stop("Elements in argument 'index' must be greater 0 
-                       and must not exceed its number of columns.")
-              }
+              .swapElements.valid.Arg(object, index)
               if (object@model@K == 1) {
                   return(object)
               } else {
                   ## Call method 'swap()' from 'mcmcoutputfix' 
-                  object <- callNextMethod(object, index)
-                  return(object)
+                  callNextMethod(object, index)
               }
           }
 )
 
-setGeneric("getHyper", function(object) standardGeneric("getHyper"))
-setMethod("getHyper", "mcmcoutputfixhier", function(object) {
-							return(object@hyper)
-						}
+setMethod("getHyper", "mcmcoutputfixhier", 
+          function(object) 
+          {
+              return(object@hyper)
+          }
 )
 	
-## No setters for this object as it is not intended 	##
-## that users manipulate this object 		    	##
+## No setters for this object as it is not intended ##
+## that users manipulate this object. 		    	##
+
+### Private functions
+### These functions are not exported.
+
+### Plot
+
+### Plot Traces
+### Plot traces Poisson: Plots traces for each component
+### parameter of a Poisson mixture and the hyper parameter 'b'.
+".traces.Poisson.Hier" <- function(x, dev)
+{
+    K <- x@model@K
+    trace.n <- K + 1
+    if (.check.grDevice() && y) {
+        dev.new(title = "Traceplots")
+    }
+    par(mfrow = c(trace.n, 1), mar = c(1, 0, 0, 0),
+        oma = c(4, 5, 4, 4))
+    lambda <- x@par$lambda
+    for (k in 1:K) {
+        plot(lambda[, k], type = "l", axes = F, 
+             col = "gray20", xlab = "", ylab = "")
+        axis(2, las = 2, cex.axis = 0.7)
+        mtext(side = 2, las = 2, bquote(lambda[k = .(k)]),
+              cex = 0.6, line = 3)
+    }
+    b <- x@hyper$b
+    plot(b, type = "l", axes = F, 
+         col = "gray68", xlab = "", ylab = "")
+    axis(2, las = 2, cex.axis = 0.7)    
+    mtext(side = 2, las = 2, "b", cex = 0.6, line = 3)
+    axis(1)
+    mtext(side = 1, "Iterations", cex = 0.7, line = 3)	
+}
+
+### Plot Histograms
+### Plot hist Poisson: Plots histograms for each component
+### parameter and the hyper parameter 'b'.
+".hist.Poisson.Hier" <- function(x, dev)
+{
+    K <- x@model@K
+    if (.check.grDevice() && dev) {
+        dev.new(title = "Histograms")
+    }
+    lambda  <- x@par$lambda
+    b       <- x@hyper$b
+    vars    <- cbind(lambda, b)
+    if (K == 1) {
+        lab.names <- list(bquote(lambda), "b")
+        .symmetric.Hist(vars, lab.names)
+    } else {
+        lab.names <- vector("list", K + 1)
+        for (k in 1:K) {
+            lab.names[[k]] <- bquote(lambda[.(k)])
+        }
+        lab.names[[K + 1]] <- "b"
+        .symmetric.Hist(vars, lab.names)
+    }
+}
+
+### Plot Densities
+### Plot Dens Poisson Hier: Plots Kernel densities for each
+### component parameter and the hyper parameter 'b'.
+".dens.Poisson.Hier" <- function(x, dev)
+{
+    K   <- x@model@K
+    if (.check.grDevice() && dev) {
+        dev.new("Densities")
+    }
+    lambda  <- x@par$lambda
+    b       <- x@hyper$b
+    vars    <- cbind(lambda, b)
+    if (K == 1) {
+        lab.names   <- list(bquote(lambda), "b")
+        .symmetric.Dens(vars, lab.names)
+    } else {
+        lab.names   <- vector("list", K + 1)
+        for (k in seq(1, K)) {
+            lab.names[[k]]  <- bquote(lambda[.(k)])
+        }
+        lab.names[[K + 1]]  <- "b"
+        .symmetric.Dens(vars, lab.names)
+    }
+}
+
+### Logic
+### Logic subseq Hier: Creates a subsequence for the sample
+### of the Poisson hyper parameter 'b'.
+".subseq.Poisson.Hier" <- function(obj, index)
+{
+    obj@hyper$b <- array(obj@hyper$b[index], 
+                          dim = c(obj@M, 1))
+    return(obj)
+}
+

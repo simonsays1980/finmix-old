@@ -13,7 +13,7 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with finmix.  If not, see <http://www.gnu.org/licenses/>.
+# along with finmix. If not, see <http://www.gnu.org/licenses/>.
 
 .mcmc <- setClass("mcmc", 
                   representation(burnin     = "integer",
@@ -35,15 +35,16 @@
                             storepost   = logical(),
                             ranperm     = logical()
                             )
-)	
-"mcmc" <- function(burnin = 0, M = 5000, startpar = FALSE, 
-                   storeS = 1000, storepost = TRUE, 
-                   ranperm = TRUE) 
+)
+
+"mcmc" <- function(burnin = 0, M = 5000,
+                   startpar = TRUE, storeS = 1000, 
+                   storepost = TRUE, ranperm = TRUE) 
 {
-		.mcmc("mcmc", burnin = as.integer(burnin), 
-              M = as.integer(M), startpar = startpar, 
-              storeS = as.integer(storeS), storepost = storepost, 
-              ranperm = ranperm)
+    .mcmc(burnin = as.integer(burnin), 
+          M = as.integer(M), startpar = startpar, 
+          storeS = as.integer(storeS), storepost = storepost, 
+          ranperm = ranperm)
 }
 
 setMethod("show", "mcmc", 
@@ -144,6 +145,7 @@ setReplaceMethod("setStorepost", "mcmc",
                      return(object)
                  }
 )
+
 setReplaceMethod("setRanperm", "mcmc", 
                  function(object, value) 
                  {
@@ -155,16 +157,25 @@ setReplaceMethod("setRanperm", "mcmc",
 
 ### Private functions
 ### These functions are not exported
+
+### Valid mcmc: The number of burnins @burnin and the number of 
+### last indicator vectors to store @storeS must be non-negative
+### 'integers'. The number of MCMC draws @M must be a positive 'integer'.
 ".valid.MCMC" <- function(object)
 {
     if(object@burnin < as.integer(0)) {
-        stop(paste("Number of Burn-In draws in slot 'burnin' must be",
+        stop(paste("Number of Burn-In draws in slot 'burnin' must be ",
              "nonnegative.", sep = ""))
-    } else if(object@M < as.integer(0)) {
-        stop("Number of MCMC draws in slot 'M' must be positive.")
+    } else if(object@M <= as.integer(0)) {
+        stop("Number of MCMC draws in slot 'M' must be positive. ")
     } else if(object@storeS < as.integer(0)) {
-        stop(paste("Number of indicators to store in slot 'storeS' must be",
+        stop(paste("Number of indicators to store in slot 'storeS' must be ",
              "nonnegative.", sep = ""))
+    }
+    if (object@storeS > object@M) {
+        stop(paste("Number of indicators to store in slot 'storeS' must be ",
+                   "smaller or equal to the number of MCMC draws in slot 'M'.",
+                   sep = ""))
     }
 }
 

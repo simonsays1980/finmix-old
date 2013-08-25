@@ -13,35 +13,26 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with Rcpp.  If not, see <http://www.gnu.org/licenses/>.
+# along with finmix. If not, see <http://www.gnu.org/licenses/>.
 
-## 'datamoments' is a virtual class from which the corresponding      ##
-## datamoments for 'continuous' and 'discrete' inherit	 		## 
-setClass("datamoments",
-         representation(mean            = "numeric",
-                        var             = "matrix",
-		                data            = "data",
-                		"VIRTUAL")
+## 'datamoments' is a virtual class from which the corresponding 
+## datamoments for 'continuous' and 'discrete' inherit	 		 
+.datamoments <- setClass("datamoments",
+                         representation(mean            = "numeric",
+                                        var             = "matrix",
+                                        fdata           = "fdata",
+                                        "VIRTUAL"
+                                        )
 )
 
-## Getters ##
-## Generic set in 'groupmoments.R' ##
-setGeneric("getSmoments", function(object) standardGeneric("getSmoments"))
-
-## Setters ##
-## No setters as users should not manipulate a 'datamoments' object ##
-
 ## mutual constructor for all type of datamoments ##
-"datamoments" <- function(value = data()) {
-        if (all(is.na(value@y))) {
-            stop("'data' object has no data. Slot 'y' is empty.")
-        }
-		if (value@type == "continuous") {
+"datamoments" <- function(value = fdata()) 
+{
+        hasY(value, verbose = TRUE)
+        if (value@type == "continuous") {
 			.Object <- .cdatamoments(value = value)
         } else { 
 			.Object <- .ddatamoments(value = value)
         }
 		return(.Object)
 }
-
-

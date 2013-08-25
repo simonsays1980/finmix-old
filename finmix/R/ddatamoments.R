@@ -13,32 +13,35 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with Rcpp.  If not, see <http://www.gnu.org/licenses/>.
+# along with finmix. If not, see <http://www.gnu.org/licenses/>.
 
 .ddatamoments <- setClass("ddatamoments",
                           representation(factorial   = "array",
                                          over        = "vector",
                                          zero        = "vector",
-                                         smoments    = "sdatamoments"),
+                                         smoments    = "sdatamomentsOrNULL"),
                           contains = c("datamoments"),
-                          validity = function(object) {
+                          validity = function(object) 
+                          {
                               ## else: ok
                               TRUE
                           },
                           prototype(factorial   = array(),
                                     over        = vector(),
                                     zero        = vector(),
-                                    smoments    = new("sdatamoments")
+                                    smoments    = .sdatamoments()
                                     )
 )
 
 setMethod("initialize", "ddatamoments", 
-          function(.Object, ..., value = data()) 
+          function(.Object, ..., value = fdata()) 
           {
-              .Object@data <- value
-			  if (!all(is.na(value@S))) {
-                  .Object@smoments <- sdatamoments(value)
-			  }
+              .Object@fdata <- value
+			  if (hasS(value)) {
+                  .Object@smoments  <- sdatamoments(value)
+			  } else {
+                  .Object@smoments  <- NULL
+              }
               generateMoments(.Object)
           }
 )
@@ -65,12 +68,12 @@ setMethod("show", "ddatamoments",
                   length(object@over), "\n")
               cat("     zero        : Vector of",
                   length(object@zero), "\n")
-              if (!all(is.na(object@data@S))) {
+              if (hasS(object@fdata)) {
                   cat("     smoments    : Object of class",
                       class(object@smoments), "\n")
               }
-              cat("     data        : Object of class",
-                  class(object@data), "\n")
+              cat("     fdata       : Object of class",
+                  class(object@fdata), "\n")
           }
 )
 
@@ -111,14 +114,11 @@ setMethod("getZero", "ddatamoments",
 ".generateDdatamoments" <- function(object) 
 {
     ## enforce column-wise ordering ##
-    if (!object@data@bycolumn) {
-        datam <- t(object@data@y)
-    } else {
-        datam <- object@data@y
-    }
+    hasY(object@fdata, verbose = TRUE)
+    datam   <- getColY(object@fdata)
     ## Compute factorial moments ##
     ## fact.moments is a L x r array (L = 4) ## 
-    momentsm <- array(NA, dim = c(4, object@data@r))
+    momentsm <- array(NA, dim = c(4, object@fdata@r))
     means           <- apply(datam, 2, mean, na.rm = TRUE)
     object@mean <- means
     object@var    <- var(datam, na.rm = TRUE)

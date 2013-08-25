@@ -13,7 +13,7 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with Rcpp.  If not, see <http://www.gnu.org/licenses/>.
+# along with finmix. If not, see <http://www.gnu.org/licenses/>.
 
 setClass("modelmoments",
          representation(mean    = "vector",
@@ -34,21 +34,20 @@ setClass("modelmoments",
 "modelmoments" <- function(model) {
     dist <- model@dist
     if (dist == "normult") {
-        object <- .normultmodelmoments(model = model)
+        .normultmodelmoments(model = model)
     } else if (dist == "studmult") {
-        object <- .studmultmodelmoments(model = model)
+        .studmultmodelmoments(model = model)
     } else if (dist == "student") {
-        object <- .studentmodelmoments(model = model)
+        .studentmodelmoments(model = model)
     } else if (dist == "normal") {
-        object <- .normalmodelmoments(model = model)
+        .normalmodelmoments(model = model)
     } else if (dist == "exponential") {
-        object <- .exponentialmodelmoments(model = model)
-    } else if (dist == "poisson") {
-        object <- .poissonmodelmoments(model = model)
+        .exponentialmodelmoments(model = model)
+    } else if (dist %in% c("poisson", "cond.poisson")) {
+        .poissonmodelmoments(model = model)
     } else if (dist == "binomial") {
-        object <- .binomialmodelmoments(model = model)
+        .binomialmodelmoments(model = model)
     }
-    return(object)
 }
 
 ## Getters ##

@@ -13,101 +13,142 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with Rcpp.  If not, see <http://www.gnu.org/licenses/>.
+# along with finmix. If not, see <http://www.gnu.org/licenses/>.
 
-"mixturemcmc" <- function(data, model, prior, mcmc) {
-	## check if all arguments are provided ##
-	if (nargs() < 4) {       
-		stop("All arguments must be provided.")
-    }
+"mixturemcmc" <- function(fdata, model, prior, mcmc) {
+    ## Check arguments 
+    mcmc <- .check.args.Mixturemcmc(fdata, model, prior, mcmc, nargs())
 
-	## check input objects ##
-	validObject(data)
-    validObject(model)
-    validObject(prior)
-    validObject(mcmc)
-
-    ## Set global variables ##
-	K <- model@K
-
-    ## For fixed indicators random permutation ##
-    ## is senseless ##
-	if (model@indicfix) {
-		ranperm <- FALSE
-	}
-## --------------------------------------------------------------------------
-    ## Check the data ##
-	has.data <- !all(is.na(data@y))
-	has.S <- !all(is.na(data@S))
-	if (has.data) {
-		if (data@bycolumn) {
-			datam <- data@y
-			if(has.S && K == 1) {
-				classm <- matrix(1, nrow = nrow(datam), ncol = 1)
-			} else if(has.S && K > 1) {
-				classm <- data@S
-			}
-		} else { ## data stored by row
-			datam <- t(data@y)
-			if (has.S && K == 1) {
-				classm <- matrix(1, nrow = nrow(datam), ncol = 1)
-			} else if (has.S && K > 1) {
-				classm <- t(data@S)
-			}
-		}
-		r <- ncol(datam)
-		N <- nrow(datam)
-	} else { ## data has no observations
-        stop("Observations 'y' of 'data' object 
-             are obligatory for MCMC sampling.")
-	}
-## --------------------------------------------------------------------------   
-    ## Check for starting with sampling the parameters ##
-    ## or with sampling the allocations ##
-	if (mcmc@startpar && !model@indicfix && K > 1) { 
-        ## i.e. it should be started by sampling allocations
-		if (length(model@par) == 0) {
-			stop("For starting with sampling allocations 'model' 
-                 must provide starting parameters.")                 
-        } ## TODO: else check for each distribution starting parameters.
-		if (any(is.na(model@weight)) && model@indicmod == "multinomial") {
-			stop("For starting with sampling allocations 'model' 
-                 must provide starting weights.")
-        }
-        ## If all OK: sample allocations.
-		dataclass <- dataclass(data, model, simS = TRUE)	
-	} else if (!has.S && K > 1) { 
-		stop("For starting with sampling the parameters 'data' object 
-             must provide starting allocations in 'S'.")			
-    }
-## --------------------------------------------------------------------------
-    ## Check mixture model specific preconditions for ##
-    ## MCMC sampling ## 
-	if (model@dist == "poisson") {
-        data@exp <- .valid.Poisson(data) 
-    } else if (model@dist == "cond.poisson") {
-        data@exp <- .valid.CondPoisson(data, model, prior)
-    } else if (model@dist == "binomial") {
-        validObject(model)
-        T <- .valid.Reps.Binomial(data, model)
-    }
-	norstud <- (model@dist == "normal" || model@dist == "normult" 
-                || model@dist == "student" || model@dist == "studmult")
-    if (norstud) {
-        .valid.Norstud(prior, model)
-	} ## end norstud
-## --------------------------------------------------------------------------
+    ## Default ordering for MCMC: bycolumn
+    setBycolumn(fdata)  <- TRUE
     ######################### MCMC SAMPLING #############################
-	if (model@dist == "poisson") {
-        .do.MCMC.Poisson(data, model, prior, mcmc, dataclass)
+    ## Set the indicators as a default to one for K == 1
+    if (model@K == 1) {
+        fdata@S <- matrix(1, nrow = fdata@N, ncol = 1)
+    }
+	if (model@dist == "poisson") {        
+        .do.MCMC.Poisson(fdata, model, prior, mcmc)
 	} else if (model@dist == "cond.poisson") {
-        .do.MCMC.CondPoisson(data, model, prior, mcmc, dataclass)
+        .do.MCMC.CondPoisson(fdata, model, prior, mcmc)
     }
 } ## end mixturemcmc
 
 ### Private functions
 ### These functions are not exported
 
+### Checking
+### Check arguments: 'fdata' must contain valid data in @y and in case of 
+### starting with sampling the parameters indicators in @S. Further,
+### the data in @y must match with the specified distribution in @dist
+### of 'model'.
+### If it should started with sampling the indicators, 'model' must
+### contain valid starting parameters in @par and @weight.
+### The 'prior' object must contain valid parameters for the prior
+### distribution. 
+### Further, if a fixed indicator model is used, @startpar in 'mcmc'
+### must be TRUE and @ranperm must be FALSE.
+".check.args.Mixturemcmc" <- function(fdata.obj, model.obj,
+                                      prior.obj, mcmc.obj, n.args)
+{
+    ## Check if all arguments are provided
+    if (n.args < 4) {
+        stop("All arguments must be provided.")
+    }
+    ## Check if 'fdata' object is valid
+    if (class(fdata.obj) != "fdata") {
+        stop(paste("Unkown argument. Argument 1 must be an ",
+                   "object of class 'fdata'.", sep = ""))
+    }
+    hasY(fdata.obj, verbose = TRUE)
+    ## Check if 'model' was provided:
+    if (class(model.obj) != "model") {
+        stop(paste("Unknown argument. Argument 2 must be an ",
+                   "object of class 'model'.", sep = ""))
+    }
+    ## Check if 'prior' was provided:
+    if (class(prior.obj) != "prior") {
+        stop(paste("Unknown argument. Argument 3 must be an ",
+                   "object of class 'prior'.", sep = ""))
+    }
+    ## Check if 'mcmc' was provided:
+    if (class(mcmc.obj) != "mcmc") {
+        stop(paste("Unkown argument. Argument 4 must be an ",
+                   "object of class 'mcmc'.", sep = ""))
+    }
+    ## Check if @startpar in 'mcmc' object and @indicfix in 
+    ## 'model' object match.
+    ## For fixed indicator models indicators are not sampled.
+    if (model.obj@indicfix && !mcmc.obj@startpar) {
+        mcmc.obj@startpar   <- TRUE
+    }
+    ## Check if @K in 'model' object is one. For a model with
+    ## only one component indicators are not sampled.
+    if (model.obj@K == 1) {
+        mcmc.obj@startpar   <- TRUE
+    }
+    ## If @startpar in 'mcmc.obj' is TRUE, it should be started 
+    ## by sampling the parameters. In this case starting 
+    ## indicators must be provided in the 'fdata.obj' object.
+    ## If @startpar in 'mcmc.obj' is FALSE it should be started
+    ## by sampling the indicators. In this case starting 
+    ## parameters must be provided in the 'model.obj' object.
+    if (model.obj@K > 1) {
+        if (mcmc.obj@startpar) {
+            if (!hasS(fdata.obj)) {
+                stop(paste("For starting with sampling the parameters ",
+                           "the 'fdata' object must contain starting ",
+                           "indicator values. See ?mcmcstart for ",
+                           "generating valid starting values.", sep = ""))
+            }
+        } else {
+            if (!hasPar(model.obj)) {
+                stop(paste("For starting with sampling the indicators ",
+                           "the 'model' object must contain starting ",
+                           "parameter values. See ?mcmcstart for ",
+                           "generating valid starting values.", sep = ""))
+            }
+            if (!hasWeight(model.obj)) {
+                stop(paste("For starting with sampling the indicators ",
+                           "the 'model' object must contain starting ",
+                           "weight values. See ?mcmcstart for ",
+                           "generating valid starting values.", sep = ""))
+            }
+        }
+    }
+    ## Check if 'fdata' object and 'model' objects match
+    ## Call '.check.fdata.model.Mcmcstart()' from 'mcmcstart.R'.
+    .check.fdata.model.Mcmcstart(fdata.obj, model.obj)
+    ## Check if 'prior' object is valid    
+    if (!hasPriorPar(prior.obj, model.obj)) {
+        stop(paste("Slot 'par' in 'prior' object is empty. ",
+                   "For MCMC sampling the prior needs fully ",
+                   "specified parameters. See ?priordefine for ",
+                   "generating valid prior parameters.", sep = ""))
+    }
+    if (!model.obj@indicfix && model.obj@K > 1) {
+        if(!hasPriorWeight(prior.obj, model.obj)) {
+            stop(paste("Slot 'weight' of 'prior' object is empty. ",
+                       "For MCMC sampling the prior needs specified ",
+                       "parameters for the prior of the weights. See ",
+                       "?priordefine for generating valid prior ",
+                       "parameters.", sep = ""))
+        }
+    }
+    ## Check if @indicfix in 'model' object and 
+    ## @ranperm in 'mcmc' object match.
+    ## For a fixed indicator model random permutation
+    ## sampling is senseless.
+    if (model.obj@indicfix && mcmc.obj@ranperm) {
+        mcmc.obj@ranperm    <- FALSE
+    }
+    ## For a model with only one component random permutation
+    ## is senseless as well.
+    if (model.obj@K == 1 && mcmc.obj@ranperm) {
+        mcmc.obj@ranperm    <- FALSE
+    }
+    return(mcmc.obj)
+}
+       
 ### Validity
 ### For a Binomial model either the 'data' object
 ### or the 'model' object must have specified 
@@ -137,7 +178,7 @@
                 T <- matrix(data@T[1, 1], nrow = N, ncol = 1)	
             }
         }
-    } else { ## then check in model ##
+    } else { ## then check in model 
         has.reps <- !all(is.na(model@T))
         if (has.reps) {
             if(nrow(model@T) != N && nrow(model@T) != 1) {
@@ -153,7 +194,7 @@
                  repetitions 'T' for binomial model specified.")
         }
     }
-    ## check for identifiability ##
+    ## Check for identifiability ##
     ## Reference: Teicher (1961) ##
     rep.occ <- table(T)
     if (dim(unique(T))[1] == 1) {
@@ -182,96 +223,6 @@
             }
         }
     }
-}
-
-### A conditional Poisson mixture must provide a coefficient 
-### matrix. This matrix must be a lower triangular matrix with 
-### zeros on its diagonal. Further, the matrix must be quadratic.
-".valid.CondPoisson" <- function(data.obj, model.obj, prior.obj) 
-{
-    N   <- data.obj@N
-    K   <- model.obj@K
-    if (!("coef" %in% names(prior.obj@par))) {
-        stop("Element 'coef' in slot 'par' of 'prior' is missing. A conditional 
-             Poisson mixture needs a coefficient matrix.")
-    } else {
-        coef <- prior.obj@par$coef
-        if (!is.matrix(coef) && !is.array(coef)) {
-            stop("Element 'coef' in slot 'par' of 'prior' must be 
-                 of type 'matrix' or 'array'.")
-        }		
-        if (nrow(coef) != ncol(coef)) {
-            stop("ELement 'coef' in slot 'par' of 'prior' must be 
-                 a quadratic matrix.")
-        }
-        if (nrow(coef) != K) {
-            stop("Dimension of element 'coef' in slot 'par' of 'prior' 
-                 must correspond to the number of components 'K' in 'model'.")
-        }
-        if (!(all(diag(coef) == 1))) {
-            stop("Coefficients on the diagnoal of element 'coef' in slot 'par' 
-                 of 'prior' must be equal to one.")
-        }
-	}
-    has.exposures <- !all(is.na(data.obj@exp))
-    if (has.exposures) {
-        if (data.obj@bycolumn) {
-            if (nrow(data.obj@exp) != N && nrow(data.obj@exp) != 1) {
-                stop("Number of exposures 'exp' in 'data' does not 
-                     match number of observations in 'y'.")
-            }
-            else if (nrow(data.obj@exp) == N) {
-                exp <- data.obj@exp
-            }
-            else { ## exp has dimension 1 x 1
-                exp <- matrix(data.obj@exp[1, 1], nrow = N, ncol = 1)
-            }
-        } else { ## data stored by row
-            if (ncol(data.obj@exp) != N && ncol(data.obj@exp) != 1) {
-                stop("Number of exposures 'exp' in 'data' does not 
-                     match number of observations in 'y'.")
-            } else if (ncol(data.obj@exp) == N) {
-                exp <- t(data.obj@exp)
-            } else {
-                exp <- matrix(data.obj@exp[1, 1], nrow = N, ncol = 1)
-            }
-        }
-    } else { ## no exposures set default all to 1
-        exp <- matrix(1, nrow = N, ncol = 1)
-    }   
-    return(exp)
-}
-
-".valid.Poisson" <- function(data.obj) 
-{
-    has.exposures   <- !all(is.na(data.obj@exp))
-    N               <- data.obj@N
-    if (has.exposures) {
-        if (data.obj@bycolumn) {
-            if (nrow(data.obj@exp) != N && nrow(data.obj@exp) != 1) {
-                stop("Number of exposures 'exp' in 'data' does not 
-                     match number of observations in 'y'.")
-            }
-            else if (nrow(data.obj@exp) == N) {
-                exp <- data.obj@exp
-            }
-            else { ## exp has dimension 1 x 1
-                exp <- matrix(data.obj@exp[1, 1], nrow = N, ncol = 1)
-            }
-        } else { ## data stored by row
-            if (ncol(data.obj@exp) != N && ncol(data.obj@exp) != 1) {
-                stop("Number of exposures 'exp' in 'data' does not 
-                     match number of observations in 'y'.")
-            } else if (ncol(data.obj@exp) == N) {
-                exp <- t(data.obj@exp)
-            } else {
-                exp <- matrix(data.obj@exp[1, 1], nrow = N, ncol = 1)
-            }
-        }
-    } else { ## no exposures set default all to 1
-        exp <- matrix(1, nrow = N, ncol = 1)
-    }
-    return(exp)
 }
 
 ".validNorstud" <- function(prior.obj, model.obj) 
@@ -315,16 +266,22 @@
     } ## end norstudmult	
 }
 
-### Prepare
-### For each model the MCMC output has to be prepared 
-".do.MCMC.Poisson" <- function(data.obj, model.obj, prior.obj, mcmc.obj,
-                               dataclass) 
+### MCMC
+### For each model the MCMC output has to be prepared
+### MCMC Poisson: Prepares all data containers for MCMC sampling for
+### Poisson mixture models regarding the specifications in 'prior.obj'
+### 'model.obj' and 'mcmc.obj'.
+".do.MCMC.Poisson" <- function(fdata.obj, model.obj, prior.obj, mcmc.obj) 
 {
-    ## base slots inherited to every derived class ##
+    ## Base slots inherited to every derived class
     K               <- model.obj@K
-    N               <- data.obj@N
+    N               <- fdata.obj@N
     M 		        <- mcmc.obj@M
     ranperm 	    <- mcmc.obj@ranperm
+    ## Set for MCMC default exposures:
+    if (!hasExp(fdata.obj)) {
+        fdata.obj@exp   <- matrix(1, nrow = N, ncol = 1)
+    }
     pars 		    <- list(lambda = array(numeric(), dim = c(M, K)))
     log.mixlik 	    <- array(numeric(), dim = c(M, 1))
     log.mixprior 	<- array(numeric(), dim = c(M, 1))
@@ -337,78 +294,105 @@
             posts$weight    <- array(numeric(), dim = c(M, K))
         }
     }
-    ## model with fixed indicators ##
+    ## Model with fixed indicators
     if (model.obj@indicfix || K == 1) { 
         logs 	<- list(mixlik = log.mixlik, mixprior = log.mixprior)
-        ## model with simple prior ##
+        ## Model with simple prior
         if (!prior.obj@hier) {
-            ## model output with NO posterior parameters stored ##
+            ## Model output with NO posterior parameters stored
             if (!mcmc.obj@storepost) {	
-                mcmcout 	<- new("mcmcoutputfix", M = M, ranperm = ranperm,
-                                   par = pars, log = logs, model = model.obj, 
-                                   prior = prior.obj)
-                .Call("mcmc_poisson_cc", data.obj, model.obj, prior.obj, mcmc.obj, mcmcout, PACKAGE = "finmix")
+                mcmcout 	<- .mcmcoutputfix(M = M, ranperm = ranperm,
+                                              par = pars, log = logs,
+                                              model = model.obj, 
+                                              prior = prior.obj)
+                .Call("mcmc_poisson_cc", fdata.obj, model.obj, prior.obj, 
+                      mcmc.obj, mcmcout, PACKAGE = "finmix")
                 return(mcmcout)
             } else {
-            ## model output with posterior parameters stored ##
-                mcmcout 	<- new("mcmcoutputfixpost", M = M, ranperm = ranperm,
-                                   par = pars, log = logs, post = posts,
-                                   model = model.obj, prior = prior.obj)
-                .Call("mcmc_poisson_cc", data.obj, model.obj, prior.obj, mcmc.obj, mcmcout, PACKAGE = "finmix")
+            ## Model output with posterior parameters stored ##
+                mcmcout 	<- .mcmcoutputfixpost(M = M, ranperm = ranperm,
+                                                  par = pars, log = logs, 
+                                                  post = posts,
+                                                  model = model.obj, 
+                                                  prior = prior.obj)
+                .Call("mcmc_poisson_cc", fdata.obj, model.obj, prior.obj, 
+                      mcmc.obj, mcmcout, PACKAGE = "finmix")
                 return(mcmcout)
             }
             ## end no hier
         } else {
-        ## model with hierarchical prior ##
+        ## Model with hierarchical prior ##
             hypers <- list(b = array(numeric(), dim = c(M, 1)))
-            ## model output with NO posterior parameters stored ##
+            ## Model output with NO posterior parameters stored ##
             if (!mcmc.obj@storepost) {
-                mcmcout 	<- new("mcmcoutputfixhier", M = M, ranperm = ranperm,
-                                   par = pars, log = logs, hyper = hypers,
-                                   model = model.obj, prior = prior.obj)
-                .Call("mcmc_poisson_cc", data.obj, model.obj, prior.obj, mcmc.obj, mcmcout, PACKAGE = "finmix")
+                mcmcout 	<- .mcmcoutputfixhier(M = M, ranperm = ranperm,
+                                                  par = pars, log = logs, 
+                                                  hyper = hypers,
+                                                  model = model.obj, 
+                                                  prior = prior.obj)
+                .Call("mcmc_poisson_cc", fdata.obj, model.obj, prior.obj, 
+                      mcmc.obj, mcmcout, PACKAGE = "finmix")
                 return(mcmcout)			
             } else {
-            ## model output with posterior parameters stored ##
-                mcmcout 	<- new("mcmcoutputfixhierpost", M = M, ranperm = ranperm,
-                                   par = pars, log = logs, hyper = hypers, post = posts,
-                                   model = model.obj, prior = prior.obj)
-                .Call("mcmc_poisson_cc", data.obj, model.obj, prior.obj, mcmc.obj, mcmcout, PACKAGE = "finmix")
+            ## Model output with posterior parameters stored ##
+                mcmcout 	<- .mcmcoutputfixhierpost(M = M, ranperm = ranperm,
+                                                      par = pars, log = logs, 
+                                                      hyper = hypers, post = posts,
+                                                      model = model.obj, 
+                                                      prior = prior.obj)
+                .Call("mcmc_poisson_cc", fdata.obj, model.obj, prior.obj, 
+                      mcmc.obj, mcmcout, PACKAGE = "finmix")
                 return(mcmcout)
             }
         ## end hier
         }
         ## end indicfix
     } else if (!model.obj@indicfix && K > 1) {			
-    ## model with simulated indicators ##
+    ## Model with simulated indicators ##
         log.cdpost 	<- array(numeric(), dim = c(M, 1))
         logs 		<- list(mixlik = log.mixlik, mixprior = log.mixprior, cdpost = log.cdpost)
         weights 	<- array(numeric(), dim = c(M, K))
         entropies 	<- array(numeric(), dim = c(M, 1))
         STm 		<- array(integer(), dim = c(M, 1))
-        Sm 		<- array(integer(), dim = c(N, mcmc.obj@storeS))
-        NKm		<- array(integer(), dim = c(M, K))
+        Sm 		    <- array(integer(), dim = c(N, mcmc.obj@storeS))
+        NKm		    <- array(integer(), dim = c(M, K))
         clustm 		<- array(integer(), dim = c(N, 1))
-        if (mcmc.obj@startpar) {
-            Sm[,1] <- as.integer(dataclass$S)
+        if (!mcmc.obj@startpar) {
+            ## First sample for the indicators 
+            datac  <- dataclass(fdata.obj, model.obj, simS = TRUE)
+            Sm[,1] <- as.integer(datac$S)
         }
-        ## model with simple prior ##
+        ## Model with simple prior ##
         if (!prior.obj@hier) {
-            ## model output with NO posterior parameters stored ##
+            ## Model output with NO posterior parameters stored ##
             if (!mcmc.obj@storepost) {
-                mcmcout		<- new("mcmcoutputbase", M = M, ranperm = ranperm,
-                                      par = pars, log = logs, weight = weights, entropy = entropies,
-                                      ST = STm, S = Sm, NK = NKm, clust = clustm, model = model.obj,
-                                      prior = prior.obj)
-                .Call("mcmc_poisson_cc", data.obj, model.obj, prior.obj, mcmc.obj, mcmcout, PACKAGE = "finmix")
+                mcmcout		<- .mcmcoutputbase(M = M, ranperm = ranperm,
+                                                  par = pars, log = logs, 
+                                                  weight = weights, 
+                                                  entropy = entropies,
+                                                  ST = STm, S = Sm, NK = NKm, 
+                                                  clust = clustm, model = model.obj,
+                                                  prior = prior.obj)
+                .Call("mcmc_poisson_cc", fdata.obj, model.obj, prior.obj, 
+                      mcmc.obj, mcmcout, PACKAGE = "finmix")
+                if (mcmc.obj@storeS == 0) {
+                    mcmcout@S <- as.array(NA)
+                }
                 return(mcmcout)
             } else {
-            ## model output with posterior parameters stored ##
-                mcmcout 	<- new("mcmcoutputpost", M = M, ranperm = ranperm,
-                                   par = pars, log = logs, weight = weights, entropy = entropies,
-                                   ST = STm, S = Sm, NK = NKm, clust = clustm, post = posts,
-                                   model = model.obj, prior = prior.obj)
-                .Call("mcmc_poisson_cc", data.obj, model.obj, prior.obj, mcmc.obj, mcmcout, PACKAGE = "finmix")
+            ## Model output with posterior parameters stored ##
+                mcmcout 	<- .mcmcoutputpost(M = M, ranperm = ranperm,
+                                               par = pars, log = logs, 
+                                               weight = weights, 
+                                               entropy = entropies,
+                                               ST = STm, S = Sm, NK = NKm, 
+                                               clust = clustm, post = posts, 
+                                               model = model.obj, prior = prior.obj)
+                .Call("mcmc_poisson_cc", fdata.obj, model.obj, prior.obj, 
+                      mcmc.obj, mcmcout, PACKAGE = "finmix")
+                if (mcmc.obj@storeS == 0) {
+                    mcmcout@S <- as.array(NA)
+                }
                 return(mcmcout)
             }
         ## end no hier
@@ -417,31 +401,45 @@
             hypers 	<- list(b = array(numeric(), dim = c(M, 1)))			
             ## model output with NO posterior parameters stored ##
             if (!mcmc.obj@storepost) {
-                mcmcout	 	<- new("mcmcoutputhier", M = M, ranperm = ranperm, 
-                                       par = pars, log = logs, weight = weights, entropy = entropies,
-                                       ST = STm, S = Sm, NK = NKm, clust = clustm, hyper = hypers,
-                                       model = model.obj, prior = prior.obj)
-                .Call("mcmc_poisson_cc", data.obj, model.obj, prior.obj, mcmc.obj, mcmcout, PACKAGE = "finmix")
-                return(mcmcout)
+                mcmcout	 	<- .mcmcoutputhier(M = M, ranperm = ranperm, 
+                                                   par = pars, log = logs, 
+                                                   weight = weights, 
+                                                   entropy = entropies,
+                                                   ST = STm, S = Sm, NK = NKm, 
+                                                   clust = clustm, hyper = hypers,
+                                                   model = model.obj, prior = prior.obj)
+                .Call("mcmc_poisson_cc", fdata.obj, model.obj, prior.obj, 
+                      mcmc.obj, mcmcout, PACKAGE = "finmix")
+                if (mcmc.obj@storeS == 0) {
+                    mcmcout@S <- as.array(NA)
+                }
+               return(mcmcout)
             } else {	
             ## model output with posterior parameters stored ##
-                mcmcout 	<- new("mcmcoutputhierpost", M = M, ranperm = ranperm,
-                                   par = pars, log = logs, weight = weights, entropy = entropies,
-                                   ST = STm, S = Sm, NK = NKm, clust = clustm, hyper = hypers, post = posts,
-                                   model = model.obj, prior = prior.obj)		
-                .Call("mcmc_poisson_cc", data.obj, model.obj, prior.obj, mcmc.obj, mcmcout, PACKAGE = "finmix")
+                mcmcout 	<- .mcmcoutputhierpost(M = M, ranperm = ranperm,
+                                                   par = pars, log = logs, 
+                                                   weight = weights, 
+                                                   entropy = entropies,
+                                                   ST = STm, S = Sm, NK = NKm, 
+                                                   clust = clustm, hyper = hypers, 
+                                                   post = posts,
+                                                   model = model.obj, prior = prior.obj)		
+                .Call("mcmc_poisson_cc", fdata.obj, model.obj, prior.obj, 
+                      mcmc.obj, mcmcout, PACKAGE = "finmix")
+                if (mcmc.obj@storeS == 0) {
+                    mcmcout@S <- as.array(NA)
+                }
                 return(mcmcout)
             }
         } ## end hier
     } ## end no indicfix		
 }
 
-".do.MCMC.CondPoisson" <- function(data.obj, model.obj, prior.obj, 
-                                   mcmc.obj, dataclass) 
+".do.MCMC.CondPoisson" <- function(fdata.obj, model.obj, prior.obj, mcmc.obj) 
 {
     ## base slots inherited to every derived class ##
     K               <- model.obj@K
-    N               <- data.obj@N
+    N               <- fdata.obj@N
     M 		        <- mcmc.obj@M
     ranperm 	    <- mcmc.obj@ranperm
     pars 		    <- list(lambda = array(numeric(), dim = c(M, K)))
@@ -463,18 +461,21 @@
         if (!prior.obj@hier) {
             ## model output with NO posterior parameters stored ##
             if (!mcmc.obj@storepost) {	
-                mcmcout 	<- new("mcmcoutputfix", M = M, ranperm = ranperm,
-                                   par = pars, log = logs, model = model.obj, 
-                                   prior = prior.obj)
-                .Call("mcmc_condpoisson_cc", data.obj, model.obj, prior.obj, 
+                mcmcout 	<- .mcmcoutputfix(M = M, ranperm = ranperm,
+                                              par = pars, log = logs, 
+                                              model = model.obj, 
+                                              prior = prior.obj)
+                .Call("mcmc_condpoisson_cc", fdata.obj, model.obj, prior.obj, 
                       mcmc.obj, mcmcout, PACKAGE = "finmix")
                 return(mcmcout)
             } else {
             ## model output with posterior parameters stored ##
-                mcmcout 	<- new("mcmcoutputfixpost", M = M, ranperm = ranperm,
-                                   par = pars, log = logs, post = posts,
-                                   model = model.obj, prior = prior.obj)
-                .Call("mcmc_condpoisson_cc", data.obj, model.obj, prior.obj, 
+                mcmcout 	<- .mcmcoutputfixpost(M = M, ranperm = ranperm,
+                                                  par = pars, log = logs, 
+                                                  post = posts,
+                                                  model = model.obj, 
+                                                  prior = prior.obj)
+                .Call("mcmc_condpoisson_cc", fdata.obj, model.obj, prior.obj, 
                       mcmc.obj, mcmcout, PACKAGE = "finmix")
                 return(mcmcout)
             }
@@ -484,18 +485,23 @@
             hypers <- list(b = array(numeric(), dim = c(M, 1)))
             ## model output with NO posterior parameters stored ##
             if (!mcmc.obj@storepost) {
-                mcmcout 	<- new("mcmcoutputfixhier", M = M, ranperm = ranperm,
-                                   par = pars, log = logs, hyper = hypers,
-                                   model = model.obj, prior = prior.obj)
-                .Call("mcmc_condpoisson_cc", data.obj, model.obj, prior.obj, 
+                mcmcout 	<- .mcmcoutputfixhier(M = M, ranperm = ranperm,
+                                                  par = pars, log = logs, 
+                                                  hyper = hypers,
+                                                  model = model.obj, 
+                                                  prior = prior.obj)
+                .Call("mcmc_condpoisson_cc", fdata.obj, model.obj, prior.obj, 
                       mcmc.obj, mcmcout, PACKAGE = "finmix")
                 return(mcmcout)			
             } else {
             ## model output with posterior parameters stored ##
-                mcmcout 	<- new("mcmcoutputfixhierpost", M = M, ranperm = ranperm,
-                                   par = pars, log = logs, hyper = hypers, post = posts,
-                                   model = model.obj, prior = prior.obj)
-                .Call("mcmc_condpoisson_cc", data.obj, model.obj, prior.obj, 
+                mcmcout 	<- .mcmcoutputfixhierpost(M = M, ranperm = ranperm,
+                                                      par = pars, log = logs, 
+                                                      hyper = hypers, 
+                                                      post = posts,
+                                                      model = model.obj, 
+                                                      prior = prior.obj)
+                .Call("mcmc_condpoisson_cc", fdata.obj, model.obj, prior.obj, 
                       mcmc.obj, mcmcout, PACKAGE = "finmix")
                 return(mcmcout)
             }
@@ -509,31 +515,45 @@
         weights 	<- array(numeric(), dim = c(M, K))
         entropies 	<- array(numeric(), dim = c(M, 1))
         STm 		<- array(integer(), dim = c(M, 1))
-        Sm 		<- array(integer(), dim = c(N, mcmc.obj@storeS))
-        NKm		<- array(integer(), dim = c(M, K))
+        Sm 		    <- array(integer(), dim = c(N, mcmc.obj@storeS))
+        NKm		    <- array(integer(), dim = c(M, K))
         clustm 		<- array(integer(), dim = c(N, 1))
-        if (mcmc.obj@startpar) {
-            Sm[,1] <- as.integer(dataclass$S)
+        if (!mcmc.obj@startpar) {
+            ## First sample for the indicators 
+            datac  <- dataclass(fdata.obj, model.obj, simS = TRUE)
+            Sm[,1] <- as.integer(datac$S)
         }
         ## model with simple prior ##
         if (!prior.obj@hier) {
             ## model output with NO posterior parameters stored ##
             if (!mcmc.obj@storepost) {
-                mcmcout		<- new("mcmcoutputbase", M = M, ranperm = ranperm,
-                                      par = pars, log = logs, weight = weights, entropy = entropies,
-                                      ST = STm, S = Sm, NK = NKm, clust = clustm, model = model.obj,
-                                      prior = prior.obj)
-                .Call("mcmc_condpoisson_cc", data.obj, model.obj, prior.obj, 
+                mcmcout		<- .mcmcoutputbase(M = M, ranperm = ranperm,
+                                                  par = pars, log = logs, 
+                                                  weight = weights, 
+                                                  entropy = entropies,
+                                                  ST = STm, S = Sm, NK = NKm, 
+                                                  clust = clustm, 
+                                                  model = model.obj, prior = prior.obj)
+                .Call("mcmc_condpoisson_cc", fdata.obj, model.obj, prior.obj, 
                       mcmc.obj, mcmcout, PACKAGE = "finmix")
+                if (mcmc.obj@storeS == 0) {
+                    mcmcout@S <- as.array(NA)
+                }
                 return(mcmcout)
             } else {
             ## model output with posterior parameters stored ##
-                mcmcout 	<- new("mcmcoutputpost", M = M, ranperm = ranperm,
-                                   par = pars, log = logs, weight = weights, entropy = entropies,
-                                   ST = STm, S = Sm, NK = NKm, clust = clustm, post = posts,
-                                   model = model.obj, prior = prior.obj)
-                .Call("mcmc_condpoisson_cc", data.obj, model.obj, prior.obj, 
+                mcmcout 	<- .mcmcoutputpost(M = M, ranperm = ranperm,
+                                               par = pars, log = logs, 
+                                               weight = weights, 
+                                               entropy = entropies,
+                                               ST = STm, S = Sm, NK = NKm, 
+                                               clust = clustm, post = posts,
+                                               model = model.obj, prior = prior.obj)
+                .Call("mcmc_condpoisson_cc", fdata.obj, model.obj, prior.obj, 
                       mcmc.obj, mcmcout, PACKAGE = "finmix")
+                if (mcmc.obj@storeS == 0) {
+                    mcmcout@S <- as.array(NA)
+                }
                 return(mcmcout)
             }
         ## end no hier
@@ -542,21 +562,34 @@
             hypers 	<- list(b = array(numeric(), dim = c(M, 1)))			
             ## model output with NO posterior parameters stored ##
             if (!mcmc.obj@storepost) {
-                mcmcout	 	<- new("mcmcoutputhier", M = M, ranperm = ranperm, 
-                                       par = pars, log = logs, weight = weights, entropy = entropies,
-                                       ST = STm, S = Sm, NK = NKm, clust = clustm, hyper = hypers,
-                                       model = model.obj, prior = prior.obj)
-                .Call("mcmc_condpoisson_cc", data.obj, model.obj, prior.obj, 
+                mcmcout	 	<- .mcmcoutputhier(M = M, ranperm = ranperm, 
+                                                   par = pars, log = logs, 
+                                                   weight = weights, 
+                                                   entropy = entropies,
+                                                   ST = STm, S = Sm, NK = NKm, 
+                                                   clust = clustm, hyper = hypers,
+                                                   model = model.obj, prior = prior.obj)
+                .Call("mcmc_condpoisson_cc", fdata.obj, model.obj, prior.obj, 
                       mcmc.obj, mcmcout, PACKAGE = "finmix")
+                if (mcmc.obj@storeS == 0) {
+                    mcmcout@S <- as.array(NA)
+                }
                 return(mcmcout)
             } else {	
             ## model output with posterior parameters stored ##
-                mcmcout 	<- new("mcmcoutputhierpost", M = M, ranperm = ranperm,
-                                   par = pars, log = logs, weight = weights, entropy = entropies,
-                                   ST = STm, S = Sm, NK = NKm, clust = clustm, hyper = hypers, post = posts,
-                                   model = model.obj, prior = prior.obj)		
-                .Call("mcmc_condpoisson_cc", data.obj, model.obj, prior.obj, 
+                mcmcout 	<- .mcmcoutputhierpost(M = M, ranperm = ranperm,
+                                                   par = pars, log = logs, 
+                                                   weight = weights, 
+                                                   entropy = entropies,
+                                                   ST = STm, S = Sm, NK = NKm, 
+                                                   clust = clustm, hyper = hypers, 
+                                                   post = posts,
+                                                   model = model.obj, prior = prior.obj)		
+                .Call("mcmc_condpoisson_cc", fdata.obj, model.obj, prior.obj, 
                       mcmc.obj, mcmcout, PACKAGE = "finmix")
+                if (mcmc.obj@storeS == 0) {
+                    mcmcout@S <- as.array(NA)
+                }
                 return(mcmcout)
             }
         } ## end hier

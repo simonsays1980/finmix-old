@@ -4,32 +4,30 @@ Title: Gibbs sampling for finite mixture distributions.
 Version: 0.1
 Date: 2013-07-05
 Author: Lars Simon Zehnder
-Maintainer: Lars Simon Zehnder <szehnder@uni-bonn.de>
+Maintainer: Lars Simon Zehnder <simon.zehnder@gmail.com>
 Description: More about what it does (maybe more than one line)
 License: GPL (>= 3)
 Depends: Rcpp (>= 0.10.2), RcppArmadillo (>= 0.3.6.2), graphics, 
-		mvtnorm (>= 0.9-7), KernSmooth (>= 2.23.10)
-Imports: graphics, mnormt (>= 1.4-5)
+            mvtnorm (>= 0.9-7), KernSmooth (>= 2.23.10)
+Imports: graphics, mvtnorm (>= 0.9-7), KernSmooth (>= 0.3.6.2)
 Suggests: RUnit
 LinkingTo: Rcpp, RcppArmadillo
 Collate:
-    RcppExports.R
-    graphic_func.R 
-    distributions.R
     AllGenerics.R
-    model.R
+    graphic_func.R
     mixturemoments.R
+    model.R
     modelmoments.R
-    cmodelmoments.R
     dmodelmoments.R
-    normultmodelmoments.R
-    studmultmodelmoments.R
-    studentmodelmoments.R
-    normalmodelmoments.R
-    exponentialmodelmoments.R
+    cmodelmoments.R
     poissonmodelmoments.R
     binomialmodelmoments.R
-    data.R
+    exponentialmodelmoments.R
+    normalmodelmoments.R
+    studentmodelmoments.R
+    normultmodelmoments.R
+    studmultmodelmoments.R
+    fdata.R
     groupmoments.R
     sdatamoments.R
     csdatamoments.R
@@ -37,20 +35,22 @@ Collate:
     cdatamoments.R
     ddatamoments.R
     prior.R
-        mcmc.R
-	unass.R
-        mcmcstart.R
-        dataclass.R
-        likelihood.R
-	mcmcoutputfix.R
-	mcmcoutputfixhier.R
-	mcmcoutputfixpost.R
-	mcmcoutputfixhierpost.R
-	mcmcoutputbase.R
-	mcmcoutputhier.R
-	mcmcoutputpost.R
-	mcmcoutputhierpost.R
-	mixturemcmc.R
+    mcmc.R
+    unass.R
+    mcmcstart.R
+    likelihood.R
+    distributions.R
+    dataclass.R
+    RcppExports.R
+    mcmcoutputfix.R
+    mcmcoutputfixhier.R
+    mcmcoutputfixpost.R
+    mcmcoutputfixhierpost.R
+    mcmcoutputbase.R
+    mcmcoutputhier.R
+    mcmcoutputpost.R
+    mcmcoutputhierpost.R
+    mixturemcmc.R
     mcmcpermfix.R
     mcmcpermfixpost.R
     mcmcpermind.R
@@ -63,7 +63,4 @@ Collate:
     mcmcoutputpermhier.R
     mcmcoutputpermpost.R
     mcmcoutputpermhierpost.R
-    mcmcpermute.R
-    mcmcestfix.R
-    mcmcestind.R
-    mcmcestimate.R
+

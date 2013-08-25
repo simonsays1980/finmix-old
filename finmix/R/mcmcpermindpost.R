@@ -13,21 +13,23 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with Rcpp.  If not, see <http://www.gnu.org/licenses/>.
+# along with finmix. If not, see <http://www.gnu.org/licenses/>.
 
-setClass("mcmcpermindpost",
-         representation(postperm = "list"),
-         contains = c("mcmcpermind"),
-         validity = function(object) {
-             ## else: OK
-             TRUE
-         }
+.mcmcpermindpost <- setClass("mcmcpermindpost",
+                             representation(postperm = "list"),
+                             contains = c("mcmcpermind"),
+                             validity = function(object) 
+                             {
+                                 ## else: OK
+                                 TRUE
+                             },
+                             prototype(postperm = list())
 )
 
 ## Getters ##
-## Generic defined in 'mcmcpermfixpost.R' ##
 setMethod("getPostperm", "mcmcpermindpost",
-          function(object) {
+          function(object) 
+          {
               return(object@postperm)
           }
 )

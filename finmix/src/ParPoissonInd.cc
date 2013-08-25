@@ -27,7 +27,7 @@ ParPoissonInd::ParPoissonInd (const bool& STARTPAR,
 		ParPoissonFix(STARTPAR, model), 
 		weight(model.K) 
 {
-	if(STARTPAR && model.K > 1) {
+	if (!STARTPAR && model.K > 1) {
 		weight = model.weight;
 	}
 }

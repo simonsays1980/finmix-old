@@ -15,19 +15,21 @@
 # You should have received a copy of the GNU General Public License
 # along with Rcpp.  If not, see <http://www.gnu.org/licenses/>.
 
-setClass("mcmcpermfixpost",
-         representation(postperm = "list"),
-         contains = c("mcmcpermfix"),
-         validity = function(object) {
-             ## else: OK
-             TRUE
-         }
+.mcmcpermfixpost <- setClass("mcmcpermfixpost",
+                             representation(postperm = "list"),
+                             contains = c("mcmcpermfix"),
+                             validity = function(object) 
+                             {
+                                 ## else: OK
+                                 TRUE
+                             },
+                             prototype(postperm = list())
 )
 
 ## Getters ##
-setGeneric("getPostperm", function(object) standardGeneric("getPostperm"))
 setMethod("getPostperm", "mcmcpermfixpost", 
-          function(object) {
+          function(object) 
+          {
               return(object@postperm)
           }
 )

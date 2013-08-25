@@ -58,7 +58,7 @@ class FIX {
 				arma::urowvec compIndex2;
 
 				Node (const FinmixData&, const FinmixModel&,
-					const FinmixPrior&, const FinmixMCMC&);
+                        const FinmixPrior&, const FinmixMCMC&);
 				virtual void update ();
 		};
 		class Output {
@@ -95,9 +95,9 @@ FIX <PriorType, ParType, LogType, ParOutType>::Node::Node (const FinmixData& dat
 		y(data.y), S(data.S), expos(data.expos), compIndex(model.K), 
 		permIndex(model.K), compIndex2(model.K)
 {
-        for(unsigned int k = 0; k < K; ++k) {
-		    compIndex(k) = k;
-	    }
+    for (unsigned int k = 0; k < K; ++k) {
+        compIndex(k) = k;
+    }
 }
 
 template <typename PriorType, typename ParType, typename LogType,

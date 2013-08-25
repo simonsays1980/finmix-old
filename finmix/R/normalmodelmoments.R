@@ -13,7 +13,7 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with Rcpp.  If not, see <http://www.gnu.org/licenses/>.
+# along with finmix. If not, see <http://www.gnu.org/licenses/>.
 
 .normalmodelmoments <- setClass("normalmodelmoments", 
                                 representation(B   = "numeric",
@@ -111,4 +111,3 @@ setMethod("getR", "normalmodelmoments",
     object@R        <- 1 - object@W/object@var[1]
     return(object)
 }
-

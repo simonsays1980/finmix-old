@@ -13,19 +13,16 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with finmix.  If not, see <http://www.gnu.org/licenses/>.
+# along with finmix. If not, see <http://www.gnu.org/licenses/>.
 
 .prior <- setClass("prior",
                    representation(weight 	= "matrix",
                                   par 	    = "list",
                                   type 	    = "character",
                                   hier 	    = "logical"),
-                   validity = function(object) {
-                       type.choices <- c("condconjugate", "independent")
-                       if (!(object@type %in% type.choices)) {               
-                           stop("Unknown prior 'type'. 'type' must be 'independent' 
-                                or 'condconjugate'.")
-                       }
+                   validity = function(object) 
+                   {
+                       .valid.type.Prior(object)
                        ## else: OK
                        TRUE		
                    },
@@ -39,43 +36,83 @@
 "prior" <- function(weight = matrix(), par = list(), 
                     type = "independent", hier = TRUE) 
 {
-    object <- .prior(weight = weight, par = par, 
-                  type = type, hier = hier)
-    return(object)
+    .prior(weight = weight, par = par, 
+           type = type, hier = hier)
 }
 
-"priordefine" <- function(data = data(), model = model(), 
+"priordefine" <- function(fdata = fdata(), model = model(), 
                           coef.mat = NULL, varargin = NULL) 
 {
-
-    .valid.Data.Obj(data, model@dist) 
-    validObject(model)
-    validObject(varargin)
+    .check.fdata.model.Prior(fdata, model)
+    if (!is.null(varargin)) {
+        .check.varargin.Prior(varargin)
+    }
     if (model@dist == "cond.poisson") {
-        .valid.Coef.mat(model, coef.mat) 
+        .valid.coefmat.Prior(model, coef.mat) 
     }
     object <- .prior(hier = TRUE, type = "independent")
-    generatePrior(object, data = data, model = model, 
+    generatePrior(object, fdata = fdata, model = model, 
                   varargin = varargin, coef.mat = coef.mat)
 }
 
+setMethod("hasPriorPar", signature(object   = "prior",
+                                   model    = "model",
+                                   verbose  = "ANY"),
+          function(object, model, verbose = FALSE) 
+          {
+              .haspar.Prior(object, model, verbose)
+          }
+)
+
+setMethod("hasPriorWeight", signature(object    = "prior",
+                                      model     = "model",
+                                      verbose   = "ANY"),
+          function(object, model, verbose = FALSE) 
+          {
+              if (!all(is.na(object@weight))) {
+                  if (ncol(object@weight) == model@K) {                      
+                      return(TRUE)
+                  } else {
+                      if (verbose) {
+                          stop(paste("Wrong dimension of ",
+                                     "slot 'weight' of ",
+                                     "'prior' object. " ,
+                                     "Weights must be of ",
+                                     "dimension 1 x K.",
+                                     sep = ""))
+                      } else {
+                          return(FALSE)
+                      }
+                  }
+              } else {
+                  if (verbose) {
+                      stop(paste("Slot 'weight' of 'prior' ",
+                                 "object is empty.",
+                                 sep = ""))                      
+                  } else {                      
+                      return(FALSE)
+                  }
+              }
+          }
+)
+
 setMethod("generatePrior", "prior", 
-          function(object, data, model, varargin, coef.mat) 
+          function(object, fdata, model, varargin, coef.mat) 
           {
               dist <- model@dist
               if (dist == "poisson") {
-                  object <- .generatePriorPoisson(object, data, model, 
+                  object <- .generatePriorPoisson(object, fdata, model, 
                                                   varargin = varargin)
               } else if (dist == "cond.poisson") {
-                  object <- .generatePriorCondPoisson(object, data, model, 
+                  object <- .generatePriorCondPoisson(object, fdata, model, 
                                                       varargin = varargin, 
                                                       coef.mat)
               } else if (dist == "binomial") {
                   object <- .generatePriorBinomial(object, model)
               } else if (dist == "exponential") {
-                  object <- .generatePriorExponential(object, data)
+                  object <- .generatePriorExponential(object, fdata)
               } else {
-                  object <- .generatePriorNorstud(object, data, model, 
+                  object <- .generatePriorNorstud(object, fdata, model, 
                                                   varargin = varargin)
                   if (dist == "student" || dist == "studmult") {
                       object <- .generateDFPrior(object, model)
@@ -99,37 +136,37 @@ setMethod("show", "prior",
               }		
           }
 )
+
 ## Getters ##
-## Generic set in 'model' class ##
 setMethod("getWeight", "prior", 
           function(object) 
           {
               return(object@weight)
           }
 ) 
-## Generic set in 'model' class ##
+
 setMethod("getPar", "prior", 
           function(object) 
           {
               return(object@par)
           }
 )
-##setGeneric("getType", function(object) standardGeneric("getType"))
+
 setMethod("getType", "prior", 
           function(object) 
           {
               return(object@type)
           }
 )
-setGeneric("getHier", function(object) standardGeneric("getHier"))
+
 setMethod("getHier", "prior", 
           function(object)
           {
               return(object@hier)
           }
 )
-## R usual setters ##
-## Generic set in 'model' class ##
+
+## Setters ##
 setReplaceMethod("setWeight", "prior", 
                  function(object, value) 
                  {
@@ -138,7 +175,7 @@ setReplaceMethod("setWeight", "prior",
                      return(object)
                  }
 )
-## Generic set in 'model' class ##
+
 setReplaceMethod("setPar", "prior", 
                  function(object, value) 
                  {
@@ -147,7 +184,7 @@ setReplaceMethod("setPar", "prior",
                      return(object)
                  }
 )
-## Generic set in 'model' class ##
+
 setReplaceMethod("setType", "prior", 
                  function(object, value) 
                  {
@@ -156,7 +193,7 @@ setReplaceMethod("setType", "prior",
                      return(object)
                  }
 )
-setGeneric("setHier<-", function(object, value) standardGeneric("setHier<-"))
+
 setReplaceMethod("setHier", "prior", 
                  function(object, value) 
                  {
@@ -167,16 +204,120 @@ setReplaceMethod("setHier", "prior",
 )
 
 ### Private functions
-### These functions are not exported 
-".generatePriorPoisson" <- function(object, data.obj, 
+### These functions are not exported
+
+### Checking
+".check.fdata.model.Prior" <- function(fdata.obj, model.obj) 
+{
+    .valid.Fdata(fdata.obj)
+    hasY(fdata.obj, verbose = TRUE)
+    .valid.Model(model.obj)
+    .valid.fdata.model.Prior(fdata.obj, model.obj)
+}
+
+### Check varargin: The varargin must be also an object of 
+### class 'prior'.
+".check.varargin.Prior" <- function(obj) 
+{
+    if (class(obj) != "prior") {
+        stop(paste("Argument 'varargin' is not of class 'prior'. ",
+                   "If argument 'varargin' in 'priordefine()' is ",
+                   "specified, it must be of class 'prior'.", sep = ""))
+    } else {
+        validObject(obj)
+    }
+}
+
+### Has
+### hasPar Prior
+".haspar.Prior" <- function(obj, model.obj, verbose)
+{
+    dist    <- model.obj@dist
+    if (dist == "poisson") {
+        .haspar.Poisson.Prior(obj, model.obj, verbose)
+    }
+}
+
+### hasPar Prior Poisson
+".haspar.Poisson.Prior" <- function(obj, model.obj, verbose)
+{
+    if (length(obj@par) == 0) {
+        if (verbose) {
+            stop("Slot 'par' in 'prior' object is empty.")
+        } else {
+            return(FALSE)
+        }
+    } else {
+        if (!("a" %in% names(obj@par))) {
+            if (verbose) {
+                stop(paste("Wrong specification of slot 'par' ",
+                           "in 'prior' object. Poisson models ",
+                           "need Gamma shape parameters named ",
+                           "'a'.", sep = ""))
+            } else {
+                return(FALSE)
+            }
+        } else {
+            if (!("b" %in% names(obj@par))) {
+                if (verbose) {
+                    stop(paste("Wrong specification of slot 'par' ",
+                               "in 'prior' object. Poisson models ",
+                               "need Gamma rate parameters named ",
+                               "'b'.", sep = ""))
+                } else {
+                    return(FALSE)
+                }
+            } else {
+                if (obj@hier) {
+                    if (!("g" %in% names(obj@par))) {
+                        if (verbose) {
+                            stop(paste("Wrong specification of slot 'par' ",
+                                       "in 'prior' object if slot 'hier' ",
+                                       "is set to TRUE. Hierarchical Poisson models ",
+                                       "need Gamma shape hyperparameter named ",
+                                       "'g'.", sep = ""))
+                        } else {
+                            return(FALSE)
+                        }
+                    } else {
+                        if (!("G" %in% names(obj@par))) {
+                            if (verbose) {
+                                stop(paste("Wrong specification of slot 'par' ",
+                                           "in 'prior' object if slot 'hier' ",
+                                           "is set to TRUE. Hierarchical Poisson models ",
+                                           "need Gamma rate hyperparameter named ",
+                                           "'gG'.", sep = ""))
+                            } else {
+                                return(FALSE)
+                            }
+                        } else {
+                            return(TRUE)
+                        }
+                    }
+                } else {
+                    return(TRUE)
+                }
+            }
+        }
+    }
+}
+                                                                               
+### Prior
+### Prior Poisson: Generates prior parameters for the Poisson 
+### mixture model. 
+### @Distribution:      Gamma distribution
+### @Parameters:    
+###                     a:  Shape parameter, 1 x K
+###                     b:  Rate parameter, 1 x K
+### @Hier:              Gamma distribution
+### Hier-Parameters:    
+###                     g:  Shape parameter, 1 x 1
+###                     G:  Rate parameter, 1 x 1
+".generatePriorPoisson" <- function(object, fdata.obj, 
                                     model.obj, varargin) 
 {
     K <- model.obj@K
-    if (data.obj@bycolumn) {
-        datam <- data.obj@y
-    } else {
-        datam <- t(data.obj@y)
-    }
+    datam   <- getColY(fdata.obj)
     if (is.null(varargin)) {
         object@hier <- TRUE ## default prior is hierarchical
         object@type <- "condconjugate"
@@ -184,10 +325,12 @@ setReplaceMethod("setHier", "prior",
         object@hier <- varargin@hier
         object@type <- "condconjugate"
     }
-    ## default prior based on matching moments ##
+    ## Default prior based on matching moments
+    ## See Frühwirth-Schnatter (2006) and Viallefont et. al. (2002)
+    ## for more information.
 
-    ## choose level of overdispersion, depending on the 
-    ## ratio overdispersion/mean^2 ##
+    ## Choose level of overdispersion, depending on the 
+    ## ratio overdispersion/mean^2 
     ## no idea: data-based choice 
     mean <- mean(datam, na.rm = TRUE) 
     over <- as.numeric(var(datam, na.rm = TRUE) - mean)
@@ -456,6 +599,11 @@ setReplaceMethod("setHier", "prior",
     return(object)
 }
 
+### Prior weight: The prior distribution of the weights.
+### @Distribution:      Dirichlet
+### @Parameters:        
+###                     e_1,...e_K,  1 x K
+### A default with e_i = 4 for all i = 1, ..., K is chosen.
 ".generatePriorWeight" <- function(object, model) 
 {
     K   <- model@K
@@ -470,12 +618,32 @@ setReplaceMethod("setHier", "prior",
 }
 
 ### Validity 
+### Valid type: The prior @type must be one of the two choices
+### 'independent' or 'condconjugate' (conditional conjugate). 
+### For some distribution models only one type of prior exists:
+### @Poisson:   'condconjugate'
+".valid.type.Prior" <- function(obj) 
+{
+    type.choices <- c("condconjugate", "independent")
+    if (!(obj@type %in% type.choices)) {               
+        stop(paste("Unknown prior 'type'. 'type' must be",
+                   "'independent' or 'condconjugate'.", 
+                   sep = ""))
+    }
+#    if (model.obj@dist == "poisson" && obj@type == "independent") {
+#        warning(paste("Wrong specification of slot 'type' in 'prior' ",
+#                      "object with slot 'dist' in 'model' object set to ",
+#                      "'poisson'. For Poisson mixtures only the prior ",
+#                      "type 'condconjugate' is available.", sep = ""))
+#    }
+}
+
 ### The coefficient matrix 'coef.mat' for 'cond.poisson'
 ### distributions with conditional prior must be a lower
 ### triangular matrix with ones on its diagonal.
 ### Further it must be of type 'matrix' or 'array' with
 ### dimension K x K.
-".valid.Coef.mat" <- function(model.obj, coef.mat) {
+".valid.coefmat.Prior" <- function(model.obj, coef.mat) {
     K <- model.obj@K
     if (is.null(coef.mat)) {
         stop("For a conditional Poisson mixture a coefficient matrix 
@@ -495,43 +663,18 @@ setReplaceMethod("setHier", "prior",
     }
 }
 
-### 'data' objects must have a slot @y with not all values 
-### NA. Further the dimensions @N and @r must be conform
-### with the slot @y given the slot @bycolumn.
-### Furthermore, only Student-t and Normal models are
-### intended to handle multivariate data.
-".valid.Data.Obj" <- function(data.obj, model.dist)
+### Valid fdata/model
+".valid.fdata.model.Prior" <- function(fdata.obj, model.obj) 
 {
-    validObject(data.obj)
-    if (all(is.na(data.obj@y))) {
-        stop("Argument 'data': slot 'y' is empty.")
-    } else {
-        if (data.obj@bycolumn) {
-            N   <- nrow(data.obj@y)
-            r   <- ncol(data.obj@y)
-            if (N != data.obj@N) {
-                data.obj@N  <- N
-            }
-            if (r != data.obj@r) {
-                data.obj@r  <- r
-            }
-        } else {
-            N   <- ncol(data.obj@y)
-            r   <- nrow(data.obj@y)
-            if (N != data.obj@N) {
-                data.obj@N  <- N
-            }
-            if (r != data.obj@r) {
-                data.obj@r  <- r
-            }
-        }
-        if (data.obj@r > 1) {
-            if (!model.dist %in% c("normult", "studmult")) {
-                stop("Model", model.dist, "can not handle multivariate
-                     data")
-            } 
-        }
+    if (model.obj@dist %in% .get.univ.Model() && fdata.obj@r > 1) {
+        stop(paste("Wrong specification of slot 'r' in 'fdata' object. ",
+                   "Univariate distribution in slot 'dist' of 'model' ",
+                   "object but dimension in slot 'r' of 'fdata' object ",
+                   "greater 1.", sep = ""))
+    } else if (model.obj@dist %in% .get.multiv.Model() && fdata.obj@r < 2) {
+        stop(paste("Wrong specification of slot 'r' in 'fdata' object. ",
+                   "Multivariate distribution in slot 'dist' of 'model' ",
+                   "object but dimension in slot 'r' of 'fdata' object ",
+                   "less than two.", sep = ""))
     }
 }
-
-
