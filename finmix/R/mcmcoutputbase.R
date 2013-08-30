@@ -224,7 +224,6 @@ setMethod("getClust", "mcmcoutputbase",
     axis(2, las = 2, cex.axis = 0.7)
     mtext(side = 2, las = 3, "mixprior", cex = 0.6,
           line = 3)
-    axis(1)
     mtext(side = 1, "Iterations", cex = 0.7, line = 3)
     cdpost      <- x@log$cdpost
     plot(cdpost, type = "l", axes = F,
@@ -284,6 +283,7 @@ setMethod("getClust", "mcmcoutputbase",
 ".subseq.Base" <- function(obj, index)
 {
     M               <- dim(obj@weight)[1]
+    K               <- dim(obj@weight)[2]
     newM            <- sum(index)
     obj@log$cdpost  <- array(obj@log$cdpost[index],
                               dim = c(newM,1))
@@ -293,18 +293,18 @@ setMethod("getClust", "mcmcoutputbase",
     obj@ST          <- array(obj@ST[index],
                               dim = c(newM, 1)) 
     ## Check which S stay ##
-    stores  <- dim(obj@S)[2]
-    if (stores != 0) {
-        ms      <- M - stores
+    storeS  <- ifelse(!all(is.na(obj@S)), dim(obj@S)[2], 0)
+    if (storeS != 0) {
+        ms      <- M - storeS
         index.S <- index[(ms + 1):M]
+        N       <- dim(obj@S)[1]
         if (any(index.S)) {
-            obj@S       <- obj@S[,index.S]
+            obj@S       <- array(obj@S[,index.S], dim = c(N, storeS))
         } else {
             obj@S       <- as.array(NA)
         }
     }
-    obj@NK          <- array(obj@NK[index,],
-                             dim = c(newM, 1))
+    obj@NK          <- obj@NK[index, ]                             
     return(obj)
 }
 
@@ -317,7 +317,7 @@ setMethod("getClust", "mcmcoutputbase",
     ## Rcpp::export 'swapInd_cc()'
     M               <- obj@M
     K               <- ncol(index)
-    storeS          <- dim(obj@S)[2]
+    storeS          <- ifelse(!all(is.na(obj@S)), dim(obj@S)[2], 0)
     if (storeS != 0) {
         index.S     <- matrix(index[(M - storeS + 1):M, ], 
                               ncol = K, byrow = TRUE)

@@ -13,23 +13,27 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with Rcpp.  If not, see <http://www.gnu.org/licenses/>.
+# along with finmix. If not, see <http://www.gnu.org/licenses/>.
 
-setClass("mcmcestind",
-         representation(eavg = "list"),
-         contains = c("mcmcestfix"),
-         validity = function(object) {
-             ## else: OK
-             TRUE
-         }
+.mcmcestind <- setClass("mcmcestind",
+                        representation(eavg = "list"),
+                        contains = c("mcmcestfix"),
+                        validity = function(object) 
+                        {
+                            ## else: OK
+                            TRUE
+                        },
+                        prototype(eavg  = list())                                  
 )
 
-setClassUnion("mcmcest", c("mcmcestfix",
-                           "mcmcestind")
+setClassUnion("mcmcest", 
+              c("mcmcestfix",
+                "mcmcestind")
 )
 
 setMethod("show", "mcmcestind",
-          function(object) {
+          function(object) 
+          {
               cat("Object 'mcmcest\n")
               cat("     dist        :", object@dist, "\n")
               cat("     K           :", object@K, "\n")
@@ -47,9 +51,9 @@ setMethod("show", "mcmcestind",
 )
 
 ## Getters ##
-setGeneric("getEavg", function(object) standardGeneric("getEavg"))
 setMethod("getEavg", "mcmcestind", 
-          function(object) {
+          function(object) 
+          {
               return(object@eavg)
           }
 )

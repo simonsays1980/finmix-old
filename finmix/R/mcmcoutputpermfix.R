@@ -248,7 +248,7 @@ setMethod("plotPostDens", signature(x   = "mcmcoutputpermfix",
 ### Plot sampling representation Poisson: Plots the sampling
 ### representation for Poisson parameters. Each parameter sample
 ### is combined with the other samples. 
-".samprep.Poisson" <- function(x, dev)
+".permsamprep.Poisson" <- function(x, dev)
 {
     K       <- x@model@K
     if (K == 1) {

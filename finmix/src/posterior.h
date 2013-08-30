@@ -51,4 +51,5 @@ posterior_multinomial(const unsigned int &K, const arma::ivec &S,
 	
 	return par_post;
 }
+
 #endif

@@ -241,6 +241,7 @@ setReplaceMethod("setHier", "prior",
 ### hasPar Prior Poisson
 ".haspar.Poisson.Prior" <- function(obj, model.obj, verbose)
 {
+    K   <- model.obj@K
     if (length(obj@par) == 0) {
         if (verbose) {
             stop("Slot 'par' in 'prior' object is empty.")
@@ -258,6 +259,13 @@ setReplaceMethod("setHier", "prior",
                 return(FALSE)
             }
         } else {
+            if (dim(obj@par$a)[2] != K) {
+                stop(paste("Wrong specifcation of slot 'par' ",
+                           "in 'prior' object. Slot 'K' in ",
+                           "'model' object does not match ",
+                           "dimension of prior parameters.",
+                           sep = ""))
+            }
             if (!("b" %in% names(obj@par))) {
                 if (verbose) {
                     stop(paste("Wrong specification of slot 'par' ",
@@ -268,7 +276,14 @@ setReplaceMethod("setHier", "prior",
                     return(FALSE)
                 }
             } else {
-                if (obj@hier) {
+                if (dim(obj@par$b)[2] != K) {
+                    stop(paste("Wrong specifcation of slot 'par' ",
+                               "in 'prior' object. Slot 'K' in ",
+                               "'model' object does not match ",
+                               "dimension of prior parameters.",
+                               sep = ""))
+                }
+               if (obj@hier) {
                     if (!("g" %in% names(obj@par))) {
                         if (verbose) {
                             stop(paste("Wrong specification of slot 'par' ",

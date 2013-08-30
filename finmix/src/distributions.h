@@ -47,6 +47,33 @@ arma::rowvec rdirichlet (const arma::rowvec& dpar)
 	return par_out;
 }
 
+inline 
+arma::vec lddirichlet (const arma::mat &values, const arma::vec &par)
+{
+    const unsigned int M    = values.n_rows;
+    const unsigned int K    = values.n_cols;
+    arma::vec rvalues       = arma::zeros(M);
+    double std_const        = 0.0;
+    for (unsigned int k = 0; k < K; ++k) {
+        rvalues     += arma::log(values.col(k)) * (par(k) - 1);
+        std_const   += R::lgammafn(par(k));
+    }
+    std_const   -= R::lgammafn(arma::as_scalar(arma::sum(par)));
+    rvalues     -= std_const;
+    return(rvalues);
+}
+
+inline 
+arma::rowvec dpoisson(const double &value, const arma::rowvec &par)
+{
+    const unsigned int K = par.n_elem;
+    arma::rowvec rvec(K);
+    for (unsigned int k = 0; k < K; ++k) {
+        rvec(k) = R::dpois(value, par(k), 0);
+    }
+    return rvec;
+}
+
 inline
 arma::rowvec rgammaprod (const arma::rowvec& par_a, 
 	const arma::rowvec& par_b) 
@@ -65,6 +92,22 @@ arma::rowvec rgammaprod (const arma::rowvec& par_a,
 	PutRNGstate();
 
 	return par_out;
+}
+
+inline 
+arma::mat ldgamma (const arma::mat &values, const arma::vec &shape,
+        const arma::vec &rate)
+{
+    const unsigned int M    = values.n_rows;
+    const unsigned int K    = values.n_cols;
+    arma::mat rvalues(M, K);
+    for (unsigned int k = 0; k < K; ++k) {
+        rvalues.col(k) = arma::log(values.col(k)) * (shape(k) - 1);
+        rvalues.col(k) -= values.col(k) * rate(k);
+        rvalues.col(k) += shape(k) * std::log(rate(k));
+        rvalues.col(k) -= R::lgammafn(shape(k));
+    }
+    return rvalues;
 }
 
 inline 

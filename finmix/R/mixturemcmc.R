@@ -350,7 +350,9 @@
     } else if (!model.obj@indicfix && K > 1) {			
     ## Model with simulated indicators ##
         log.cdpost 	<- array(numeric(), dim = c(M, 1))
-        logs 		<- list(mixlik = log.mixlik, mixprior = log.mixprior, cdpost = log.cdpost)
+        logs 		<- list(mixlik = log.mixlik, 
+                             mixprior = log.mixprior, 
+                             cdpost = log.cdpost)
         weights 	<- array(numeric(), dim = c(M, K))
         entropies 	<- array(numeric(), dim = c(M, 1))
         STm 		<- array(integer(), dim = c(M, 1))

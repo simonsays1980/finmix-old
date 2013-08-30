@@ -130,7 +130,7 @@ setMethod("plotPostDens", signature(x   = "mcmcoutputhierpost",
 )
 
 setMethod("subseq", signature(object = "mcmcoutputhierpost", 
-                              index = "array"), 
+                              index  = "array"), 
           function(object, index) 
           {
               ## Call 'subseq()' method from 'mcmcoutputhier'

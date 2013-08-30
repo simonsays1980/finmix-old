@@ -13,23 +13,32 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with Rcpp.  If not, see <http://www.gnu.org/licenses/>.
+# along with finmix. If not, see <http://www.gnu.org/licenses/>.
 
-setClass("mcmcestfix",
-         representation(dist        = "character",
-                        K           = "integer",
-                        indicmod    = "character",
-                        map         = "list",
-                        bml         = "list",
-                        ieavg       = "list"),
-         validity = function(object) {
-             ## else: OK
-             TRUE
-         }
+.mcmcestfix <- setClass("mcmcestfix",
+                        representation(dist        = "character",
+                                       K           = "integer",
+                                       indicmod    = "character",
+                                       map         = "list",
+                                       bml         = "list",
+                                       ieavg       = "list"),
+                        validity = function(object) 
+                        {
+                            ## else: OK
+                            TRUE
+                        },
+                        prototype(dist      = character(),
+                                  K         = integer(),
+                                  indicmod  = character(),
+                                  map       = list(),
+                                  bml       = list(),
+                                  ieavg     = list()
+                                  )
 )
 
 setMethod("show", "mcmcestfix", 
-          function(object) {
+          function(object) 
+          {
               cat("Object 'mcmcest\n")
               cat("     dist        :", object@dist, "\n")
               cat("     K           :", object@K, "\n")
@@ -45,42 +54,44 @@ setMethod("show", "mcmcestfix",
 )
 
 ## Getters ##
-## Generic set in 'model.R' ##
 setMethod("getDist", "mcmcestfix", 
-          function(object) {
+          function(object) 
+          {
               return(object@dist)
           }
 )
-## Generic set in 'model.R' ##
+
 setMethod("getK", "mcmcestfix", 
-          function(object) {
+          function(object) 
+          {
               return(object@K)
           }
 )
-## Generic set in 'model.R'
+
 setMethod("getIndicmod", "mcmcestfix", 
-          function(object) {
+          function(object) 
+          {
               return(object@indicmod)
           }
 )
 
-setGeneric("getMap", function(object) standardGeneric("getMap"))
 setMethod("getMap", "mcmcestfix", 
-           function(object) {
+           function(object) 
+           {
                return(object@map)
            }
 )
 
-setGeneric("getBml", function(object) standardGeneric("getBml"))
 setMethod("getBml", "mcmcestfix",
-          function(object) {
+          function(object) 
+          {              
               return(object@bml)
           }
 )
 
-setGeneric("getIeavg", function(object) standardGeneric("getIeavg"))
 setMethod("getIeavg", "mcmcestfix", 
-          function(object) {
+          function(object) 
+          {
               return(object@ieavg)
           }
 )

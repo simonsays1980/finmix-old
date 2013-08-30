@@ -7,6 +7,7 @@ importFrom(graphics, persp)
 importFrom(graphics, contour)
 importFrom(graphics, pairs)
 importFrom(KernSmooth, bkde2D)
+importFrom(dfoptim, nmkb)
 export( ## user-defined constructors
         "model",
         "modelmoments",
@@ -19,7 +20,10 @@ export( ## user-defined constructors
         "mcmc",
         "%=%",
         "mcmcstart",
-        "dataclass"
+        "dataclass",
+        "mixturemcmc",
+        "mcmcpermute",
+        "mcmcestimate"
 )
 
 exportClasses( ## all classes
@@ -152,5 +156,38 @@ exportMethods( ## name of the generic, as with other methods
         "subseq",
         "swapElements",
         "getLog",
-        "getPrior"
+        "getPrior",
+
+        ## 'mcmcoutputfixhier' class ##
+        "getHyper",
+        
+        ## 'mcmcoutputfixpost' class ##
+        "getPost",
+
+        ## 'mcmcoutputbase' class ##
+        "getST",
+        "getClust",
+
+        ## 'mcmcpermfix' class ##
+        "getMperm",
+        "getParperm",
+        "getLogperm",
+
+        ## 'mcmcpermfixpost' class ##
+        "getPostperm",
+
+        ## 'mcmcpermind' class ##
+        "getWeightperm",
+        "getEntropyperm",
+        "getSTperm",
+        "getSperm",
+        "getNKperm",
+
+        ## 'mcmcestfix' class ##
+        "getMap",
+        "getBml",
+        "getIeavg",
+
+        ## 'mcmcind' class ##
+        "getEavg"
 )

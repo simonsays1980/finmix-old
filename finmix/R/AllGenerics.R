@@ -287,12 +287,17 @@ setGeneric("getSperm", function(object) standardGeneric("getSperm"))
 
 setGeneric("getNKperm", function(object) standardGeneric("getNKperm"))
 
+## Class 'mcmcestfix' -----------------------------------------------------
 
+setGeneric("getMap", function(object) standardGeneric("getMap"))
 
+setGeneric("getBml", function(object) standardGeneric("getBml"))
 
+setGeneric("getIeavg", function(object) standardGeneric("getIeavg"))
 
+## Class 'mcmcestind' ------------------------------------------------------
 
-
+setGeneric("getEavg", function(object) standardGeneric("getEavg"))
 
 
 

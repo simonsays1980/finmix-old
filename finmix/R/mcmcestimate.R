@@ -13,18 +13,11 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with Rcpp.  If not, see <http://www.gnu.org/licenses/>.
+# along with finmix. If not, see <http://www.gnu.org/licenses/>.
 
-"mcmcestimate" <- function(mcmcout, returnOut = FALSE) {
+"mcmcestimate" <- function(mcmcout, method = "kmeans", permOut = FALSE) {
     ## Check input ##
-    if (!inherits(mcmcout, c("mcmcoutput", "mcmcoutputperm"))) {
-        stop("Argument 'mcmcout' must be either of type 
-             'mcmcoutput' or of type 'mcmcoutputperm'.")
-    } 
-    if (!is.logical(returnOut)) {
-        stop("Argument 'returnOut' must be of type 'logical'.")
-    }
-
+    .check.args.Mcmcestimate(mcmcout, method, permOut)
     ## Constants
     K           <- mcmcout@model@K
     M           <- mcmcout@M
@@ -72,12 +65,12 @@
                                    ieavg = ieavg)
                     return(mcmcest)
                 } else {
-                    warning("No identification possible. Not a single draw in
-                         'mcmcoutputperm' object is a permutation")
+                    warning(paste("No identification possible. Not a single ",
+                                  "draw is a permutation", sep = ""))
                 }
             } else {
                 ## Use function 'mcmcpermute' to permute the sample
-                mcmcoutperm <- mcmcpermute(mcmcout)
+                mcmcoutperm <- mcmcpermute(mcmcout, method)
                 if (mcmcoutperm@Mperm > 0) {
                     ## Use ergodic average function on 'mcmcoutputperm'
                     ## object
@@ -94,8 +87,8 @@
                         return(mcmcest)
                     }
                 } else {
-                    warning("No identification possible. Not a single draw in
-                         'mcmcoutputperm' object is a permutation.")
+                    warning(paste("No identification possible. Not a single ",
+                                  "draw is a permutation", sep = ""))
                 }
             }
         } else { 
@@ -107,75 +100,78 @@
     }
     ## New 'mcmcestimate' object.
     
-    ## In case the returnOut = TRUE the mcmcout object is 
+    ## In case the permOut = TRUE the mcmcout object is 
     ## returned as well in a list
 }
 
-"mcmc.map" <- function(mcmcout) {
+### Private functions
+### These functions are not exported.
+
+### Checking
+### Check arguments: The 'mcmcout' object must inherit from
+### 'mcmcoutput' or 'mcmcoutputperm'. Argument 2 must match one
+### of three permutation algorithms in 'mcmcpermute()'.
+### Argument 3 must be of type logical. If any case is not true 
+### an error is thrown.
+".check.args.Mcmcestimate" <- function(obj, arg2, arg3)
+{
+    if (!inherits(obj, c("mcmcoutput", "mcmcoutputperm"))) {
+        stop(paste("Wrong argument: Argument 1 must be either of type ", 
+                   "'mcmcoutput' or of type 'mcmcoutputperm'.",
+                   sep = ""))
+    } 
+    match.arg(arg2, c("kmeans", "Stephens1997a", "stephens1997b"))
+    if (!is.logical(arg3)) {
+        stop("Wrong argument: Argument 3 must be of type 'logical'.")
+    }
+}
+
+".map.Mcmcestimate" <- function(obj) {
     ## Take the value with the highest posterior log
     ## likelihood
-    ## Check arguments ##
-    if (!inherits(mcmcout, c("mcmcoutput", "mcmcoutputperm"))) {
-        stop("Argument 'mcmcout' must be either of type
-             'mcmcoutput' or of type 'mcmcoutputperm'.")
-    }
-    mixpost <- mcmcout@log$mixlik + mcmcout@log$mixprior
+    mixpost <- obj@log$mixlik + obj@log$mixprior
     mixpost.sort <- sort.int(mixpost, index.return = TRUE)
     map.index <- tail(mixpost.sort$ix, 1)
     return(as.integer(map.index))
 }
 
-"mcmc.bml" <- function(mcmcout) {
+".bml.Mcmcestimate" <- function(obj) {
     ## Take the value with the highest log likelihood 
-    ## Check argument ##
-    if (!inherits(mcmcout, c("mcmcoutput", "mcmcoutputperm"))) {
-        stop("Argument 'mcmcout' must be either of type 
-             'mcmcoutput' or of type 'mcmcoutputperm'.")
-    }
-    mixlik <- mcmcout@log$mixlik
+    mixlik <- obj@log$mixlik
     mixlik.sort <- sort.int(mixlik, index.return = TRUE)
     bml.index <- tail(mixlik.sort$ix, 1)
     return(bml.index)
 }
     
-"mcmc.extract" <- function(mcmcout, m) {
+".extract.Mcmcestimate" <- function(obj, m) {
     ## Extract the 'm'th row in each slot of an mcmcout
     ## object
-    ## Check arguments ##
-    if (!inherits(mcmcout, c("mcmcoutput", "mcmcoutputperm"))) {
-        stop("Argument 'mcmcout' must be either of type
-             'mcmcoutput' or of type 'mcmcoutputperm'.")
-    }
-    K <- mcmcout@model@K
-    dist <- mcmcout@model@dist
-    indicfix <- !inherits(mcmcout, what = "mcmcoutputbase")
+    K           <- obj@model@K
+    dist        <- obj@model@dist
+    indicfix    <- !inherits(obj, what = "mcmcoutputbase")
     if (dist == "poisson") {
-        par.est <- list(lambda = as.array(mcmcout@par$lambda[m, ]))
+        par.est <- list(lambda = as.array(obj@par$lambda[m, ]))
     }
     if(!indicfix && K > 1) {
-        weight.est <- as.array(mcmcout@weight[m, ])
-        est.list <- list(par = par.est,  weight = weight.est)
+        weight.est  <- as.array(obj@weight[m, ])
+        est.list    <- list(par = par.est,  weight = weight.est)
         return(est.list)
     }
     est.list <- list(par = par.est)
     return(est.list)
 }
 
-"mcmc.eavg" <- function(mcmcout) {
+".eavg.Mcmcestimate" <- function(obj) {
     ## Check arguments ##
-    if (!inherits(mcmcout, c("mcmcoutput", "mcmcoutputperm"))) {
-        stop("Argument 'mcmcout' must be either of type 
-             'mcmcoutput' or of type 'mcmcoutputperm'.")
-    }
-    dist <- mcmcout@model@dist
-    indicfix <- !inherits(mcmcout, what = "mcmcoutputbase")
+    dist <- obj@model@dist
+    indicfix <- !inherits(obj, what = "mcmcoutputbase")
     perm <- inherits(mcmcout, what = "mcmcoutputperm")
     if (dist == "poisson") {
         if(!perm) {
-            par.eavg <- list(lambda = as.array(apply(mcmcout@par$lambda, 
+            par.eavg <- list(lambda = as.array(apply(obj@par$lambda, 
                                             2, mean, na.rm = TRUE)))
         } else {
-            par.eavg <- list(lambda = as.array(apply(mcmcout@parperm$lambda,
+            par.eavg <- list(lambda = as.array(apply(obj@parperm$lambda,
                                             2, mean, na.rm = TRUE)))
         }
     }
@@ -184,12 +180,12 @@
         return(eavg.list)
     } else {
         if (perm) {
-             weight.eavg <- as.array(apply(mcmcout@weightperm,
+             weight.eavg <- as.array(apply(obj@weightperm,
                                            2, mean, na.rm = TRUE))
              eavg.list <- list(par = par.eavg, weight = weight.eavg)
              return(eavg.list)
         } else {
-            weight.eavg = as.array(apply(mcmcout@weight, 2, mean, 
+            weight.eavg = as.array(apply(obj@weight, 2, mean, 
                                          na.rm = TRUE))
             eavg.list <- list(par = par.eavg, weight = weight.eavg)
             return(eavg.list)
