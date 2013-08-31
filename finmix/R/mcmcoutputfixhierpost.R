@@ -32,6 +32,7 @@ setMethod("show", "mcmcoutputfixhierpost",
               cat("Object 'mcmcoutput'\n")
               cat("     class       :", class(object), "\n")
               cat("     M           :", object@M, "\n")
+              cat("     burnin      :", object@burnin, "\n")
               cat("     ranperm     :", object@ranperm, "\n")
               cat("     par         : List of",
                   length(object@par), "\n")

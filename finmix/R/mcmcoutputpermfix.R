@@ -29,6 +29,7 @@ setMethod("initialize", "mcmcoutputpermfix",
                    parperm = list(), logperm = list()) 
           {
               .Object@M         <- mcmcoutput@M
+              .Object@burnin    <- mcmcoutput@burnin
               .Object@ranperm   <- mcmcoutput@ranperm
               .Object@par       <- mcmcoutput@par
               .Object@log       <- mcmcoutput@log
@@ -47,6 +48,7 @@ setMethod("show", "mcmcoutputpermfix",
               cat("Object 'mcmcoutputperm'\n")
               cat("     class       :", class(object), "\n")
               cat("     M           :", object@M, "\n")
+              cat("     burnin      :", object@burnin, "\n")
               cat("     ranperm     :", object@ranperm, "\n")
               cat("     par         : List of", 
                   length(object@par), "\n")

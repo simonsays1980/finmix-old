@@ -25,7 +25,7 @@
     } else if (method == "Stephens1997a") {
         .stephens1997a.Mcmcpermute(mcmcout)
     } else {        
-        .stephens1997b.Mcmcpermute(mcmcout, fdata.obj)
+        .stephens1997b.Mcmcpermute(mcmcout, fdata)
     }
 }
 
@@ -123,9 +123,9 @@
         ## Apply permutation suggested by kmeans clustering
         obj.swap <- swapElements(obj.subseq, perm.index[is.perm,])
         ## Create 'mcmcoutputperm' objects
-        .process.output.Mcmcpermute(obj, obj.swap)
+        .process.output.Mcmcpermute(obj, obj.swap, method = "kmeans")
     } else {
-        .process.output.empty.Mcmcpermute(obj)
+        .process.output.empty.Mcmcpermute(obj, method = "kmeans")
     }
 }
 
@@ -149,9 +149,9 @@
                           ncol = obj@model@K, byrow = TRUE)
     if (any(startidx != index)) {
         obj.swap    <- swapElements(obj, index)
-        .process.output.Mcmcpermute(obj, obj.swap)
+        .process.output.Mcmcpermute(obj, obj.swap, method = "Stephens1997a")
     } else {
-        .process.output.empty.Mcmcpermute(obj)
+        .process.output.empty.Mcmcpermute(obj, method = "Stephens1997a")
     }                   
 }
 
@@ -246,9 +246,9 @@
                           ncol = obj@model@K, byrow = TRUE)
     if (any(startidx != index)) {
         obj.swap    <- swapElements(obj, index)
-        .process.output.Mcmcpermute(obj, obj.swap)
+        .process.output.Mcmcpermute(obj, obj.swap, method = "Stephens1997b")
     } else {
-        .process.output.empty.Mcmcpermute(obj)
+        .process.output.empty.Mcmcpermute(obj, method = "Stephens1997b")
     }
 }
 
@@ -258,7 +258,7 @@
                                       obj@weight)
 }
 
-".process.output.Mcmcpermute" <- function(obj, obj.swap)
+".process.output.Mcmcpermute" <- function(obj, obj.swap, method)
 {
     ## Create 'mcmcoutputperm' objects ##
     if (class(obj) == "mcmcoutputfix") {
@@ -286,7 +286,8 @@
     } else if (class(obj) == "mcmcoutputbase") {
         .mcmcoutputpermbase(obj,
                             Mperm        = obj.swap@M,
-                            parperm      = obj.swap@par,                            
+                            parperm      = obj.swap@par,       
+                            relabel      = method,
                             weightperm   = obj.swap@weight,
                             logperm      = obj.swap@log,
                             entropyperm  = obj.swap@entropy,
@@ -297,6 +298,7 @@
         .mcmcoutputpermhier(obj,
                             Mperm        = obj.swap@M,
                             parperm      = obj.swap@par,
+                            relabel      = method,
                             weightperm   = obj.swap@weight,
                             logperm      = obj.swap@log,
                             entropyperm  = obj.swap@entropy,
@@ -307,6 +309,7 @@
         .mcmcoutputpermpost(obj,
                             Mperm        = obj.swap@M,
                             parperm      = obj.swap@par,
+                            relabel      = method,
                             weightperm   = obj.swap@weight,
                             logperm      = obj.swap@log,
                             postperm     = obj.swap@post,
@@ -318,6 +321,7 @@
         .mcmcoutputpermhierpost(obj,
                                 Mperm        = obj.swap@M,
                                 parperm      = obj.swap@par,
+                                relabel      = method,
                                 weightperm   = obj.swap@weight,
                                 logperm      = obj.swap@log,
                                 postperm     = obj.swap@post,
@@ -328,7 +332,7 @@
     }
 }
 
-".process.output.empty.Mcmcpermute" <- function(obj)
+".process.output.empty.Mcmcpermute" <- function(obj, method)
 {
     warning(paste("Not a single draw is a permutation in the",
                   "function 'mcmcpermute()'.", sep = ""))
@@ -342,13 +346,13 @@
     } else if (class(obj) == "mcmcoutputfixhierpost") {
         .mcmcoutputpermfixhierpost(obj)
     } else if (class(obj) == "mcmcoutputbase") {
-        .mcmcoutputpermbase(obj)
+        .mcmcoutputpermbase(obj, relabel = method)
     } else if (class(obj) == "mcmcoutputhier") {
-        .mcmcoutputpermhier(obj,)
+        .mcmcoutputpermhier(obj, relabel = method)
     } else if (class(obj) == "mcmcoutputpost") {
-        .mcmcoutputpermpost(obj) 
+        .mcmcoutputpermpost(obj, relabel = method) 
     } else {
-        .mcmcoutputpermhierpost(obj)
+        .mcmcoutputpermhierpost(obj, relabel = method)
     }
 }
 

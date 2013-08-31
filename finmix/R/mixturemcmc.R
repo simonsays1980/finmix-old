@@ -278,6 +278,7 @@
     N               <- fdata.obj@N
     M 		        <- mcmc.obj@M
     ranperm 	    <- mcmc.obj@ranperm
+    burnin          <- mcmc.obj@burnin
     ## Set for MCMC default exposures:
     if (!hasExp(fdata.obj)) {
         fdata.obj@exp   <- matrix(1, nrow = N, ncol = 1)
@@ -301,7 +302,8 @@
         if (!prior.obj@hier) {
             ## Model output with NO posterior parameters stored
             if (!mcmc.obj@storepost) {	
-                mcmcout 	<- .mcmcoutputfix(M = M, ranperm = ranperm,
+                mcmcout 	<- .mcmcoutputfix(M = M, burnin = burnin,
+                                              ranperm = ranperm,
                                               par = pars, log = logs,
                                               model = model.obj, 
                                               prior = prior.obj)
@@ -310,7 +312,8 @@
                 return(mcmcout)
             } else {
             ## Model output with posterior parameters stored ##
-                mcmcout 	<- .mcmcoutputfixpost(M = M, ranperm = ranperm,
+                mcmcout 	<- .mcmcoutputfixpost(M = M, burnin = burnin,
+                                                  ranperm = ranperm,
                                                   par = pars, log = logs, 
                                                   post = posts,
                                                   model = model.obj, 
@@ -325,7 +328,8 @@
             hypers <- list(b = array(numeric(), dim = c(M, 1)))
             ## Model output with NO posterior parameters stored ##
             if (!mcmc.obj@storepost) {
-                mcmcout 	<- .mcmcoutputfixhier(M = M, ranperm = ranperm,
+                mcmcout 	<- .mcmcoutputfixhier(M = M,  burnin = burnin,
+                                                  ranperm = ranperm,
                                                   par = pars, log = logs, 
                                                   hyper = hypers,
                                                   model = model.obj, 
@@ -335,7 +339,8 @@
                 return(mcmcout)			
             } else {
             ## Model output with posterior parameters stored ##
-                mcmcout 	<- .mcmcoutputfixhierpost(M = M, ranperm = ranperm,
+                mcmcout 	<- .mcmcoutputfixhierpost(M = M, burnin = burnin,
+                                                      ranperm = ranperm,
                                                       par = pars, log = logs, 
                                                       hyper = hypers, post = posts,
                                                       model = model.obj, 
@@ -368,7 +373,8 @@
         if (!prior.obj@hier) {
             ## Model output with NO posterior parameters stored ##
             if (!mcmc.obj@storepost) {
-                mcmcout		<- .mcmcoutputbase(M = M, ranperm = ranperm,
+                mcmcout		<- .mcmcoutputbase(M = M, burnin = burnin,
+                                                  ranperm = ranperm,
                                                   par = pars, log = logs, 
                                                   weight = weights, 
                                                   entropy = entropies,
@@ -383,7 +389,8 @@
                 return(mcmcout)
             } else {
             ## Model output with posterior parameters stored ##
-                mcmcout 	<- .mcmcoutputpost(M = M, ranperm = ranperm,
+                mcmcout 	<- .mcmcoutputpost(M = M, burnin = burnin,
+                                               ranperm = ranperm,
                                                par = pars, log = logs, 
                                                weight = weights, 
                                                entropy = entropies,
@@ -403,7 +410,8 @@
             hypers 	<- list(b = array(numeric(), dim = c(M, 1)))			
             ## model output with NO posterior parameters stored ##
             if (!mcmc.obj@storepost) {
-                mcmcout	 	<- .mcmcoutputhier(M = M, ranperm = ranperm, 
+                mcmcout	 	<- .mcmcoutputhier(M = M, burnin = burnin,
+                                                   ranperm = ranperm, 
                                                    par = pars, log = logs, 
                                                    weight = weights, 
                                                    entropy = entropies,
@@ -418,7 +426,8 @@
                return(mcmcout)
             } else {	
             ## model output with posterior parameters stored ##
-                mcmcout 	<- .mcmcoutputhierpost(M = M, ranperm = ranperm,
+                mcmcout 	<- .mcmcoutputhierpost(M = M, burnin = burnin,
+                                                   ranperm = ranperm,
                                                    par = pars, log = logs, 
                                                    weight = weights, 
                                                    entropy = entropies,
@@ -443,6 +452,7 @@
     K               <- model.obj@K
     N               <- fdata.obj@N
     M 		        <- mcmc.obj@M
+    burnin          <- mcmc.obj@burnin
     ranperm 	    <- mcmc.obj@ranperm
     pars 		    <- list(lambda = array(numeric(), dim = c(M, K)))
     log.mixlik 	    <- array(numeric(), dim = c(M, 1))
@@ -463,7 +473,8 @@
         if (!prior.obj@hier) {
             ## model output with NO posterior parameters stored ##
             if (!mcmc.obj@storepost) {	
-                mcmcout 	<- .mcmcoutputfix(M = M, ranperm = ranperm,
+                mcmcout 	<- .mcmcoutputfix(M = M, burnin = burnin,
+                                              ranperm = ranperm,
                                               par = pars, log = logs, 
                                               model = model.obj, 
                                               prior = prior.obj)
@@ -472,7 +483,8 @@
                 return(mcmcout)
             } else {
             ## model output with posterior parameters stored ##
-                mcmcout 	<- .mcmcoutputfixpost(M = M, ranperm = ranperm,
+                mcmcout 	<- .mcmcoutputfixpost(M = M, burnin = burnin,
+                                                  ranperm = ranperm,
                                                   par = pars, log = logs, 
                                                   post = posts,
                                                   model = model.obj, 
@@ -487,7 +499,8 @@
             hypers <- list(b = array(numeric(), dim = c(M, 1)))
             ## model output with NO posterior parameters stored ##
             if (!mcmc.obj@storepost) {
-                mcmcout 	<- .mcmcoutputfixhier(M = M, ranperm = ranperm,
+                mcmcout 	<- .mcmcoutputfixhier(M = M, burnin = burnin,
+                                                  ranperm = ranperm,
                                                   par = pars, log = logs, 
                                                   hyper = hypers,
                                                   model = model.obj, 
@@ -497,7 +510,8 @@
                 return(mcmcout)			
             } else {
             ## model output with posterior parameters stored ##
-                mcmcout 	<- .mcmcoutputfixhierpost(M = M, ranperm = ranperm,
+                mcmcout 	<- .mcmcoutputfixhierpost(M = M, burnin = burnin,
+                                                      ranperm = ranperm,
                                                       par = pars, log = logs, 
                                                       hyper = hypers, 
                                                       post = posts,
@@ -529,7 +543,8 @@
         if (!prior.obj@hier) {
             ## model output with NO posterior parameters stored ##
             if (!mcmc.obj@storepost) {
-                mcmcout		<- .mcmcoutputbase(M = M, ranperm = ranperm,
+                mcmcout		<- .mcmcoutputbase(M = M, burnin = burnin,
+                                                  ranperm = ranperm,
                                                   par = pars, log = logs, 
                                                   weight = weights, 
                                                   entropy = entropies,
@@ -544,7 +559,8 @@
                 return(mcmcout)
             } else {
             ## model output with posterior parameters stored ##
-                mcmcout 	<- .mcmcoutputpost(M = M, ranperm = ranperm,
+                mcmcout 	<- .mcmcoutputpost(M = M, burnin = burnin,
+                                               ranperm = ranperm,
                                                par = pars, log = logs, 
                                                weight = weights, 
                                                entropy = entropies,
@@ -564,7 +580,8 @@
             hypers 	<- list(b = array(numeric(), dim = c(M, 1)))			
             ## model output with NO posterior parameters stored ##
             if (!mcmc.obj@storepost) {
-                mcmcout	 	<- .mcmcoutputhier(M = M, ranperm = ranperm, 
+                mcmcout	 	<- .mcmcoutputhier(M = M, burnin = burnin,
+                                                   ranperm = ranperm, 
                                                    par = pars, log = logs, 
                                                    weight = weights, 
                                                    entropy = entropies,
@@ -579,7 +596,8 @@
                 return(mcmcout)
             } else {	
             ## model output with posterior parameters stored ##
-                mcmcout 	<- .mcmcoutputhierpost(M = M, ranperm = ranperm,
+                mcmcout 	<- .mcmcoutputhierpost(M = M, burnin = burnin, 
+                                                   ranperm = ranperm,
                                                    par = pars, log = logs, 
                                                    weight = weights, 
                                                    entropy = entropies,

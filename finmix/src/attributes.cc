@@ -233,8 +233,8 @@ arma::imat stephens1997b_poisson_cc(const arma::vec values, const arma::mat comp
     unsigned int N      = values.n_elem;
     unsigned int M      = comp_par.n_rows;
     unsigned int K      = comp_par.n_cols;
-    double value = 0.0;
-    double value_next = 1.0;
+    double value = 1.0;
+    double value_next = 0.0;
     arma::mat lambda(comp_par);
     arma::mat weight(weight_par);
     arma::umat index(M, K);
@@ -250,22 +250,25 @@ arma::imat stephens1997b_poisson_cc(const arma::vec values, const arma::mat comp
         seq_vec(k) = k * K;
         index_out.col(k) *= (k + 1);
     }
+    for (unsigned int m = 0; m < M; ++m) {
+        arma::mat* pmat_ptr = new arma::mat(N, K);
+        /* Save a pointer to the STL vector */
+        mat_vector[m] = pmat_ptr;
+    }
     while (value != value_next) {
-        value_next  = value;
-        value       = 0.0;
+        value       = value_next;
+        value_next  = 0.0;
         /* For all sampled MCMC parameters a matrix 
          * pmat (N x K) is computed with p_ij 
          * indicating the probability for a value i
          * being from component j.
          * */
         for (unsigned int m = 0; m < M; ++m) {
-            arma::mat* pmat_ptr = new arma::mat(N, K);
             for (unsigned int n = 0; n < N; ++n) {
-                pmat_ptr->row(n) = weight.row(m) % dpoisson(values(n), lambda.row(m)); 
-                pmat_ptr->row(n) /= arma::sum(pmat_ptr->row(n));
+                mat_vector[m]->row(n) = weight.row(m) 
+                    % dpoisson(values(n), lambda.row(m)); 
+                mat_vector[m]->row(n) /= arma::sum(mat_vector[m]->row(n));
             }
-            /* Save a pointer in the STL vector */
-            mat_vector[m] = pmat_ptr;
         }
         for (unsigned int m = 0; m < M; ++m) {
             pmat_hat += *(mat_vector[m]);
@@ -292,16 +295,17 @@ arma::imat stephens1997b_poisson_cc(const arma::vec values, const arma::mat comp
                             pmat_hat.col(k));
                 }          
             }
-            value += arma::trace(cost);
+            value_next += arma::trace(cost);
             /* Assignment */
             indM = hungarian(cost);
             arma::uvec f = arma::find(indM.t() == 1);
-            index.row(m) = arma::trans(arma::find(indM.t() == 1) + 1 - seq_vec);  
-        }
+            index.row(m) = arma::trans(arma::find(indM.t() == 1) - seq_vec);  
+        }        
         /* Permute parameters */
         swapmat_by_index(lambda, index);
-        swapmat_by_index(weight, index);
+        swapmat_by_index(weight, index);        
         swapumat_by_index(index_out, index);
+        pmat_hat = arma::zeros(N, K);
     }        
     for (unsigned int m = 0; m < M; ++m) {
         delete mat_vector[m];

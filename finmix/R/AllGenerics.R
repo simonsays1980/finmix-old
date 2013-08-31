@@ -277,6 +277,8 @@ setGeneric("getPostperm", function(object) standardGeneric("getPostperm"))
 
 ## Class 'mcmcpermind' ---------------------------------------------------
 
+setGeneric("getRelabel", function(object) standardGeneric("getRelabel"))
+
 setGeneric("getWeightperm", function(object) standardGeneric("getWeightperm"))
 
 setGeneric("getEntropyperm", function(object) standardGeneric("getEntropyperm"))
@@ -294,6 +296,8 @@ setGeneric("getMap", function(object) standardGeneric("getMap"))
 setGeneric("getBml", function(object) standardGeneric("getBml"))
 
 setGeneric("getIeavg", function(object) standardGeneric("getIeavg"))
+
+setGeneric("getSdpost", function(object) standardGeneric("getSdpost"))
 
 ## Class 'mcmcestind' ------------------------------------------------------
 

@@ -15,9 +15,10 @@
 # You should have received a copy of the GNU General Public License
 # along with finmix. If not, see <http://www.gnu.org/licenses/>.
 
-"mcmcestimate" <- function(mcmcout, method = "kmeans", permOut = FALSE) {
+"mcmcestimate" <- function(mcmcout, method = "kmeans", fdata = NULL, 
+                           permOut = FALSE) {
     ## Check input ##
-    .check.args.Mcmcestimate(mcmcout, method, permOut)
+    .check.args.Mcmcestimate(mcmcout, method, fdata, permOut)
     ## Constants
     K           <- mcmcout@model@K
     M           <- mcmcout@M
@@ -34,22 +35,26 @@
     perm        <- inherits(mcmcout, what = "mcmcoutputperm")
     
     ## Posterior Mode (MAP)
-    map.index   <- mcmc.map(mcmcout)
-    map         <- mcmc.extract(mcmcout, map.index) 
+    map.index   <- .map.Mcmcestimate(mcmcout)
+    map         <- .extract.Mcmcestimate(mcmcout, map.index)    
     
     ## Bayesian Maximum Likelihood (BML)
-    bml.index   <- mcmc.bml(mcmcout)
-    bml         <- mcmc.extract(mcmcout, bml.index)
+    bml.index   <- .bml.Mcmcestimate(mcmcout)
+    bml         <- .extract.Mcmcestimate(mcmcout, bml.index)
 
     ## Ergodic average (EAVG)
-    eavg        <- mcmc.eavg(mcmcout)
-
+    eavg        <- .eavg.Mcmcestimate(mcmcout)
+    
     if (indicfix) {
         ## Ergodic average is identified
         ## 'avg.id'
-        mcmcest <- new("mcmcestfix", dist = dist, K = K, indicmod = indicmod,
-                       map = map, bml = bml, ieavg = eavg)
-        return(mcmcest)
+        ## Posterior Std. Error. 
+        sdpost      <- .sdpost.Mcmcestimate(mcmcout, perm)
+
+        .mcmcestfix(dist = dist, K = K, M = mcmcout@M, burnin = mcmcout@burnin, 
+                    ranperm = mcmcout@ranperm, relabel = "none",
+                    indicmod = indicmod, map = map, bml = bml, ieavg = eavg,
+                    sdpost = sdpost)
     } else {
         if (ranperm) {
             ## Ergodic average is invariant
@@ -59,27 +64,35 @@
                 if (mcmcout@Mperm > 0) {    
                     ## Use ergodic average function on 'mcmcoutputperm'
                     ## object
-                    ieavg <- mcmc.eavg(mcmcout) 
-                    mcmcest <- new("mcmcestfix", dist = dist, K = K, 
-                                   indicmod = indicmod, map = map, bml = bml,
-                                   ieavg = ieavg)
-                    return(mcmcest)
+                    ieavg <- .eavg.Mcmcestimate(mcmcout)
+                    ## Posterior Std. Error. 
+                    sdpost      <- .sdpost.Mcmcestimate(mcmcout, perm)                                       
+                    .mcmcestfix(dist = dist, K = K, 
+                                indicmod = indicmod, M = mcmcout@Mperm, 
+                                burnin = mcmcout@burnin, ranperm = mcmcout@ranperm,
+                                relabel = mcmcout@relabel, map = map, bml = bml, 
+                                ieavg = ieavg, sdpost = sdpost)
                 } else {
                     warning(paste("No identification possible. Not a single ",
                                   "draw is a permutation", sep = ""))
                 }
             } else {
                 ## Use function 'mcmcpermute' to permute the sample
-                mcmcoutperm <- mcmcpermute(mcmcout, method)
+                mcmcoutperm <- mcmcpermute(mcmcout, method = method, fdata = fdata)
+                perm    <- TRUE
                 if (mcmcoutperm@Mperm > 0) {
                     ## Use ergodic average function on 'mcmcoutputperm'
                     ## object
                     ## Build 'avg.id'
-                    ieavg <- mcmc.eavg(mcmcoutperm)
-                    mcmcest <- new("mcmcestind", dist = dist, K = K, 
-                                   indicmod = indicmod, map = map, bml = bml,
-                                   ieavg = ieavg, eavg = eavg)
-                    if (returnOut) {
+                    ieavg <- .eavg.Mcmcestimate(mcmcoutperm)
+                    ## Posterior Std. Error
+                    sdpost  <- .sdpost.Mcmcestimate(mcmcoutperm, perm)
+                    mcmcest <- .mcmcestind(dist = dist, K = K, 
+                                           indicmod = indicmod, M = mcmcoutperm@Mperm, 
+                                           burnin = mcmcout@burnin, ranperm = mcmcout@ranperm, 
+                                           relabel = method, map = map, bml = bml, 
+                                           ieavg = ieavg, eavg = eavg, sdpost = sdpost)
+                    if (permOut) {
                         return.list <- list(mcmcest = mcmcest, 
                                             mcmcoutputperm = mcmcoutperm)
                         return(return.list)
@@ -93,9 +106,12 @@
             }
         } else { 
             ## 'eavg'
-            mcmcest <- new("mcmcestfix", dist = dist, K = K, indicmod = indicmod,
-                          map = map, bml = bml, ieavg = eavg)
-            return(mcmcest)
+            ## Posterior Std. Error
+            sdpost  <- .sdpost.Mcmcestimate(mcmcout, perm)
+            .mcmcestfix(dist = dist, K = K, indicmod = indicmod,
+                        M = mcmcout@M, burnin = mcmcout@burnin, 
+                        ranperm = mcmcout@ranperm, relabel = "none",
+                        map = map, bml = bml, ieavg = eavg, sdpost = sdpost)
         }
     }
     ## New 'mcmcestimate' object.
@@ -113,16 +129,20 @@
 ### of three permutation algorithms in 'mcmcpermute()'.
 ### Argument 3 must be of type logical. If any case is not true 
 ### an error is thrown.
-".check.args.Mcmcestimate" <- function(obj, arg2, arg3)
+".check.args.Mcmcestimate" <- function(obj, arg2, arg3, arg4)
 {
     if (!inherits(obj, c("mcmcoutput", "mcmcoutputperm"))) {
-        stop(paste("Wrong argument: Argument 1 must be either of type ", 
-                   "'mcmcoutput' or of type 'mcmcoutputperm'.",
-                   sep = ""))
+        stop(paste("Wrong argument: Argument 1 must be an object ",
+                   "either of class 'mcmcoutput' or of type ",
+                   "'mcmcoutputperm'.", sep = ""))
     } 
-    match.arg(arg2, c("kmeans", "Stephens1997a", "stephens1997b"))
-    if (!is.logical(arg3)) {
-        stop("Wrong argument: Argument 3 must be of type 'logical'.")
+    match.arg(arg2, c("kmeans", "Stephens1997a", "Stephens1997b"))
+    if (!inherits(arg3, "fdata") && !is.null(arg3)) {
+        stop(paste("Wrong argument: Argument 3 must be an object ",
+                   "of class 'fdata'.", sep = ""))
+    }
+    if (!is.logical(arg4)) {
+        stop("Wrong argument: Argument 4 must be of type 'logical'.")
     }
 }
 
@@ -154,10 +174,11 @@
     }
     if(!indicfix && K > 1) {
         weight.est  <- as.array(obj@weight[m, ])
-        est.list    <- list(par = par.est,  weight = weight.est)
+        est.list    <- list(par = par.est,  weight = weight.est, 
+                            log = obj@log$mixlik[m])
         return(est.list)
     }
-    est.list <- list(par = par.est)
+    est.list <- list(par = par.est, log = obj@log$mixlik[m])
     return(est.list)
 }
 
@@ -191,4 +212,31 @@
             return(eavg.list)
         }
     }
+}
+
+".sdpost.Mcmcestimate" <- function(obj, perm) 
+{
+    .sdpost.poisson.Mcmcestimate(obj, perm)
+}
+
+".sdpost.poisson.Mcmcestimate" <- function(obj, perm)
+{
+    if (perm) {
+        sdpar       <- apply(obj@parperm$lambda, 2, sd)
+        sdparpre    <- apply(obj@par$lambda, 2, sd)
+        sdweight    <- apply(obj@weightperm, 2, sd)
+        sdweightpre <- apply(obj@weight, 2, sd)
+        identified      <- list(par = list(lambda = sdpar), 
+                                weight = sdweight)
+        unidentified    <- list(par = list(lambda = sdparpre), 
+                                weight = sdweightpre)
+        sdlist          <- list(identified = identified, 
+                                unidentified = unidentified)    
+    } else {
+        sdpar       <- apply(obj@par$lambda, 2, sd)
+        sdweight    <- apply(obj@weight)
+        identfied   <- list(par = list(lambda = sdpar), weight = sdweight)
+        sdlist      <- list(identified = identified)
+    }
+    return(sdlist)
 }

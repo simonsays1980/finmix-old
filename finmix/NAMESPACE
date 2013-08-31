@@ -177,6 +177,7 @@ exportMethods( ## name of the generic, as with other methods
         "getPostperm",
 
         ## 'mcmcpermind' class ##
+        "getRelabel",
         "getWeightperm",
         "getEntropyperm",
         "getSTperm",

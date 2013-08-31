@@ -16,7 +16,8 @@
 # along with Rcpp.  If not, see <http://www.gnu.org/licenses/>.
 
 .mcmcpermind <- setClass("mcmcpermind", 
-                         representation(weightperm  = "array",
+                         representation(relabel     = "character",
+                                        weightperm  = "array",
                                         entropyperm = "array",
                                         STperm      = "array",
                                         Sperm       = "array",
@@ -28,7 +29,8 @@
                              ## else: OK
                              TRUE
                          },
-                         prototype(weightperm   = array(),
+                         prototype(relabel      = character(),
+                                   weightperm   = array(),
                                    entropyperm  = array(),
                                    STperm       = array(),
                                    Sperm        = array(),
@@ -37,6 +39,13 @@
 )
 
 ## Getters ##
+setMethod("getRelabel", "mcmcpermind",
+          function(object)
+          {
+              return(object@relabel)
+          }
+)
+
 setMethod("getWeightperm", "mcmcpermind", 
           function(object) 
           {

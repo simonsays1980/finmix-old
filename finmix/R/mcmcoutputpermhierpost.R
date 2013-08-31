@@ -27,12 +27,14 @@
 
 setMethod("initialize", "mcmcoutputpermhierpost",
           function(.Object, mcmcoutput, Mperm = integer(), 
-                   parperm = list(), weightperm = array(), 
-                   logperm = list(), postperm = list(), 
-                   entropyperm = array(), STperm = array(), 
-                   Sperm = array(), NKperm = array()) 
+                   parperm = list(), relabel = character(),
+                   weightperm = array(), logperm = list(), 
+                   postperm = list(), entropyperm = array(), 
+                   STperm = array(), Sperm = array(), 
+                   NKperm = array()) 
           {
               .Object@M             <- mcmcoutput@M
+              .Object@burnin        <- mcmcout@burnin
               .Object@ranperm       <- mcmcoutput@ranperm
               .Object@par           <- mcmcoutput@par
               .Object@weight        <- mcmcoutput@weight
@@ -47,6 +49,7 @@ setMethod("initialize", "mcmcoutputpermhierpost",
               .Object@prior         <- mcmcoutput@prior
               .Object@Mperm         <- Mperm
               .Object@parperm       <- parperm
+              .Object@relabel       <- relabel
               .Object@weightperm    <- weightperm
               .Object@logperm       <- logperm
               .Object@postperm      <- postperm
@@ -64,7 +67,9 @@ setMethod("show", "mcmcoutputpermhierpost",
               cat("Object 'mcmcoutputperm'\n")
               cat("     class       :", class(object), "\n")
               cat("     M           :", object@M, "\n")
+              cat("     burnin      :", object@burnin, "\n")
               cat("     ranperm     :", object@ranperm, "\n")
+              cat("     relabel     :", object@relabel, "\n")
               cat("     par         : List of", 
                   length(object@par), "\n")
               cat("     weight      :",

@@ -17,6 +17,7 @@
 
 .mcmcoutputfix <- setClass("mcmcoutputfix",
                            representation(M 	    = "integer",
+                                          burnin    = "integer",
                                           ranperm   = "logical",
                                           par 	    = "list",
                                           log	    = "list",
@@ -28,6 +29,7 @@
                                TRUE
                            },
                            prototype(M          = integer(),
+                                     burnin     = integer(),
                                      ranperm    = logical(),
                                      par        = list(),
                                      log        = list(),
@@ -41,6 +43,7 @@ setMethod("show", "mcmcoutputfix",
               cat("Object 'mcmcoutputfix'\n")
               cat("     class       :", class(object), "\n")
               cat("     M           :", object@M, "\n")
+              cat("     burnin      :", object@burnin, "\n")
               cat("     ranperm     :", object@ranperm, "\n")
               cat("     par         : List of", 
                   length(object@par), "\n")
@@ -152,6 +155,13 @@ setMethod("getM", "mcmcoutputfix",
           function(object) 
           {
               return(object@M)
+          }
+)
+
+setMethod("getBurnin", "mcmcoutputfix",
+          function(object) 
+          {
+              return(object@burnin)
           }
 )
 

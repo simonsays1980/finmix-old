@@ -31,6 +31,7 @@ setMethod("initialize", "mcmcoutputpermfixhierpost",
                    postperm = list()) 
           {
               .Object@M         <- mcmcoutput@M
+              .Object@burnin    <- mcmcout@burnin
               .Object@ranperm   <- mcmcoutput@ranperm
               .Object@par       <- mcmcoutput@par
               .Object@log       <- mcmcoutput@log
@@ -52,6 +53,7 @@ setMethod("show", "mcmcoutputpermfixhierpost",
               cat("Object 'mcmcoutputperm'\n")
               cat("     class       :", class(object), "\n")
               cat("     M           :", object@M, "\n")
+              cat("     burnin      :", object@burnin, "\n")
               cat("     ranperm     :", object@ranperm, "\n")
               cat("     par         : List of", 
                   length(object@par), "\n")
