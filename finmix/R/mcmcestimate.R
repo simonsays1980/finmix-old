@@ -186,7 +186,7 @@
     ## Check arguments ##
     dist <- obj@model@dist
     indicfix <- !inherits(obj, what = "mcmcoutputbase")
-    perm <- inherits(mcmcout, what = "mcmcoutputperm")
+    perm <- inherits(obj, what = "mcmcoutputperm")
     if (dist == "poisson") {
         if(!perm) {
             par.eavg <- list(lambda = as.array(apply(obj@par$lambda, 
