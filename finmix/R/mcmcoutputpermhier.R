@@ -27,7 +27,7 @@
 
 setMethod("initialize", "mcmcoutputpermhier",
           function(.Object, mcmcoutput, Mperm = integer(), 
-                   parperm = list(), ralebl = character(), 
+                   parperm = list(), relabel = character(), 
                    weightperm = array(), logperm = list(), 
                    entropyperm = array(), STperm = array(), 
                    Sperm = array(), NKperm = array()) 
