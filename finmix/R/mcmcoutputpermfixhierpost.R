@@ -31,7 +31,7 @@ setMethod("initialize", "mcmcoutputpermfixhierpost",
                    postperm = list()) 
           {
               .Object@M         <- mcmcoutput@M
-              .Object@burnin    <- mcmcout@burnin
+              .Object@burnin    <- mcmcoutput@burnin
               .Object@ranperm   <- mcmcoutput@ranperm
               .Object@par       <- mcmcoutput@par
               .Object@log       <- mcmcoutput@log

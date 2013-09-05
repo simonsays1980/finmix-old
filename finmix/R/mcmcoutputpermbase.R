@@ -33,7 +33,7 @@ setMethod("initialize", "mcmcoutputpermbase",
                    Sperm = array(), NKperm = array()) 
           {
               .Object@M             <- mcmcoutput@M
-              .Object@burnin        <- mcmcout@burnin
+              .Object@burnin        <- mcmcoutput@burnin
               .Object@ranperm       <- mcmcoutput@ranperm
               .Object@par           <- mcmcoutput@par
               .Object@weight        <- mcmcoutput@weight
