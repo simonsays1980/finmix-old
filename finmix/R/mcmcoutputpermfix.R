@@ -283,7 +283,7 @@ setMethod("plotPostDens", signature(x   = "mcmcoutputpermfix",
 ### Posterior Density
 ### Posterior Density Poisson: Plots a contour plot of the 
 ### posterior density of the sampled parameters for K = 2.
-".postdens.Poisson" <- function(x, dev)
+".permpostdens.Poisson" <- function(x, dev)
 {
     K   <- x@model@K
     if (K != 2) {

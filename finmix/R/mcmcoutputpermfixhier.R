@@ -29,7 +29,7 @@ setMethod("initialize", "mcmcoutputpermfixhier",
                    parperm = list(), logperm = list()) 
           {
               .Object@M         <- mcmcoutput@M
-              .Object@burnin    <- mcmcoutput@burnin
+              .Object@burnin    <- mcmcout@burnin
               .Object@ranperm   <- mcmcoutput@ranperm
               .Object@par       <- mcmcoutput@par
               .Object@log       <- mcmcoutput@log

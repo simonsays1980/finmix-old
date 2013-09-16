@@ -171,16 +171,34 @@ BEGIN_RCPP
     return __sexp_result;
 END_RCPP
 }
+// stephens1997a_poisson_cc
+arma::imat stephens1997a_poisson_cc(const Rcpp::NumericMatrix values1, const Rcpp::NumericMatrix values2, arma::vec pars, const arma::umat perm);
+RcppExport SEXP finmix_stephens1997a_poisson_cc(SEXP values1SEXP, SEXP values2SEXP, SEXP parsSEXP, SEXP permSEXP) {
+BEGIN_RCPP
+    SEXP __sexp_result;
+    {
+        Rcpp::RNGScope __rngScope;
+        Rcpp::NumericMatrix values1 = Rcpp::as<Rcpp::NumericMatrix >(values1SEXP);
+        Rcpp::NumericMatrix values2 = Rcpp::as<Rcpp::NumericMatrix >(values2SEXP);
+        arma::vec pars = Rcpp::as<arma::vec >(parsSEXP);
+        arma::umat perm = Rcpp::as<arma::umat >(permSEXP);
+        arma::imat __result = stephens1997a_poisson_cc(values1, values2, pars, perm);
+        PROTECT(__sexp_result = Rcpp::wrap(__result));
+    }
+    UNPROTECT(1);
+    return __sexp_result;
+END_RCPP
+}
 // stephens1997b_poisson_cc
-arma::imat stephens1997b_poisson_cc(const arma::vec values, const arma::mat comp_par, const arma::mat weight_par);
+arma::imat stephens1997b_poisson_cc(const Rcpp::NumericVector values, const Rcpp::NumericMatrix comp_par, const Rcpp::NumericMatrix weight_par);
 RcppExport SEXP finmix_stephens1997b_poisson_cc(SEXP valuesSEXP, SEXP comp_parSEXP, SEXP weight_parSEXP) {
 BEGIN_RCPP
     SEXP __sexp_result;
     {
         Rcpp::RNGScope __rngScope;
-        arma::vec values = Rcpp::as<arma::vec >(valuesSEXP);
-        arma::mat comp_par = Rcpp::as<arma::mat >(comp_parSEXP);
-        arma::mat weight_par = Rcpp::as<arma::mat >(weight_parSEXP);
+        Rcpp::NumericVector values = Rcpp::as<Rcpp::NumericVector >(valuesSEXP);
+        Rcpp::NumericMatrix comp_par = Rcpp::as<Rcpp::NumericMatrix >(comp_parSEXP);
+        Rcpp::NumericMatrix weight_par = Rcpp::as<Rcpp::NumericMatrix >(weight_parSEXP);
         arma::imat __result = stephens1997b_poisson_cc(values, comp_par, weight_par);
         PROTECT(__sexp_result = Rcpp::wrap(__result));
     }

@@ -176,49 +176,7 @@
     ind                 <- apply(perm, 1, function(x) all(x == x[1]))
     perm                <- perm[!ind, ]
     storage.mode(perm)  <- "integer"
-    lvalue              <- 0.0
-    lvalue.next         <- 1.0
-    optim.fn            <- .objective.stephens1997a.poisson.Mcmcpermute
-    optim.lower         <- rep(0, 3 * K)
-    optim.upper         <- rep(10e+6, 3 * K)
-    optim.fnscale       <- -1
-    optim.maxit         <- 200
-    optim.ctrl          <- list(maximize = TRUE, maxfeval = 200)
-    while (lvalue != lvalue.next) {
-        lvalue          <- lvalue.next
-        optim.res       <- nmkb(par = startpar, fn = optim.fn, lambda = lambda, 
-                                weight = weight,
-                                lower = optim.lower, upper = optim.upper,
-                                control = optim.ctrl)
-        startpar        <- optim.res$par
-        lvalue.next     <- optim.res$value
-        dirich          <- optim.res$par[seq(1, K)]    
-        shape           <- optim.res$par[seq(K + 1, 2 * K)]
-        rate            <- optim.res$par[seq(2 * K + 1, 3 * K)]   
-        idx             <- maxlabel_poisson_cc(lambda, weight, shape, rate, 
-                                            dirich, perm)
-        index           <- idx
-        lambda          <- swap_cc(lambda, idx)
-        obj@par$lambda  <- lambda
-        weight          <- swap_cc(weight, idx)
-        obj@weight      <- weight
-        index.out       <- swapInteger_cc(index.out, idx)
-    }
-    return(index.out)    
-}
-
-### Stephens1997a Objective: Objective function for optimization
-### procedure. 
-".objective.stephens1997a.poisson.Mcmcpermute" <- function(pars, lambda, weight)
-{
-    K       <- dim(lambda)[2]
-    dirich  <- pars[seq(1, K)] 
-    shape   <- pars[seq(K + 1, 2 * K)]
-    rate    <- pars[seq(2 * K + 1, 3 * K)]
-    valD    <- ddirichlet_cc(weight, dirich)
-    valG    <- dgamma_cc(lambda, shape, rate)
-    logval  <- sum(log(valD * apply(valG, 1, prod)))
-    return(logval)
+    stephens1997a_poisson_cc(lambda, weight, startpar, perm)
 }
 
 ### Stephens1997b calling function: Calls the approrpiate

@@ -55,8 +55,8 @@ arma::vec lddirichlet (const arma::mat &values, const arma::vec &par)
     arma::vec rvalues       = arma::zeros(M);
     double std_const        = 0.0;
     for (unsigned int k = 0; k < K; ++k) {
-        rvalues     += arma::log(values.col(k)) * (par(k) - 1);
-        std_const   += R::lgammafn(par(k));
+        rvalues     += arma::log(values.unsafe_col(k)) * (par.at(k) - 1);
+        std_const   += R::lgammafn(par.at(k));
     }
     std_const   -= R::lgammafn(arma::as_scalar(arma::sum(par)));
     rvalues     -= std_const;
@@ -102,10 +102,10 @@ arma::mat ldgamma (const arma::mat &values, const arma::vec &shape,
     const unsigned int K    = values.n_cols;
     arma::mat rvalues(M, K);
     for (unsigned int k = 0; k < K; ++k) {
-        rvalues.col(k) = arma::log(values.col(k)) * (shape(k) - 1);
-        rvalues.col(k) -= values.col(k) * rate(k);
-        rvalues.col(k) += shape(k) * std::log(rate(k));
-        rvalues.col(k) -= R::lgammafn(shape(k));
+        rvalues.unsafe_col(k) = arma::log(values.unsafe_col(k)) * (shape.at(k) - 1);
+        rvalues.unsafe_col(k) -= values.unsafe_col(k) * rate.at(k);
+        rvalues.unsafe_col(k) += shape.at(k) * std::log(rate.at(k));
+        rvalues.unsafe_col(k) -= R::lgammafn(shape.at(k));
     }
     return rvalues;
 }

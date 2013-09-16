@@ -41,6 +41,10 @@ hungarian_cc <- function(cost) {
     .Call('finmix_hungarian_cc', PACKAGE = 'finmix', cost)
 }
 
+stephens1997a_poisson_cc <- function(values1, values2, pars, perm) {
+    .Call('finmix_stephens1997a_poisson_cc', PACKAGE = 'finmix', values1, values2, pars, perm)
+}
+
 stephens1997b_poisson_cc <- function(values, comp_par, weight_par) {
     .Call('finmix_stephens1997b_poisson_cc', PACKAGE = 'finmix', values, comp_par, weight_par)
 }
