@@ -10,7 +10,7 @@ report*
 # R specific     #
 ##################
 symbols.rds
-
+.Rhistory
 
 # OS generated   #
 ##################
