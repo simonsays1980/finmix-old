@@ -149,6 +149,7 @@ exportMethods( ## name of the generic, as with other methods
         "getPostS",
 
         ## 'mcmcoutputfix' class ##
+        "plotTraces",
         "plotHist",
         "plotDens",
         "plotSampRep",

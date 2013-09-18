@@ -57,14 +57,19 @@ setMethod("show", "mcmcoutputhier",
           }
 )
 
-setMethod("plot", signature(x = "mcmcoutputhier", 
-                            y = "missing"), 
-          function(x, y = TRUE, ...) 
+setMethod("plotTraces", signature(x     = "mcmcoutputhier", 
+                                  dev   = "ANY",
+                                  lik   = "ANY"), 
+          function(x, dev = TRUE, lik = 1, ...) 
           {
-              if (x@model@dist == "poisson") {
-                  .traces.Poisson.Base.Hier(x, y)
+              if (lik %in% c(0, 1)) {
+                  if (x@model@dist == "poisson") {
+                      .traces.Poisson.Base.Hier(x, dev)
+                  }
+              }
+              if (lik %in% c(1, 2)) {
                   ## log ##
-                  .traces.Log.Base(x, y)
+                  .traces.Log.Base(x, dev) 
               }
           }
 )

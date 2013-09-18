@@ -74,15 +74,20 @@ setMethod("show", "mcmcoutputpermfixpost",
           }
 )
 
-setMethod("plot", signature(x = "mcmcoutputpermfixpost", 
-                            y = "ANY"), 
-          function(x, y = TRUE, ...) 
+setMethod("plotTraces", signature(x     = "mcmcoutputpermfixpost", 
+                                  dev   = "ANY",
+                                  lik   = "ANY"), 
+          function(x, dev = TRUE, lik = 1, ...) 
           {
-              if (x@model@dist == "poisson") {
-                  .permtraces.Poisson(x, y)
-              }	
-              ## log ##
-              .permtraces.Log(x, y)
+              if (lik %in% c(0, 1)) {
+                  if (x@model@dist == "poisson") {
+                      .permtraces.Poisson(x, dev)
+                  }
+              }
+              if (lik %in% c(1, 2)) {
+                  ## log ##
+                  .permtraces.Log(x, dev)
+              }
           }
 )
 

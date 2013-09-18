@@ -76,12 +76,13 @@ setMethod("show", "mcmcoutputhierpost",
           }
 )
 
-setMethod("plot", signature(x = "mcmcoutputhierpost", 
-                            y = "missing"), 
-          function(x, y, ...) 
+setMethod("plotTraces", signature(x     = "mcmcoutputhierpost", 
+                                  dev   = "ANY",
+                                  lik   = "ANY"), 
+          function(x, dev = TRUE, lik = 1, ...) 
           {
               ## Call method 'plot()' from 'mcmcoutputhier'
-              callNextMethod(x, y, ...)
+              callNextMethod(x, dev, lik, ...)
           }
 )
 

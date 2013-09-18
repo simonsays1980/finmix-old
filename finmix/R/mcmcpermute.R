@@ -147,7 +147,7 @@
     ## Create 'mcmcoutputperm' objects
     startidx    <- matrix(seq(1, obj@model@K), nrow = obj@M, 
                           ncol = obj@model@K, byrow = TRUE)
-    if (any(startidx != index)) {
+    if (!identical(startidx, index)) {
         obj.swap    <- swapElements(obj, index)
         .process.output.Mcmcpermute(obj, obj.swap, method = "Stephens1997a")
     } else {
@@ -292,25 +292,25 @@
 
 ".process.output.empty.Mcmcpermute" <- function(obj, method)
 {
-    warning(paste("Not a single draw is a permutation in the",
+    warning(paste("Not a single draw is a permutation in the ",
                   "function 'mcmcpermute()'.", sep = ""))
     ## Create 'mcmcoutputperm' objects ##
     if (class(obj) == "mcmcoutputfix") {
-        .mcmcoutputpermfix(obj) 
+        .mcmcoutputpermfix(obj, Mperm = as.integer(0)) 
     } else if (class(obj) == "mcmcoutputfixhier") {
-        .mcmcoutputpermfixhier(obj) 
+        .mcmcoutputpermfixhier(obj, Mperm = as.integer(0)) 
     } else if (class(obj) == "mcmcoutputfixpost") {
-        .mcmcoutputpermfixpost(obj)
+        .mcmcoutputpermfixpost(obj, Mperm = as.integer(0))
     } else if (class(obj) == "mcmcoutputfixhierpost") {
-        .mcmcoutputpermfixhierpost(obj)
+        .mcmcoutputpermfixhierpost(obj, Mperm = as.integer(0))
     } else if (class(obj) == "mcmcoutputbase") {
-        .mcmcoutputpermbase(obj, relabel = method)
+        .mcmcoutputpermbase(obj, Mperm = as.integer(0), relabel = method)
     } else if (class(obj) == "mcmcoutputhier") {
-        .mcmcoutputpermhier(obj, relabel = method)
+        .mcmcoutputpermhier(obj, Mperm = as.integer(0), relabel = method)
     } else if (class(obj) == "mcmcoutputpost") {
-        .mcmcoutputpermpost(obj, relabel = method) 
+        .mcmcoutputpermpost(obj, Mperm = as.integer(0), relabel = method) 
     } else {
-        .mcmcoutputpermhierpost(obj, relabel = method)
+        .mcmcoutputpermhierpost(obj, Mperm = as.integer(0), relabel = method)
     }
 }
 

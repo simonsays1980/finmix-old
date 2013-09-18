@@ -66,15 +66,20 @@ setMethod("show", "mcmcoutputbase",
           }
 )
 
-setMethod("plot", signature(x = "mcmcoutputbase", 
-                            y = "ANY"), 
-          function(x, y = TRUE, ...) 
+setMethod("plotTraces", signature(x     = "mcmcoutputbase", 
+                                  dev   = "ANY",
+                                  lik   = "ANY"), 
+          function(x, dev = TRUE, lik = 1, ...) 
           {
-              if (x@model@dist == "poisson") {
-                  .traces.Poisson.Base(x, y)
+              if (lik %in% c(0, 1)) {
+                  if (x@model@dist == "poisson") {
+                      .traces.Poisson.Base(x, dev)
+                  }
               }
-              ## log ##
-              .traces.Log.Base(x, y)
+              if (lik %in% c(1, 2)) {
+                  ## log ##
+                  .traces.Log.Base(x, dev)
+              }
           }
 )
 
@@ -225,7 +230,6 @@ setMethod("getClust", "mcmcoutputbase",
     axis(2, las = 2, cex.axis = 0.7)
     mtext(side = 2, las = 3, "mixprior", cex = 0.6,
           line = 3)
-    mtext(side = 1, "Iterations", cex = 0.7, line = 3)
     cdpost      <- x@log$cdpost
     plot(cdpost, type = "l", axes = F,
          col = "gray47", xlab = "", ylab = "")

@@ -57,12 +57,13 @@ setMethod("show", "mcmcoutputpost",
           }
 )
 
-setMethod("plot", signature(x = "mcmcoutputpost", 
-                            y = "missing"), 
-          function(x, y = TRUE, ...) 
+setMethod("plotTraces", signature(x     = "mcmcoutputpost", 
+                                  dev   = "ANY",
+                                  lik   = "ANY"), 
+          function(x, dev = TRUE, lik = 1, ...) 
           {
               ## Call 'plot()' from 'mcmcoutputbase'
-              callNextMethod(x, y, ...)
+              callNextMethod(x, dev, lik, ...)
           }
 )
 

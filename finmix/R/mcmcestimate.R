@@ -75,6 +75,12 @@
                 } else {
                     warning(paste("No identification possible. Not a single ",
                                   "draw is a permutation", sep = ""))
+                    sdpost      <- .sdpost.unidentified.Mcmcestimate(mcmcout)
+                    .mcmcestfix(dist = dist, K = K,
+                                indicmod = indicmod, M = mcmcout@M, 
+                                burnin = mcmcout@burnin, ranperm = mcmcout@ranperm,
+                                relabel = method, map = map, bml = bml,
+                                eavg = eavg, sdpost = sdpost)
                 }
             } else {
                 ## Use function 'mcmcpermute' to permute the sample
@@ -102,6 +108,19 @@
                 } else {
                     warning(paste("No identification possible. Not a single ",
                                   "draw is a permutation", sep = ""))
+                    sdpost  <- .sdpost.unidentified.Mcmcestimate(mcmcout) 
+                    mcmcest <- .mcmcestind(dist = dist, K = K,
+                                           indicmod = indicmod, M = mcmcout@M, 
+                                           burnin = mcmcout@burnin, ranperm = mcmcout@ranperm,
+                                           relabel = method, map = map, bml = bml,
+                                           ieavg = list(), eavg = eavg, sdpost = sdpost)
+                    if (permOut) {
+                        return.list <- list(mcmcest = mcmcest, 
+                                            mcmcoutputperm = mcmcoutperm)
+                        return(return.list)
+                    } else {
+                        return(mcmcest)
+                    }
                 }
             }
         } else { 
@@ -238,5 +257,20 @@
         identfied   <- list(par = list(lambda = sdpar), weight = sdweight)
         sdlist      <- list(identified = identified)
     }
+    return(sdlist)
+}
+
+".sdpost.unidentified.Mcmcestimate" <- function(obj) 
+{
+    .sdpost.unidentified.poisson.Mcmcestimate(obj)
+}
+
+".sdpost.unidentified.poisson.Mcmcestimate" <- function(obj)
+{
+    sdpar           <- apply(obj@par$lambda, 2, sd)
+    sdweight        <- apply(obj@weight, 2, sd)
+    unidentified    <- list(par = list(lambda = sdpar),
+                           weight = sdweight)
+    sdlist          <- list(unidentified = unidentified)
     return(sdlist)
 }

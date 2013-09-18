@@ -233,6 +233,8 @@ setGeneric("getLoglikcd", function(object) standardGeneric("getLoglikcd"))
 
 ## Class 'mcmcoutputfix' ------------------------------------------------
 
+setGeneric("plotTraces", function(x, dev = TRUE, lik = 1, ...) standardGeneric("plotTraces"))
+
 setGeneric("plotHist", function(x, dev = TRUE, ...) standardGeneric("plotHist"))
 
 setGeneric("plotDens", function(x, dev = TRUE, ...) standardGeneric("plotDens"))

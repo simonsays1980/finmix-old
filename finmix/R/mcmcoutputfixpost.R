@@ -46,11 +46,12 @@ setMethod("show", "mcmcoutputfixpost",
           }
 )
 
-setMethod("plot", signature(x = "mcmcoutputfixpost", 
-                            y = "ANY"), 
-          function(x, y = TRUE, ..., dev = TRUE) {
+setMethod("plotTraces", signature(x     = "mcmcoutputfixpost", 
+                                  dev   = "ANY",
+                                  lik   = "ANY"), 
+          function(x, dev = TRUE, lik = 1, ...) {
               ## Call 'plot()' from 'mcmcoutputfix
-              callNextMethod(x, y, ..., dev)
+              callNextMethod(x, dev, lik, ...)
           }
 )
 

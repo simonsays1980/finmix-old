@@ -48,12 +48,17 @@ setMethod("show", "mcmcoutputfixhier",
           }
 )
 
-setMethod("plot", signature(x = "mcmcoutputfixhier", 	
-                            y = "ANY"), 
-          function(x, y = TRUE, ...) 
+setMethod("plotTraces", signature(x     = "mcmcoutputfixhier", 	
+                                  dev   = "ANY",
+                                  lik   = "ANY"), 
+          function(x, dev = TRUE, lik = 1, ...) 
           {
-              if (x@model@dist == "poisson") {
-                  .traces.Poisson.Hier(x, dev)
+              if (lik %in% c(0, 1)) {
+                  if (x@model@dist == "poisson") {
+                      .traces.Poisson.Hier(x, dev)
+                  }
+              }
+              if (lik %in% c(1, 2)) {
                   ## log ##
                   .traces.Log(x, dev)
               }	
