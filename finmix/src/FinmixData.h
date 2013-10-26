@@ -32,13 +32,12 @@ class FinmixData {
 		arma::mat y;
 		arma::ivec S;
 		arma::vec expos;
-		arma::ivec T;
-	       /**
+		arma::vec T;
+	   /**
 		* finmix 'data' objects arriving in C++ 
-         	* are always column-wise ordered 
-         	* therefore slot 'bycolumn' is left out
-		*
-        	*/
+        * are always column-wise ordered 
+        * therefore slot 'bycolumn' is left out
+        */
 		std::string dataType;
 		unsigned int N;
 		unsigned int r;

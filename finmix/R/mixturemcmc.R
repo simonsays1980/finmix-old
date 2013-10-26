@@ -30,6 +30,8 @@
         .do.MCMC.Poisson(fdata, model, prior, mcmc)
 	} else if (model@dist == "cond.poisson") {
         .do.MCMC.CondPoisson(fdata, model, prior, mcmc)
+    } else if (model@dist == "binomial") {
+        .do.MCMC.Binomial(fdata, model, prior, mcmc)
     }
 } ## end mixturemcmc
 
@@ -444,6 +446,103 @@
             }
         } ## end hier
     } ## end no indicfix		
+}
+
+### ----------------------------------------------------------------------------
+### .do.MCMC.Binomial
+### @description    Performs MCMC simulation for A Binomial mixture model using 
+###                 the Gibbs Sampler.
+### @par    fdata.obj   an S4 object of class 'fdata'
+### @par    model.obj   an S4 object of class 'model'
+### @par    prior.obj   an S4 object of class 'prior'
+### @par    mcmc.obj    an S4 object of class 'mcmc'
+### @return         an S4 object of class 'mcmcoutput'
+### @see ?mixturemcmc, ?fdata, ?model, ?prior, ?mcmc, ?mcmcoutput
+### @author Lars Simon Zehnder
+### ----------------------------------------------------------------------------
+".do.MCMC.Binomial" <- function(fdata.obj, model.obj, prior.obj, mcmc.obj) 
+{
+    ## Base slots inherited to every derived 'mcmcoutput' class
+    K               <- model.obj@K
+    N               <- fdata.obj@N
+    M               <- mcmc.obj@M
+    burnin          <- mcmc.obj@burnin
+    ranperm         <- mcmc.obj@ranperm
+    pars            <- list(p = array(numeric(), dim = c(c(M, K))))
+    log.mixlik      <- array(numeric(), dim = c(M, 1))
+    log.mixprior    <- array(numeric(), dim = c(M, 1))
+    if (mcmc.obj@storepost) {
+        post.a      <- array(numeric(), dim = c(M, K))
+        post.b      <- array(numeric(), dim = c(M, K))
+        post.par    <- list(a = post.a, b = post.b)
+        posts       <- list(par = post.par)
+        if (!model.obj@indicfix) {
+            posts$weight    <- array(numeric(), dim = c(M, K))
+        }
+    }
+    ## Model with fixed indicators 
+    if (model.obj@indicfix || K == 1) {
+        logs    <- list(mixlik = log.mixlik, mixprior = log.mixprior)
+        if (!mcmc.obj@storepost) {
+            mcmcout <- .mcmcoutputfix(M = M, burnin = burnin, ranperm = ranperm,
+                                      par = pars, log = logs, model = model.obj, 
+                                      prior = prior.obj)
+            .Call("mcmc_binomial_cc", fdata.obj, model.obj, prior.obj, 
+                  mcmc.obj, mcmcout, PACKAGE = "finmix")
+            return(mcmcout)
+        } else {
+            ## MCMC output with posterior hyper parameters stored 
+            mcmcout <- .mcmcoutputfixpost(M = M, burnin = burnin, ranperm = ranperm, 
+                                          par = pars, log = logs, post = posts, 
+                                          model = model.obj, prior = prior.obj)
+            .Call("mcmc_binomial_cc", fdata.obj, model.obj, prior.obj, 
+                  mcmc.obj, mcmcout, PACKAGE = "finmix")
+            return(mcmcout)
+        }        
+        ## End: indicfix
+    } else if (!model.obj@indicfix && K > 1) {
+        ## Model with simulated indicators
+        log.cdpost  <- array(numeric(), dim = c(M, 1))
+        logs        <-list(mixlik = log.mixlik, mixprior = log.mixprior,
+                           cdpost = log.cdpost)
+        weights     <- array(numeric(), dim = c(M, K))
+        entropies   <- array(numeric(), dim = c(M, 1))
+        STm         <- array(integer(), dim = c(M, 1))
+        Sm          <- array(integer(), dim = c(N, mcmc.obj@storeS))
+        NKm         <- array(integer(), dim = c(M, K))
+        clustm      <- array(integer(), dim = c(N, 1))
+        if (!mcmc.obj@startpar) {
+            ## First sample for the indicators
+            datac   <- dataclass(fdata.obj, model.obj, simS = TRUE)
+            Sm[, 1] <- as.integer(datac$S)            
+        }
+        if (!mcmc.obj@storepost) {
+            mcmcout <- .mcmcoutputbase(M = M, burnin = burnin, ranperm = ranperm,
+                                       par = pars, log = logs, weight = weights,
+                                       entropy = entropies, ST = STm, S = Sm, 
+                                       NK = NKm, clust = clustm, 
+                                       model = model.obj, prior = prior.obj)
+            .Call("mcmc_binomial_cc", fdata.obj, model.obj, prior.obj, mcmc.obj, 
+                  mcmcout, PACKAGE = "finmix")
+            if (mcmc.obj@storeS == 0) {
+                mcmcout@S <- as.array(NA)
+            }
+            return(mcmcout)
+        } else {
+            ## MCMC output with posterior hyper parameters stored
+            mcmcout <- .mcmcoutputpost(M = M, burnin = burnin, ranperm = ranperm,
+                                       par = pars, log = logs, weight = weights,
+                                       entropy = entropies, ST = STm, S = Sm, 
+                                       NK = NKm, clust = clustm, post = posts, 
+                                       model = model.obj, prior = prior.obj)
+            .Call("mcmc_binomial_cc", fdata.obj, model.obj, prior.obj, mcmc.obj, 
+                  mcmcout, PACKAGE = "finmix")
+            if (mcmc.obj@storeS == 0) {
+                mcmcout@S <- as.array(NA)
+            }
+            return(mcmcout)
+        }
+    } ## End no indicfix
 }
 
 ".do.MCMC.CondPoisson" <- function(fdata.obj, model.obj, prior.obj, mcmc.obj) 

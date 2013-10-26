@@ -109,10 +109,13 @@ setMethod("plotTraces", signature(x     = "mcmcoutputpermbase",
                                   lik   = "ANY"), 
           function(x, dev = TRUE, lik = 1, ...) 
           {
+              dist <- x@model@dist
               if (lik %in% c(0, 1)) {
-                  if (x@model@dist == "poisson") {
+                  if (dist == "poisson") {
                       .permtraces.Poisson.Base(x, dev)
-                  }
+                  } else if (dist == "binomial") {
+                      .permtraces.Binomial.Base(x, dev)
+                  } 
               }
               if (lik %in% c(1, 2)) {
                   ## log ##
@@ -125,9 +128,12 @@ setMethod("plotHist", signature(x   = "mcmcoutputpermbase",
                                 dev = "ANY"), 
           function(x, dev = TRUE, ...) 
           {
-              if(x@model@dist == "poisson") {
+              dist <- x@model@dist
+              if(dist == "poisson") {
                   .permhist.Poisson.Base(x, dev)
-              }	
+              }	else if (dist == "binomial") {
+                  .permhist.Binomial.Base(x, dev)
+              }
           }
 )
 
@@ -135,9 +141,12 @@ setMethod("plotDens", signature(x   = "mcmcoutputpermbase",
                                 dev = "ANY"), 
           function(x, dev = TRUE, ...) 
           {
-              if(x@model@dist == "poisson") {
+              dist <- x@model@dist
+              if (dist == "poisson") {
                   .permdens.Poisson.Base(x, dev)
-              }	
+              }	else if (dist == "binomial") {
+                  .permdens.Binomial.Base(x, dev)
+              }
           }
 )
 
@@ -145,8 +154,11 @@ setMethod("plotPointProc", signature(x      = "mcmcoutputpermbase",
                                      dev    = "ANY"),
           function(x, dev = TRUE, ...)
           {
-              if (x@model@dist == "poisson") {
+              dist <- x@model@dist
+              if (dist == "poisson") {
                   .permpointproc.Poisson(x, dev)
+              } else if (dist == "binomial") {
+                  .permpointproc.Binomial(x, dev)
               }
           }
 )
@@ -155,8 +167,11 @@ setMethod("plotSampRep", signature(x    = "mcmcoutputpermbase",
                                    dev  = "ANY"),
           function(x, dev, ...) 
           {
-              if (x@model@dist == "poisson") {
+              dist <- x@model@dist
+              if (dist == "poisson") {
                   .permsamprep.Poisson(x, dev)
+              } else if (dist == "binomial") {
+                  .permsamprep.Binomial(x, dev)
               }
           }
 )
@@ -165,8 +180,11 @@ setMethod("plotPostDens", signature(x   = "mcmcoutputpermbase",
                                     dev = "ANY"),
           function(x, dev = TRUE, ...) 
           {
-              if (x@model@dist == "poisson") {
+              dist <- x@model@dist
+              if (dist == "poisson") {
                   .permpostdens.Poisson(x, dev)
+              } else if (dist == "binomial") {
+                  .permpostdens.Binomial(x, dev)
               }
           }
 )
@@ -207,13 +225,42 @@ setMethod("plotPostDens", signature(x   = "mcmcoutputpermbase",
     mtext(side = 1, "Iterations", cex = 0.7, line = 3)
 }
 
+".permtraces.Binomial.Base" <- function(x, dev)
+{
+    K <- x@model@K
+    trace.n <- K * 2 - 1
+    if (.check.grDevice() && dev) {
+        dev.new(title = "Traceplots (permuted)")
+    }
+    par(mfrow = c(trace.n, 1), mar = c(1, 0, 0, 0),
+        oma = c(4, 5, 4, 4))
+    p <- x@parperm$p
+    for (k in 1:K) {
+        plot(p[, k], type = "l", axes = F, 
+             col = "gray20", xlab = "", ylab = "")
+        axis(2, las = 2, cex.axis = 0.7)
+        mtext(side = 2, las = 2, bquote(p[k = .(k)]),
+              cex = 0.6, line = 3)
+    }
+    weight <- x@weightperm
+    for (k in 1:(K - 1)) {
+        plot(weight[, k], type = "l", axes = F, 
+             col = "gray47", xlab = "", ylab = "")
+        axis(2, las = 2, cex.axis = 0.7)
+        mtext(side = 2, las = 2, bquote(eta[k = .(k)]),
+              cex = 0.6, line = 3)
+    }
+    axis(1)
+    mtext(side = 1, "Iterations", cex = 0.7, line = 3)
+}
+
 ### Traces log-likelihoods: Plots traces for the log-likelihoods.
 ".permtraces.Log.Base" <- function(x, dev)
 {
     if (.check.grDevice() && dev) {
         dev.new(title = "Log Likelihood Traceplots (permuted)")
     }
-    par(mfrow = c(2, 1), mar = c(1, 0, 0, 0),
+    par(mfrow = c(3, 1), mar = c(1, 0, 0, 0),
         oma = c(4, 5, 4, 4))
     mixlik <- x@logperm$mixlik
     plot(mixlik, type = "l", axes = F,
@@ -227,8 +274,6 @@ setMethod("plotPostDens", signature(x   = "mcmcoutputpermbase",
     axis(2, las = 2, cex.axis = 0.7)
     mtext(side = 2, las = 3, "mixprior", cex = 0.6,
           line = 3)
-    axis(1)
-    mtext(side = 1, "Iterations", cex = 0.7, line = 3)
     cdpost <- x@logperm$cdpost
     plot(mixprior, type = "l", axes = F,
          col = "gray47", xlab = "", ylab = "")
@@ -261,6 +306,25 @@ setMethod("plotPostDens", signature(x   = "mcmcoutputpermbase",
     .symmetric.Hist(vars, lab.names)
 }
 
+".permhist.Binomial.Base" <- function(x, dev)
+{
+    K <- x@model@K 
+    if (.check.grDevice() && dev) {
+        dev.new(title = "Histograms (permuted)")
+    }
+    p           <- x@parperm$p
+    weight      <- x@weightperm
+    vars        <- cbind(p, weight[, seq(1:(K - 1))])
+    lab.names   <- vector("list", 2 * K - 1)
+    for (k in 1:K) {
+        lab.names[[k]] <- bquote(p[.(k)])
+    }
+    for (k in (K + 1):(2 * K - 1)) {
+        lab.names[[k]] <- bquote(eta[.(k - K)])
+    }
+    .symmetric.Hist(vars, lab.names)
+}
+
 ### Densities
 ### Densities Poisson: Plots Kernel densities for all Poisson
 ### parameters and weights.
@@ -276,6 +340,25 @@ setMethod("plotPostDens", signature(x   = "mcmcoutputpermbase",
     lab.names   <- vector("list", 2 * K - 1)
     for (k in 1:K) {
         lab.names[[k]] <- bquote(lambda[.(k)])
+    }
+    for (k in (K + 1):(2 * K - 1)) {
+        lab.names[[k]] <- bquote(eta[.(k - K)])
+    }
+    .symmetric.Dens(vars, lab.names)
+}
+
+".permdens.Binomial.Base" <- function(x, dev)
+{
+    K <- x@model@K 
+    if (.check.grDevice() && dev) {
+        dev.new(title = "Histograms (permuted)")
+    }
+    p           <- x@parperm$p
+    weight      <- x@weightperm
+    vars        <- cbind(p, weight[, seq(1:(K - 1))])
+    lab.names   <- vector("list", 2 * K - 1)
+    for (k in 1:K) {
+        lab.names[[k]] <- bquote(p[.(k)])
     }
     for (k in (K + 1):(2 * K - 1)) {
         lab.names[[k]] <- bquote(eta[.(k - K)])

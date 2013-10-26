@@ -27,7 +27,7 @@ LogPoissonFix::LogPoissonFix () : mixlik(0.0),
 
 void LogPoissonFix::update (const unsigned int& K, const arma::mat& y, 
 			const arma::ivec& S, const arma::mat& expos, 
-			const ParPoissonFix& par, 
+            const arma::vec& T, const ParPoissonFix& par, 
 			const PriorPoissonFix& hyperPar) 
 {
 	arma::mat lambdaM = arma::kron(expos, par.lambda);

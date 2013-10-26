@@ -20,8 +20,8 @@
  * along with finmix. If not, see <http://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-#ifndef PRIORPOISSONIND_H
-#define PRIORPOISSONIND_H
+#ifndef __FINMIX_PRIORPOISSONIND_H__
+#define __FINMIX_PRIORPOISSONIND_H__
 
 #include <RcppArmadillo.h>
 #include "PriorPoissonFix.h"
@@ -35,7 +35,7 @@ class PriorPoissonInd : virtual public PriorPoissonFix {
 		PriorPoissonInd (const FinmixPrior&);
 		virtual ~PriorPoissonInd () {}
 		virtual void update (const unsigned int&,
-			const arma::mat&, arma::ivec&,
-			const ParPoissonInd&);
+			const arma::mat&, arma::ivec&, 
+            const arma::vec&, const ParPoissonInd&);
 };
-#endif
+#endif /* __FINMIX_PRIORPOISSONIND_H__ */

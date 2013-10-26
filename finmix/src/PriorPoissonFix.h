@@ -42,7 +42,7 @@ class PriorPoissonFix {
 		virtual	~PriorPoissonFix () {} 
 		virtual void update (const unsigned int&, 
 			const arma::mat&, arma::ivec&,
-			const ParPoissonFix&);
+            const arma::vec&, const ParPoissonFix&);
 		virtual void updateHier(const ParPoissonFix&);
 };
 #endif

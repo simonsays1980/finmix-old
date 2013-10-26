@@ -123,6 +123,41 @@ setMethod("hasPar", "model",
           }
 )
 
+### ----------------------------------------------------------------------
+### Simulate method
+### @description    Simulates values for a specified model in an 'model'
+###                 object.
+### @par    model       an S4 'model' object; with specified parameters 
+### @par    N           an R 'integer' value specifying the number of
+###                     values to be simulated
+### @par    varargin    an S4 'fdata' object; with specified variable 
+###                     dimension @r and repetitions @T
+### @return         an S4 object of class 'fdata' holding the simulated
+### @see    ?simulate
+### @author Lars Simon Zehnder
+### ----------------------------------------------------------------------
+setMethod("simulate", "model", 
+          function(model, N = 100, varargin, seed = 0)
+          {
+## TODO: CHeck model for parameters. Check varargin for dimension. Check
+##      model anf varargin for consistency.
+              if (!missing(seed)) {
+                  set.seed(seed)
+              } ## Implemented maybe finmixOptions with a state variable seed
+              if (!hasWeight(model)) {
+                  model@weight <- matrix(1/model@K, nrow = 1, ncol = model@K)
+              }
+              ## Start simulating the allocations
+              S <- .simulate.indicators.Model(model, N) 
+              if (missing(varargin)) {
+                  varargin <- fdata(r = 1, T = matrix(1, nrow = N), S = S)
+              } else {
+                  varargin@S <- S
+              }
+              .simulate.data.Model(model, N, varargin)
+          }
+)
+
 ## plot ##
 setMethod("plot", "model", 
           function(x, y, dev = TRUE, ...) 
@@ -453,6 +488,106 @@ setReplaceMethod("setT", "model",
     return(margin.model)
 }
 
+### ==============================================================
+### Simulate
+### --------------------------------------------------------------
+
+### --------------------------------------------------------------
+### .simulate.indicators.Model
+### @description    Simulates the indicators.
+### @par    obj an S4 object of class 'model' 
+### @par    N   an R 'integer' object
+### @return         an R 'matrix' object with N simulated indi-
+###                 cators.
+### @details        indicators are simulated via the slot @weight
+###                 the 'model' object
+### @see    ?simulate
+### @author Lars Simon Zehnder
+### --------------------------------------------------------------
+
+### TODO: Implement C++ function.
+".simulate.indicators.Model" <- function(obj, N) 
+{
+    K <- obj@K
+    if (K == 1) {
+        S <- matrix(as.integer(1), nrow = N, ncol = K)
+    } else {
+        ## if (model@indicmod = "") -> "Multinomial"
+        ## if Markov else
+        if (obj@indicmod == "multinomial") {
+            rnd       <- runif(N)
+            rnd       <- matrix(rnd, nrow = N, ncol = 2)
+            weightm   <- matrix(obj@weight, nrow = N, ncol = K, 
+                                byrow = TRUE)
+            S         <- apply((t(apply(weightm, 1, cumsum)) < rnd), 1, sum) + 1
+            S         <- matrix(S, nrow = N)                      
+        }
+    }
+    return(S)
+}
+
+### --------------------------------------------------------------------
+### .simulate.data.Model
+### @description    Simulates the simulation functions for a specific model.
+### @par    obj         an S4 'model' object
+### @par    N           an R 'integer' object; number of simulated values
+### @par    fdata.obj   an S4 'fdata' object
+### @return         an S4 object of class 'fdata' with simulated values
+### @see    ?fdata, ?simulate
+### @author Lars Simon Zehnder
+### ---------------------------------------------------------------------
+".simulate.data.Model" <- function(obj, N, fdata.obj)
+{
+    dist <- obj@dist
+    if (dist == "poisson") {
+        .simulate.data.poisson.Model(obj, N, fdata.obj)
+    } else if (dist == "binomial") {
+        .simulate.data.binomial.Model(obj, N, fdata.obj)
+    }
+}
+
+### ---------------------------------------------------------------------
+### .simulate.data.poisson.Model
+### @description    Simulates values from a Poisson mixture using pre-
+###                 specified model and indicators
+### @par    obj         an S4 object of class 'model'
+### @par    N           an R 'integer' object; number of simulated values
+### @par    fdata.obj   an S4 object of class 'fdata'
+### @return         an S4 object of class 'fdata' with simulated values
+### @see    ?simulate, model:::.simulate.data.Model, ?rpois
+### @author Lars Simon Zehnder
+### ---------------------------------------------------------------------
+".simulate.data.poisson.Model" <- function(obj, N, fdata.obj)
+{
+    fdata.obj@type  <- "discrete"
+    fdata.obj@sim   <- TRUE
+    fdata.obj@y         <- matrix(rpois(N, obj@par$lambda[fdata.obj@S]))
+    return(fdata.obj)
+   
+}
+
+### ---------------------------------------------------------------------
+### .simulate.data.binomial.Model
+### @description    Simulates values from a Binomial mixture using pre-
+###                 specified model and indicators
+### @par    obj         an S4 object of class 'model'
+### @par    N           an R 'integer' object; number of simulated values
+### @par    fdata.obj   an S4 object of class 'fdata'
+### @return         an S4 object of class 'fdata' with simulated values
+### @see    ?simulate, model:::.simulate.data.Model, ?rbinom
+### @author Lars Simon Zehnder
+### ---------------------------------------------------------------------
+".simulate.data.binomial.Model" <- function(obj, N, fdata.obj)
+{
+    if (!hasT(fdata.obj)) {
+        fdata.obj@T <- as.matrix(1)
+    }
+    fdata.obj@type  <- "discrete"
+    fdata.obj@sim   <- TRUE
+    fdata.obj@y     <- matrix(rbinom(N, fdata.obj@T, obj@par$p[fdata.obj@S]))    
+    return(fdata.obj)
+}
+
 ### Plotting
 ### Plot Poisson models: Poisson models are discrete
 ### models and a barplot is used. 
@@ -764,8 +899,11 @@ setReplaceMethod("setT", "model",
 ".haspar.Model" <- function(obj, verbose) 
 {
     if (length(obj@par) > 0) {
-        if (obj@dist %in% c("poisson", "cond.poisson")) {
+        dist <- obj@dist
+        if (dist %in% c("poisson", "cond.poisson")) {
             .haspar.poisson.Model(obj, verbose)
+        } else if (dist == "binomial") {
+            .haspar.binomial.Model(obj, verbose)
         }
     } else {
         if (verbose) {
@@ -777,17 +915,26 @@ setReplaceMethod("setT", "model",
     }
 }
 
-### Checks if a Poisson model has fully specified parameters.
-### If verbose is set to TRUE an error is thrown. 
+### -----------------------------------------------------------------
+### .haspar.poisson.Mode
+### @description    Checks if a Poisson model has fully specified 
+###                 parameters. If verbose is set to TRUE an error 
+###                 is thrown.
+### @par    obj     an S4 object of class 'model'
+### @par    verbose an object of class 'logical'
+### @return         either TRUE or FALSE if parameters are fully 
+###                 specified or not. In case verbose == FALSE an 
+###                 error is thrown.
+### -----------------------------------------------------------------
 ".haspar.poisson.Model" <- function(obj, verbose) 
 {
     if ("lambda" %in% names(obj@par)) {
         if (length(obj@par$lambda) != obj@K) {
             if (verbose) {
-                stop(paste("Wrong specification of slot 'par' of ",
+                stop(paste("Wrong specification of slot @par of ",
                            "'model' object. Number of Poisson ",
-                           "parameters in 'par$lambda' must match ",
-                           "number of components in slot 'K'.", 
+                           "parameters in @par$lambda must match ",
+                           "number of components in slot @K.", 
                            sep = ""))
             } else {
                 return(FALSE)
@@ -798,15 +945,51 @@ setReplaceMethod("setT", "model",
     } else {
         if (verbose) 
         {
-            stop(paste("Wrong specification of slot 'par' of ",
+            stop(paste("Wrong specification of slot @par of ",
                        "'model' object. Poisson parameters must be ",
-                       "names 'lambda'.", sep = ""))
+                       "named 'lambda'.", sep = ""))
         } else {
             return(FALSE)
         }
     }
 }
-    
+### -------------------------------------------------------------------
+### .haspar.binomial.Model
+### @description    Checks if a Binomial model has fully specified
+###                 parameters. If verbose is set to TRUE an error is
+###                 thrown.
+### @par    obj     an S4 object of class 'model'
+### @par    verbose an object of class 'logical'
+### @return         either TRUE or FALSE if parameters are fully 
+###                 specified or not. In case verbose == TRUE an
+###                 error is thrown.
+### -------------------------------------------------------------------
+".haspar.binomial.Model" <- function(obj, verbose)
+{
+    if ("p" %in% names(obj@par)) {
+        if (length(obj@par$p) != obj@K) {
+            if (verbose) {
+                stop(paste("Wrong specification of slot @par of ",
+                           "'model' object. Number of Binomial ",
+                           "parameters in @par$p must match ",
+                           "number of components in slot @K.",
+                           sep = ""))
+            } else {
+                return(FALSE)
+            }
+        } else {
+            return(TRUE)
+        }
+    } else {
+        if (verbose) {
+            stop(paste("Wrong specification of slot @par of ",
+                       "'model' object. Binomial parameters must be ",
+                       "named 'p'.", sep = ""))
+        } else {
+            return(TRUE)
+        }
+    }
+}
 ### Validity
 ### Validity checking of model objects is implemented
 ### in two versions: an initializing version relying partly

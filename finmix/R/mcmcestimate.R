@@ -190,6 +190,8 @@
     indicfix    <- !inherits(obj, what = "mcmcoutputbase")
     if (dist == "poisson") {
         par.est <- list(lambda = as.array(obj@par$lambda[m, ]))
+    } else if (dist == "binomial") {
+        par.est <- list(p = as.array(obj@par$p[m, ]))
     }
     if(!indicfix && K > 1) {
         weight.est  <- as.array(obj@weight[m, ])
@@ -214,6 +216,14 @@
             par.eavg <- list(lambda = as.array(apply(obj@parperm$lambda,
                                             2, mean, na.rm = TRUE)))
         }
+    } else if (dist == "binomial") {
+        if (!perm) {
+            par.eavg <- list(p = as.array(apply(obj@par$p, 2, mean, 
+                                                na.rm = TRUE)))
+        } else {
+            par.eavg <- list(p = as.array(apply(obj@parperm$p, 2, mean,
+                                                na.rm = TRUE)))
+        }
     }
     if (indicfix) {
         eavg.list <- list(par = par.eavg)
@@ -235,16 +245,21 @@
 
 ".sdpost.Mcmcestimate" <- function(obj, perm) 
 {
-    .sdpost.poisson.Mcmcestimate(obj, perm)
+    dist <- obj@model@dist
+    if (dist == "poisson") {
+        .sdpost.poisson.Mcmcestimate(obj, perm)
+    } else if (dist == "binomial") {
+        .sdpost.binomial.Mcmcestimate(obj, perm)
+    }
 }
 
 ".sdpost.poisson.Mcmcestimate" <- function(obj, perm)
 {
     if (perm) {
-        sdpar       <- apply(obj@parperm$lambda, 2, sd)
-        sdparpre    <- apply(obj@par$lambda, 2, sd)
-        sdweight    <- apply(obj@weightperm, 2, sd)
-        sdweightpre <- apply(obj@weight, 2, sd)
+        sdpar       <- apply(obj@parperm$lambda, 2, sd, na.rm = TRUE)
+        sdparpre    <- apply(obj@par$lambda, 2, sd, na.rm = TRUE)
+        sdweight    <- apply(obj@weightperm, 2, sd, na.rm = TRUE)
+        sdweightpre <- apply(obj@weight, 2, sd, na.rm = TRUE)
         identified      <- list(par = list(lambda = sdpar), 
                                 weight = sdweight)
         unidentified    <- list(par = list(lambda = sdparpre), 
@@ -252,9 +267,32 @@
         sdlist          <- list(identified = identified, 
                                 unidentified = unidentified)    
     } else {
-        sdpar       <- apply(obj@par$lambda, 2, sd)
-        sdweight    <- apply(obj@weight)
-        identfied   <- list(par = list(lambda = sdpar), weight = sdweight)
+        sdpar       <- apply(obj@par$lambda, 2, sd, na.rm = TRUE)
+        sdweight    <- apply(obj@weight, 2, sd, na.rm = TRUE)
+        identified   <- list(par = list(lambda = sdpar), weight = sdweight)
+        sdlist      <- list(identified = identified)
+    }
+    return(sdlist)
+}
+
+".sdpost.binomial.Mcmcestimate" <- function(obj, perm) 
+{
+    if (perm) {
+        sdpar       <- apply(obj@parperm$p, 2, sd, na.rm = TRUE)
+        sdparpre    <- apply(obj@par$p, 2, sd, na.rm = TRUE)
+        sdweight    <- apply(obj@weightperm, 2, sd, na.rm = TRUE)
+        sdweightpre <- apply(obj@weight, 2, sd, na.rm = TRUE)
+        identified      <- list(par = list(p = sdpar),
+                                weight = sdweight)
+        unidentified    <- list(par = list(p = sdparpre),
+                               weight = sdweightpre)
+        sdlist          <- list(identified = identified,
+                                unidentified = unidentified)
+    } else {
+        sdpar       <- apply(obj@par$p, 2, sd, na.rm = TRUE)
+        sdweight    <- apply(obj@weight, 2, sd, na.rm = TRUE)
+        identified  <- list(par = list(p = sdpar),
+                            weight = sdweight)
         sdlist      <- list(identified = identified)
     }
     return(sdlist)

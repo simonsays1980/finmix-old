@@ -62,9 +62,12 @@ setMethod("plotTraces", signature(x     = "mcmcoutputhier",
                                   lik   = "ANY"), 
           function(x, dev = TRUE, lik = 1, ...) 
           {
+              dist <- x@model@dist
               if (lik %in% c(0, 1)) {
-                  if (x@model@dist == "poisson") {
+                  if (dist == "poisson") {
                       .traces.Poisson.Base.Hier(x, dev)
+                  } else if (dist == "binomial") {
+                      .traces.Binomial.Base(x, dev)
                   }
               }
               if (lik %in% c(1, 2)) {
@@ -78,9 +81,12 @@ setMethod("plotHist", signature(x   = "mcmcoutputhier",
                                 dev = "ANY"), 
           function(x, dev = TRUE, ...) 
           {
-              if(x@model@dist == "poisson") {
+              dist <- x@model@dist
+              if (dist == "poisson") {
                   .hist.Poisson.Base.Hier(x, dev)
-              }	
+              }	else if (dist == "binomial") {
+                  .hist.Binomial.Base(x, dev)  
+              }
           }
 )
 
@@ -88,8 +94,11 @@ setMethod("plotDens", signature(x   = "mcmcoutputhier",
                                 dev = "ANY"),
           function(x, dev = TRUE, ...)
           {
-              if (x@model@dist == "poisson") {
+              dist <- x@model@dist
+              if (dist == "poisson") {
                   .dens.Poisson.Base.Hier(x, dev)
+              } else if (dist == "binomial") {
+                  .dens.Binomial.Base(x, dev)
               }
           }
 )

@@ -120,9 +120,10 @@ setMethod("subseq", signature(object = "mcmcoutputpost",
               callNextMethod(object, index)              
               ## Change owned slots ##
               dist <- object@model@dist
-              print(class(object))
               if (dist == "poisson") {
                   .subseq.Poisson.Post(object, index)
+              } else if (dist == "binomial") {
+                  .subseq.binomial.Mcmcoutputfixpost(object, index)
               }
           }
 )
@@ -139,6 +140,8 @@ setMethod("swapElements", signature(object = "mcmcoutputpost",
                   as(object, "mcmcoutputbase") <- callNextMethod(object, index)
                   if (dist == "poisson") {
                       .swapElements.Poisson.Post(object, index)
+                  } else if (dist == "binomial") {
+                      .swapelements.binomial.Mcmcoutputfixpost(object, index)
                   }
               }
           }

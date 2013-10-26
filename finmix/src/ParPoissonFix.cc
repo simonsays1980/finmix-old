@@ -22,6 +22,26 @@
  ******************************************************************************/
 #include "ParPoissonFix.h"
 
+// =============================================================
+// Constructor
+// -------------------------------------------------------------
+
+/**
+ * -------------------------------------------------------------
+ * @brief   Constructs object from model parameters.
+ * @par STARTPAR    boolean, indicating if it should be started
+ *                  by sampling the parameters
+ * @par model       FinmixModel object, holding model 
+ *                  definitions and starting parameters
+ * @return          an object of class ParPoissonFix
+ * @detail  If STARTPAR == FALSE it should be started by sampling
+ *          the indicators and starting parameters are provided 
+ *          by the model parameter
+ * @see ?model in R
+ * @author Lars Simon Zehnder
+ * -------------------------------------------------------------
+ **/
+
 ParPoissonFix::ParPoissonFix (const bool& STARTPAR, 
 		const FinmixModel& model) : lambda(model.K) 
 {
@@ -32,7 +52,29 @@ ParPoissonFix::ParPoissonFix (const bool& STARTPAR,
 	}
 } 
 
+// =============================================================
+// Update
+// -------------------------------------------------------------
+
+/** 
+ * -------------------------------------------------------------
+ * update
+ * @brief   Updates the parameters of the Poisson model
+ * @par hyperPar    object of class PriorPoissonFix, holds
+ *                  hyper parameters for sampling.
+ * @details draws samples from a Gamma prior
+ * @see ?prior in R
+ * @author Lars Simon Zehnder
+ * -------------------------------------------------------------
+ **/
+
 void ParPoissonFix::update (const PriorPoissonFix& hyperPar) 
 {
 	lambda = rgammaprod(hyperPar.aPost, hyperPar.bPost);
+}
+
+void ParPoissonFix::permute (const arma::urowvec& compIndex,
+        const arma::urowvec& permIndex)
+{
+    lambda(compIndex) = lambda(permIndex);
 }

@@ -219,7 +219,7 @@ In the following code snippets, \code{x} is an \code{model} object and the symbo
                 is returned. In case \code{@r} is \code{>2} contour plots for
                 all possible marginal Normal mixture models of dimension \code{2} 
                 are returned.
-            \item \code{"normult"}: In case the dimension of variables in 
+            \item \code{"studmult"}: In case the dimension of variables in 
                 \code{@r} is equal to \code{2} a perspective plot and a contour 
                 plot of the bivariate density of the bivariate Student-t mixture
                 is returned. In case \code{@r} is \code{>2} contour plot for

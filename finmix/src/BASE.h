@@ -26,12 +26,44 @@
 #define BASE_H
 
 #include <RcppArmadillo.h>
- 
+
+// ==============================================================
+// BASE class (to be reviewed)
+// --------------------------------------------------------------
+/**
+ * @brief   Base class for all mixin layers.
+ * @detail  This is the base class for all mixin layers defined. 
+ *          In particular it defines next to constructor and 
+ *          destructor the virtual member functions 'BASE::update' 
+ *          and 'BASE::store' to be implemented or redefined by 
+ *          inheriting classes. 
+ * @see FIX, IND, POST, HIER, ADAPTER
+ * @author Lars Simon Zehnder 
+ *
+ * ==============================================================
+ * @review  As any combination of layers begins with the FIX
+ *          the latter one has no super class and needs thereby
+ *          also no base class, as it defines 'Node' and 
+ *          'Output' classes as well as 'update()' and 'store()'
+ *          methods. The BASE class is probably only needed, if 
+ *          there is no real hierarchy to the system of layers.
+ *          The same seems to hold for the adapter.
+ * --------------------------------------------------------------
+ */
 class BASE {
 	public:
 		BASE () {}
 		virtual ~BASE () {}
+        /*
+         * Function to update parameters. 
+         * Specified in all classes inheriting
+         * from BASE
+         */
 		virtual void update () {}
+        /*
+         * Function to store values. Specified
+         * all classes inheriting from BASE
+         */
 		virtual void store (const unsigned int&) {}
 };
 #endif

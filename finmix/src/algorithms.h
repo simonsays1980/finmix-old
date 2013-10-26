@@ -12,8 +12,10 @@
  *
  ******************************************************************************/
 
-#ifndef __ALGORITHMS_H__
-#define __ALGORITHMS_H__
+#ifndef __FINMIX_ALGORITHMS_H__
+#define __FINMIX_ALGORITHMS_H__
+
+#include <RcppArmadillo.h>
 
 inline
 double kulback_leibler(const arma::vec &values, const arma::vec &base)
@@ -51,7 +53,7 @@ void swapumat_by_index(arma::umat &values, const arma::umat &index) {
     }
 }
 
-#endif /* __ALGORITHMS_H__ */
+#endif /* __FINMIX_ALGORITHMS_H__ */
 
 
 

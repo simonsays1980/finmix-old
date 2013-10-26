@@ -37,7 +37,7 @@ class LogPoissonInd : public LogPoissonFix {
 		LogPoissonInd ();
 		virtual ~LogPoissonInd () {}
 		void update (const unsigned int&, const arma::mat&,
-			arma::ivec&, const arma::mat&, const ParPoissonInd&,
-			const PriorPoissonInd&);
+			arma::ivec&, const arma::mat&, const arma::vec&,
+            const ParPoissonInd&, const PriorPoissonInd&);
 };
 #endif

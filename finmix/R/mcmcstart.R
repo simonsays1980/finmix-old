@@ -120,7 +120,7 @@
     } else if (dist == "exponential") {
         .mcmcstart.Exponential.Model(fdata.obj, model.obj, mcmc.obj)
     } else if (dist == "binomial") {
-        .mcmcstart.Binomial.Model(fdata.obj, model.obj, mcmc.obj)
+        .parameters.binomial.Mcmcstart(fdata.obj, model.obj)
     } else if (dist == "normal" || dist == "student") {
         .mcmcstart.Norstud.Model(fdata.obj, model.obj, mcmc.obj)
     } else if (dist %in% c("normult", "studmult")) {
@@ -212,20 +212,17 @@
     return(model.obj)
 }
 
-".mcmcstart.Binomial.Model" <- function(data.obj, model.obj,
-                                        mcmc.obj)
+".parameters.binomial.Mcmcstart" <- function(fdata.obj, model.obj)                                
 {
-    data.obj    <- .valid.Data.Obj(data.obj)
-    datam       <- .mcmcstart.Data(data.obj)
-    K           <- model.obj@K
-    has.par     <- (length(model.obj@par) > 0)
-    if (mcmc.obj@startpart && !has.par) {
+    if (!hasPar(model.obj) && hasT(fdata.obj, verbose = TRUE)) {
+        datam   <- getColY(fdata.obj)
+        K       <- model.obj@K           
         if (K == 1) {
-            pm <- mean(datam, na.rm = TRUE)/model.obj@par$n
-            pm <- pmin(pmax(pm, 0.1),0.9)
+            pm  <- mean(datam/fdata.obj@T, na.rm = TRUE)
+            pm  <- pmin(pmax(pm, 0.1),0.9)
         } else { ## K > 1
-            pm <- mean(datam, na.rm = TRUE)/data.obj@T * exp(runif(K))
-            pm <- pmin(pmax(pm, 0.1), 0.9)
+            pm  <- mean(datam/fdata.obj@T, na.rm = TRUE) * exp(.2 * runif(K))
+            pm  <- pmin(pmax(pm, 0.1), 0.9)
         }
         model.obj@par <- list(p = pm)
     }
@@ -349,9 +346,9 @@
 {
     dist    <- model.obj@dist
     if (dist %in% c("poisson", "cond.poisson", "exponential")) {
-            .indicators.poisson.Mcmcstart(fdata.obj, model.obj)
+        .indicators.poisson.Mcmcstart(fdata.obj, model.obj)
     } else if (dist == "binomial") {
-        .mcmcstart.Ind.Binomial(fdata.obj, model.obj)
+        .indicators.binomial.Mcmcstart(fdata.obj, model.obj)
     } else if(dist %in% c("normal", "normult", 
                           "student", "studmult")) {
         .mcmcstart.Ind.Norstud(fdata.obj, model.obj)
@@ -379,34 +376,35 @@
     return(fdata.obj)
 }
 
-".mcmcstart.Ind.Binomial" <- function(data.obj, model.obj) 
+".indicators.binomial.Mcmcstart" <- function(fdata.obj, model.obj) 
 {
-    K           <- model.obj
-    N           <- data.obj
-    has.S       <- .mcmcstart.valid.Ind(data.obj)
-    datam       <- .mcmcstart.Data(data.obj)
-    if((max(datam) - min(datam)) > 2 * K) {
-        ## use k-means to determine a starting classification
-        if (data.obj@bycolumn) {
-            data.obj@S <- as.matrix(kmeans(datam^.5, 
-                                           centers = K, 
-                                           nstart = K)$cluster)
+    if (!hasS(fdata.obj)) {
+        K           <- model.obj@K
+        datam       <- .mcmcstart.Data(data.obj)
+        if((max(datam) - min(datam)) > 2 * K) {
+            ## use k-means to determine a starting classification
+            if (data.obj@bycolumn) {
+                data.obj@S <- as.matrix(kmeans(datam^.5, 
+                                               centers = K, 
+                                               nstart = K)$cluster)
+            } else {
+                data.obj@S <- t(as.matrix(kmeans(datam^.5, 
+                                                 centers = K,
+                                                 nstart = K)$cluster))
+            }
         } else {
-            data.obj@S <- t(as.matrix(kmeans(datam^.5, 
-                                             centers = K,
-                                             nstart = K)$cluster))
-        }
-    } else {
-        ## random classification
-        if (data.obj@bycolumn) {
-            data.obj@S  <- as.matrix(sample(c(1:K), N, 
-                                            replace = TRUE))
-        } else {
-            data.obj@S  <- t(as.matrix(sample(c(1:K), N, 
-                                              replace = TRUE)))
+            ## random classification
+            N           <- data.obj@N
+            if (data.obj@bycolumn) {
+                data.obj@S  <- as.matrix(sample(c(1:K), N, 
+                                                replace = TRUE))
+            } else {
+                data.obj@S  <- t(as.matrix(sample(c(1:K), N, 
+                                                  replace = TRUE)))
+            }
         }
     }
-    return(data.obj)
+    return(fdata.obj)
 }
 
 ".mcmcstart.Ind.Norstud" <- function(data.obj, model.obj) 

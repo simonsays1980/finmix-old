@@ -5,7 +5,7 @@ NLOPT_VERSION = 2.3
 NLOPT_LIBS = -lm ./nlopt-$(NLOPT_VERSION)/lib/libnlopt_cxx.a
 NLOPT_INCL = -I./nlopt-${NLOPT_VERSION}/include
 
-PKG_CPPFLAGS = ${NLOPT_INCL}
+PKG_CPPFLAGS = ${NLOPT_INCL} -Winvalid-pch
 PKG_CFLAGS = -pipe ${NLOPT_INCL}
 PKG_LIBS = ${NLOPT_LIBS} `$(R_HOME)/bin/Rscript -e "Rcpp:::LdFlags()"` 
 

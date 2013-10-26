@@ -28,6 +28,15 @@
 #include <R.h>       		// to interface with R 
 #include <Rmath.h>   		// for using internal R C-functions 
 
+
+/**
+ * -----------------------------------------------------------
+ * liklist
+ * @brief   Structure to hold the return values from the 
+ *          likelihood computations. 
+ * @author  Lars Simon Zehnder
+ * -----------------------------------------------------------
+ **/
 struct liklist {
 	
 	const arma::mat lh;
@@ -37,7 +46,26 @@ struct liklist {
 	liklist(const arma::mat &lh, const arma::vec &maxl, 
 		const arma::mat &llh) : lh(lh), maxl(maxl), llh(llh) {}
 };
- 
+
+// ===========================================================
+// Poisson likelihood
+// -----------------------------------------------------------
+
+/**
+ * -----------------------------------------------------------
+ * likelihood_poisson
+ * @brief   Computes likelihood for a Poisson model with 
+ *          exposures.
+ * @par Y       data values, N x 1
+ * @par lambda  parameter vector, 1 x K
+ * @return  liklist struct with likelihood values
+ * @details the likelihood is computed as well as the log-
+ *          likelihood and the maximum of the likelihood 
+ *          over components.
+ * @see liklist
+ * @author Lars Simon Zehnder
+ * -----------------------------------------------------------
+ **/
 inline liklist 
 likelihood_poisson(const arma::mat &Y, arma::rowvec lambda) {
 	
@@ -73,6 +101,22 @@ likelihood_poisson(const arma::mat &Y, arma::rowvec lambda) {
 	return l_list;
 }
 
+/**
+ * -----------------------------------------------------------
+ * likelihood_poisson
+ * @brief   Computes likelihood for a Poisson model with 
+ *          exposures.
+ * @note    this is the default function called 
+ * @par Y       data values, N x 1
+ * @par lambda  parameter matrix,  N x K
+ * @return  liklist struct with likelihood values
+ * @details the likelihood is computed as well as the log-
+ *          likelihood and the maximum of the likelihood 
+ *          over components.
+ * @see liklist
+ * @author Lars Simon Zehnder
+ * -----------------------------------------------------------
+ **/
 inline liklist 
 likelihood_poisson (const arma::mat &Y, arma::mat lambda) 
 {
@@ -129,5 +173,63 @@ likelihood_ggamma(const arma::rowvec& lambda,
 			+ (shape(k) - 1) * std::log(lambda(k) - loc(k));  
 	}
 	return lik;
+}
+
+// ===========================================================
+// Binomial likelihood
+// -----------------------------------------------------------
+
+/**
+ * -----------------------------------------------------------
+ * likelihood_binomial
+ * @brief   Computes likelihood for a Binomial model with 
+ *          exposures.
+ * @note    this is the default function called 
+ * @par Y       data values, N x 1
+ * @par lambda  parameter matrix,  N x K
+ * @par T       repetitions, N x 1
+ * @return  liklist struct with likelihood values
+ * @details the likelihood is computed as well as the log-
+ *          likelihood and the maximum of the likelihood 
+ *          over components.
+ * @see liklist
+ * @author Lars Simon Zehnder
+ * -----------------------------------------------------------
+ **/
+
+inline
+liklist likelihood_binomial (const arma::mat& Y, 
+        const arma::rowvec p, 
+        const arma::vec& T)
+{
+   const unsigned int N = Y.n_rows; 
+   const unsigned int K = p.n_elem;
+   arma::vec lgammaY(N);    
+   arma::vec lgammaT(N);
+   arma::vec lgammaTY(N);
+   arma::mat loglik(N, K);
+   arma::mat lh(N, K);   
+   for (unsigned int i = 0; i < N; ++i) {
+       lgammaY(i) = R::lgammafn(Y(i, 0) + 1.0);      
+       lgammaT(i) = R::lgammafn(T(i) + 1.0);
+       lgammaTY(i) = R::lgammafn(T(i) - Y(i, 0) + 1.0);
+   }   
+   arma::mat repY   = arma::repmat(Y, 1, K);
+   arma::mat repTY  = arma::repmat(T - Y, 1, K);
+   arma::mat lgY    = arma::repmat(lgammaY, 1, K);
+   arma::mat lgT    = arma::repmat(lgammaT, 1, K);
+   arma::mat lgTY   = arma::repmat(lgammaTY, 1, K);
+   for (unsigned int i = 0; i < N; ++i) {
+       loglik.row(i) = repY.row(i) % p + repTY.row(i) % arma::log(1.0 - p);
+   }
+   loglik.each_col() += lgammaT;
+   loglik.each_col() -= lgammaTY;
+   loglik.each_col() -= lgammaY;
+   arma::vec maxl = arma::max(loglik, 1);
+   for (unsigned int k = 0; k < K; ++k) {
+       lh.col(k) = arma::exp(loglik.col(k) - maxl);
+   }
+   liklist l_list(lh, maxl, loglik);
+   return l_list;
 }
 #endif

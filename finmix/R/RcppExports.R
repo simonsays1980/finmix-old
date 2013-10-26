@@ -33,10 +33,6 @@ ddirichlet_cc <- function(values, par) {
     .Call('finmix_ddirichlet_cc', PACKAGE = 'finmix', values, par)
 }
 
-maxlabel_poisson_cc <- function(values1, values2, shape, rate, dirich, perm) {
-    .Call('finmix_maxlabel_poisson_cc', PACKAGE = 'finmix', values1, values2, shape, rate, dirich, perm)
-}
-
 hungarian_cc <- function(cost) {
     .Call('finmix_hungarian_cc', PACKAGE = 'finmix', cost)
 }
@@ -45,7 +41,15 @@ stephens1997a_poisson_cc <- function(values1, values2, pars, perm) {
     .Call('finmix_stephens1997a_poisson_cc', PACKAGE = 'finmix', values1, values2, pars, perm)
 }
 
+stephens1997a_binomial_cc <- function(values1, values2, pars, perm) {
+    .Call('finmix_stephens1997a_binomial_cc', PACKAGE = 'finmix', values1, values2, pars, perm)
+}
+
 stephens1997b_poisson_cc <- function(values, comp_par, weight_par) {
     .Call('finmix_stephens1997b_poisson_cc', PACKAGE = 'finmix', values, comp_par, weight_par)
+}
+
+stephens1997b_binomial_cc <- function(values, reps, comp_par, weight_par) {
+    .Call('finmix_stephens1997b_binomial_cc', PACKAGE = 'finmix', values, reps, comp_par, weight_par)
 }
 

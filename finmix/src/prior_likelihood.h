@@ -33,21 +33,61 @@
  * Gibbs sampling. 
  * 
  */
+
+// =============================================================
+// Dirichlet prior
+// -------------------------------------------------------------
+
+/**
+ * -------------------------------------------------------------
+ * @brief   Computes the mixture log-likelihood for a 
+ *          Dirichlet distribution. 
+ * @par eta         weight parameters
+ * @par prior_par   hyper parameters of the Dirichlet 
+ *                  distribution
+ * @return  Prior mixture log-likelihood
+ * @detail  The log-lieklihood is computed via the density
+ *          of the Dirichlet distribution evaluated at the 
+ *          weights with hyper parameters determined in 
+ *          prior_par
+ * @author Lars Simon Zehnder
+ * -------------------------------------------------------------
+ **/
 inline double 
 priormixlik_dirichlet(const arma::rowvec &eta, 
 			const arma::rowvec &prior_par) 
 {
-	unsigned int K = eta.n_elem;
-	double priormixlik = 0.0;	
-	/* evaluate dirichlet loglik */
+	unsigned int K      = eta.n_elem;
+	double priormixlik  = 0.0;	
+	/* Evaluate Dirichlet loglik */
 	priormixlik = R::lgammafn(arma::accu(prior_par));
 	for(unsigned int k = 0; k < K; ++k) {
 		priormixlik += (prior_par(k) - 1) * std::log(eta(k));
-			priormixlik -= R::lgammafn(prior_par(k));		 
+        priormixlik -= R::lgammafn(prior_par(k));		 
 	}
 	return priormixlik;
 }
+// =============================================================
+// Poisson prior
+// -------------------------------------------------------------
 
+/**
+ * -------------------------------------------------------------
+ * @brief   Computes the prior mixture log-likelihood for a 
+ *          Poisson distribution. 
+ * @par lambda      Poisson parameters, 1 x K 
+ * @par prior_parA  Gamma hyper shape parameters, 1 x K
+ * @par prior_parB  Gamma hyper rate parameters, 1 x K
+ * @par hier        boolean value indicating if a hierarchical
+ *                  prior is used
+ * @par g           Gamma hyper shape parameter of the hierar-
+ *                  chical prior
+ * @par G           Gamma hyper rate parameter of the hierar-
+ *                  chical prior
+ * @return  the prior mixture log-likelihood value
+ * @author Lars Simon Zehnder
+ * ------------------------------------------------------------
+ **/
 inline double
 priormixlik_poisson(const arma::rowvec& lambda, 
 			const arma::rowvec& prior_parA,
@@ -58,12 +98,6 @@ priormixlik_poisson(const arma::rowvec& lambda,
 	unsigned int K = lambda.n_elem;
 	double priormixlik = 0.0;
 	if(!hier) {
-		/*double scale = 0.0;
-		for(unsigned int k = 0; k < K; ++k) {
-			scale = 1.0/prior_parB(k);
-			priormixlik += R::dgamma(lambda(k), prior_parA(k),
-scale, 1);
-		}*/
 		priormixlik = likelihood_gamma(lambda, prior_parA(0), prior_parB(0));
 	}
 	else { /* hierarchical prior */
@@ -128,5 +162,41 @@ priormixlik_condpoisson (const arma::rowvec& lambda,
 		priormixlik -= R::dgamma(b, gN, scale, 1);
 	}
 	return priormixlik;
-} 
+}
+
+// =============================================================
+// Binomial distribution
+// -------------------------------------------------------------
+
+/**
+ * -------------------------------------------------------------
+ * @brief   Computes the prior mixture log-lieklihood for a 
+ *          Binomial distribution. 
+ * @par lambda      Poisson parameters, 1 x K 
+ * @par prior_parA  Gamma hyper shape parameters, 1 x K
+ * @par prior_parB  Gamma hyper rate parameters, 1 x K
+ * @par hier        boolean value indicating if a hierarchical
+ *                  prior is used
+ * @par g           Gamma hyper shape parameter of the hierar-
+ *                  chical prior
+ * @par G           Gamma hyper rate parameter of the hierar-
+ *                  chical prior
+ * @return  the prior mixture log-likelihood value
+ * @author Lars Simon Zehnder
+ * ------------------------------------------------------------
+ **/
+inline
+double priormixlik_binomial (const arma::rowvec& p,
+        const arma::rowvec& prior_parA, 
+        const arma::rowvec& prior_parB)
+{
+     const unsigned int K = p.n_elem;
+     double priormixlik = 0.0;
+     for (unsigned int k = 0; k < K; ++k) {
+         priormixlik += (prior_parA(k) - 1.0) * std::log(p(k)) 
+             + (prior_parB(k) - 1.0) * std::log(p(k));
+         priormixlik -= R::lbeta(prior_parA(k), prior_parB(k));
+     }
+     return priormixlik;
+}
 #endif

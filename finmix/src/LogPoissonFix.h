@@ -38,6 +38,7 @@ class LogPoissonFix {
 		virtual ~LogPoissonFix () {}
 		void update (const unsigned int&, const arma::mat&, 
 				const arma::ivec&, const arma::mat& expos,
-				const ParPoissonFix&, const PriorPoissonFix&);
+                const arma::vec&, const ParPoissonFix&, 
+                const PriorPoissonFix&);
 };
 #endif

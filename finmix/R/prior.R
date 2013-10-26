@@ -15,6 +15,9 @@
 # You should have received a copy of the GNU General Public License
 # along with finmix. If not, see <http://www.gnu.org/licenses/>.
 
+### ================================================================
+### The prior class
+### ----------------------------------------------------------------
 .prior <- setClass("prior",
                    representation(weight 	= "matrix",
                                   par 	    = "list",
@@ -33,13 +36,45 @@
                              )
 )
 
+### ----------------------------------------------------------------
+### Constructors 
+### ----------------------------------------------------------------
+
+### ----------------------------------------------------------------
+### prior
+### @description    Default constructor.
+### @par    weight  an R 'matrix' object containing the prior weights 
+### @par    par     an R list object containing the hyper parameters
+### @par    type    an R 'character' object defining the type of the 
+###                 prior; possible type are either "independent" or
+###                 "condconjugate"
+### @par    hier    an R 'logical' object indicating if a hierarchical
+###                 prior should be used
+### @returns        an S4 object of class 'prior'
+### @see    ?prior
+### @author Lars SImon Zehnder
+### -----------------------------------------------------------------
 "prior" <- function(weight = matrix(), par = list(), 
-                    type = "independent", hier = TRUE) 
+                    type = c("independent", "condconjugate"), 
+                    hier = TRUE) 
 {
+    type <- match.arg(type)
     .prior(weight = weight, par = par, 
            type = type, hier = hier)
 }
-
+### -----------------------------------------------------------------
+### priordefine
+### @description    Advanced constructor. Constructs an object from 
+###                 input parameters. Constructed prior has data-
+###                 dependent hyper parameters.
+### @par    fdata       an S4 object of class 'fdata'
+### @par    model       an S4 object of class 'model'
+### @par    coef.mat    not implemented yet
+### @par    varargin    an S4 object of class 'prior'
+### @return         an S4 object of class 'prior'
+### @see    ?fdata, ?model, ?priordefine
+### @author Lars Simon Zehnder
+### -----------------------------------------------------------------
 "priordefine" <- function(fdata = fdata(), model = model(), 
                           coef.mat = NULL, varargin = NULL) 
 {
@@ -55,6 +90,9 @@
                   varargin = varargin, coef.mat = coef.mat)
 }
 
+### ==================================================================
+### Has methods
+### ------------------------------------------------------------------
 setMethod("hasPriorPar", signature(object   = "prior",
                                    model    = "model",
                                    verbose  = "ANY"),
@@ -96,6 +134,21 @@ setMethod("hasPriorWeight", signature(object    = "prior",
           }
 )
 
+### -----------------------------------------------------------------------
+### generaterPrior
+### @description    Generates an object of class 'prior' from input
+###                 parameters, i.e. it fills all slots with appropriate
+###                 values. The object itself is constructed before this 
+###                 method is called.
+### @par    obj         an S4 object of class 'prior'
+### @par    fdata       an S4 object of class 'fdata'
+### @par    model       an S4 object of class 'model'
+### @par    varargin    an S4 object of class 'prior' or 'missing'
+### @par    coef.mat    not yet implemented
+### @return         a fully specified S4 object of class 'prior'
+### @see    .generatePrior<model@dist>
+### @author Lars Simon Zehnder
+### -----------------------------------------------------------------------
 setMethod("generatePrior", "prior", 
           function(object, fdata, model, varargin, coef.mat) 
           {
@@ -206,7 +259,22 @@ setReplaceMethod("setHier", "prior",
 ### Private functions
 ### These functions are not exported
 
+### ==================================================================
 ### Checking
+### ------------------------------------------------------------------
+
+### ------------------------------------------------------------------
+### .check.fdata.model.Prior
+### @description    Checks objects of classes 'fdata' and 'model' for
+###                 validity and consistency. 
+### @par    fdata.obj   an S4 object of class 'fdata'
+### @par    model.obj   an S4 object of class 'model'
+### @return         throws an error if any object is not valid or if
+###                 the two objects are not consistent among each other
+### @see    fdata:::.valid.Fdata, fdata:::.hasY, model:::.valid.Model,
+###         .valid.fdata.model.Prior
+### @author Lars Simon Zehnder
+### -------------------------------------------------------------------
 ".check.fdata.model.Prior" <- function(fdata.obj, model.obj) 
 {
     .valid.Fdata(fdata.obj)
@@ -215,11 +283,20 @@ setReplaceMethod("setHier", "prior",
     .valid.fdata.model.Prior(fdata.obj, model.obj)
 }
 
-### Check varargin: The varargin must be also an object of 
-### class 'prior'.
+### ------------------------------------------------------------------
+### .check.varargin.Prior
+### @description    Checks if the variable argument 'varargin' is also
+###                 of class 'prior' and is valid. Throws an error if
+###                 any condition is not fulfilled.
+### @par    obj     any R object passed to the function 'priordefine()'
+###                 by the user
+### @return         throws an error if 'obj' is not of class 'prior'
+### @see    validity
+### @author Lars Simon Zehnder
+### -------------------------------------------------------------------
 ".check.varargin.Prior" <- function(obj) 
 {
-    if (class(obj) != "prior") {
+    if (!inherits(obj, "prior")) {
         stop(paste("Argument 'varargin' is not of class 'prior'. ",
                    "If argument 'varargin' in 'priordefine()' is ",
                    "specified, it must be of class 'prior'.", sep = ""))
@@ -234,12 +311,15 @@ setReplaceMethod("setHier", "prior",
 {
     dist    <- model.obj@dist
     if (dist == "poisson") {
-        .haspar.Poisson.Prior(obj, model.obj, verbose)
+        .haspar.poisson.Prior(obj, model.obj, verbose)
+    } else if (dist == "binomial") {
+        .haspar.binomial.Prior(obj, model.obj, verbose)
     }
+    
 }
 
 ### hasPar Prior Poisson
-".haspar.Poisson.Prior" <- function(obj, model.obj, verbose)
+".haspar.poisson.Prior" <- function(obj, model.obj, verbose)
 {
     K   <- model.obj@K
     if (length(obj@par) == 0) {
@@ -316,29 +396,94 @@ setReplaceMethod("setHier", "prior",
         }
     }
 }
-                                                                               
-### Prior
-### Prior Poisson: Generates prior parameters for the Poisson 
-### mixture model. 
-### @Distribution:      Gamma distribution
-### @Parameters:    
-###                     a:  Shape parameter, 1 x K
-###                     b:  Rate parameter, 1 x K
-### @Hier:              Gamma distribution
-### Hier-Parameters:    
-###                     g:  Shape parameter, 1 x 1
-###                     G:  Rate parameter, 1 x 1
-".generatePriorPoisson" <- function(object, fdata.obj, 
-                                    model.obj, varargin) 
+
+".haspar.binomial.Prior" <- function(obj, model.obj, verbose)
+{
+    K <- model.obj@K
+    if (!length(obj@par)) {
+        if (verbose) {
+            stop("Slot '@par' in 'prior' object is empty.")            
+        } else {
+            return(FALSE)
+        }
+    } else {
+        if (!('a' %in% names(obj@par))) {
+            if (verbose) {
+                stop(paste("Wrong specification of slot '@par' ",
+                           "in 'prior' object. Binomial models ",
+                           "need Beta shape parameters named ",
+                           "'a'.", sep = ""))
+            } else {
+                return(FALSE)
+            }
+        } else {
+            if (dim(obj@par$a)[2] != K) {
+                if (verbose) {
+                    stop(paste("Wrong specification of slot '@par' ",
+                               "in 'prior' object. Slot '@K' in ",
+                               "'model' object does not match ",
+                               "dimension of prior parameters.",
+                               sep = ""))
+                }
+            } 
+            if (!('b' %in% names(obj@par))) {
+                if (verbose) {
+                    stop(paste("Wrong specification of slot '@par' ",
+                               "in 'prior' object. Binomial models ",
+                               "need Beta shape parameters named ",
+                               "'b'.", sep = ""))
+                } else {
+                    return(FALSE)
+                }
+            } else {
+                if (dim(obj@par$b)[2] != K) {
+                    if (verbose) {
+                        stop(paste("Wrong specification of slot '@par' ",
+                                   "in 'prior' object. Slot '@K' in ",
+                                   "'model' object does not match ",
+                                   "dimension of prior parameters.",
+                                   sep = ""))
+                    }
+                } else {
+                    return(TRUE)
+                }
+            }
+        }
+    }
+}
+### -----------------------------------------------------------------
+### .generatePriorPoisson   
+### @description    Generates the hyper parameters for a Poisson 
+###                 distribution.
+### @par    obj     an S4 object of class 'prior'
+### @par    fdata.obj   an S4 object of class 'fdata'
+### @par    model.obj   an S4 object of class 'model'
+### @par    varargin    am S4 object of class 'prior'
+### @return         a fully specified 'prior' object for Poisson
+###                 models specified by 'model.obj' with data in 
+###                 'fdata.obj' and predefined slots in 'varargin'
+### @details        the type of a data-dependent Poisson prior is
+###                 is always conditionally conjugate Gamma with 
+###                 parameters:     a: shape,   1 x model.obj@K
+###                                 b: rate,    1 x model.obj@K
+###                 If not otherwise specified in 'varargin' an
+###                 hierarchical Gamma distribution is chosen with
+###                 parameters:     g: shape,   1 x 1
+###                                 G: rate,    1 x 1.
+### @see ?prior, ?fdata, ?model
+### @author Lars Simon Zehnder
+### ------------------------------------------------------------------
+".generatePriorPoisson" <- function(obj, fdata.obj, model.obj, 
+                                    varargin) 
 {
     K <- model.obj@K
     datam   <- getColY(fdata.obj)
     if (is.null(varargin)) {
-        object@hier <- TRUE ## default prior is hierarchical
-        object@type <- "condconjugate"
+        obj@hier <- TRUE ## default prior is hierarchical
+        obj@type <- "condconjugate"
     } else {
-        object@hier <- varargin@hier
-        object@type <- "condconjugate"
+        obj@hier <- varargin@hier
+        obj@type <- "condconjugate"
     }
     ## Default prior based on matching moments
     ## See Frühwirth-Schnatter (2006) and Viallefont et. al. (2002)
@@ -354,7 +499,7 @@ setReplaceMethod("setHier", "prior",
     } else {
         a0 <- 10
     }
-    if (object@hier) {
+    if (obj@hier) {
         g0 <- 0.5
         G0 <- mean * g0/a0
         b0 <- g0/G0
@@ -366,8 +511,8 @@ setReplaceMethod("setHier", "prior",
         par <- list(a = array(a0, dim = c(1, K)),
                     b = array(b0, dim = c(1, K)))
     }
-    object@par <- par
-    return(object)
+    obj@par <- par
+    return(obj)
 }
 
 ".generatePriorCondPoisson" <- function(object, data.obj, model.obj, 
@@ -418,16 +563,32 @@ setReplaceMethod("setHier", "prior",
     return(object)
 }
 
-".generatePriorBinomial" <- function(object, model) 
+### ----------------------------------------------------------------
+### .generatePriorBinomial
+### @description    Generates the hyper parameters for a Binomial 
+###                 distribution.
+### @par    obj         an S4 object of class 'prior'
+### @par    model.obj   an S4 object of class 'model'
+### @return         a fully specified 'prior' object for Binomial
+###                 models specified by 'model.obj'. 
+### @details        the type of generated Binomial prior is always
+###                 conditionally conjugate Beta with parameters:
+###                 a:  shape,  1 x model.obj@K
+###                 b:  rate,   1 x model.obj@K;
+###                 starting values are a = (1, 1), b = (1, 1).
+### @see ?prior, ?model
+### author Lars Simon Zehnder
+### ----------------------------------------------------------------
+".generatePriorBinomial" <- function(obj, model.obj) 
 {
-    K           <- model@K
-    object@type <- "condconjugate"
+    K           <- model.obj@K
+    obj@type <- "condconjugate"
     ## uniform prior ##
     a0 <- 1
     b0 <- 1
-    object@par <- list(a = array(a0, dim = c(1, K)),
-                       b = array(b0, dim = c(1, K)))
-    return(object)
+    obj@par <- list(a = array(a0, dim = c(1, K)),
+                    b = array(b0, dim = c(1, K)))
+    return(obj)
 }
 
 ".generatePriorExponential" <- function(object, data) 
@@ -678,7 +839,18 @@ setReplaceMethod("setHier", "prior",
     }
 }
 
-### Valid fdata/model
+### -------------------------------------------------------------------------------
+### .valid.fdata.model.Prior
+### @description    Checks for consistency between the specified model in slot
+###                 @dist of the 'model' object and the dimension of variables 
+###                 @r in the 'fdata' object. Throws and error if no consistency
+###                 exists.
+### @par    fdata.obj   an S4 object of class 'fdata'
+### @par    model.obj   an S4 object of class 'model'
+### @return         Throws an error if no consistency is found.
+### @see    ?fdata, ?model
+### @author Lars Simon Zehnder
+### --------------------------------------------------------------------------------
 ".valid.fdata.model.Prior" <- function(fdata.obj, model.obj) 
 {
     if (model.obj@dist %in% .get.univ.Model() && fdata.obj@r > 1) {

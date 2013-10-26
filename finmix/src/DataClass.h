@@ -126,6 +126,25 @@ classification (const arma::ivec &S, const liklist &lik,
 	return dataC;
 }
 
+
+/** 
+ * -------------------------------------------------------------
+ * classification_fix
+ * @brief   Computes the complete data mixture log- likelihood 
+ *          for a model with fixed indicators.
+ * @par K       number of components
+ * @par S       fixed indicators
+ * @par liklist a liklist object holding the likelihoods and log
+ *              log-likelihoods for each observation and com-
+ *              ponent as well as the maximum likelihood over 
+ *              components.
+ * @details computes the complete data likelihood by summing the
+ *          log-likelihoods over the component of each ob-
+ *          servation indicated by S. 
+ * @see liklist
+ * @author Lars Simon Zehnder
+ * -------------------------------------------------------------
+ **/
 inline DataClass
 classification_fix(const unsigned int K, const arma::ivec& S, 
 			const liklist& lik) 
@@ -134,21 +153,21 @@ classification_fix(const unsigned int K, const arma::ivec& S,
 	arma::uvec col_index(1);
 	if(K > 1) {
 	 	for(unsigned int k = 0; k < K; ++k) {
-			col_index(0) = k;
-			arma::uvec index = arma::find(S == k);
-                        loglikcd(k) = arma::accu(lik.llh.submat(index, col_index));
+			col_index(0)        = k;
+			arma::uvec index    = arma::find(S == k);
+            loglikcd(k)         = arma::accu(lik.llh.submat(index, col_index));
 		}
 	}
 	else { /* no true mixture */
-		arma::vec sump_v = sum(lik.lh, 1);        				// N x 1 matrix
-		arma::vec lsump = arma::log(sump_v) + lik.maxl;   			// N x 1 matrix
-		double mixlik = sum(lsump);               				// mixture likelihood
-						//TODO: check if better to fill all K entries with mixlik
-		loglikcd(0, 0) = mixlik;
+		arma::vec sump_v    = sum(lik.lh, 1);        				
+		arma::vec lsump     = arma::log(sump_v) + lik.maxl;   
+		double mixlik       = arma::sum(lsump);               				
+        //TODO: check if better to fill all K entries with mixlik
+		loglikcd(0, 0)      = mixlik;
 	}
 	DataClass dataC;
-	dataC.logPy = lik.llh;
-	dataC.logLikCd = loglikcd;
+	dataC.logPy     = lik.llh;
+	dataC.logLikCd  = loglikcd;
 	return dataC; 
 }
 #endif

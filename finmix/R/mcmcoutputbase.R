@@ -71,9 +71,12 @@ setMethod("plotTraces", signature(x     = "mcmcoutputbase",
                                   lik   = "ANY"), 
           function(x, dev = TRUE, lik = 1, ...) 
           {
+              dist <- x@model@dist
               if (lik %in% c(0, 1)) {
-                  if (x@model@dist == "poisson") {
+                  if (dist == "poisson") {
                       .traces.Poisson.Base(x, dev)
+                  } else if (dist == "binomial") {
+                      .traces.Binomial.Base(x, dev)
                   }
               }
               if (lik %in% c(1, 2)) {
@@ -87,8 +90,11 @@ setMethod("plotHist", signature(x   = "mcmcoutputbase",
                                 dev = "ANY"), 
           function(x, dev = TRUE, ...) 
           {
-              if (x@model@dist == "poisson") {
+              dist <- x@model@dist
+              if (dist == "poisson") {
                   .hist.Poisson.Base(x, dev)
+              } else if (dist == "binomial") {
+                  .hist.Binomial.Base(x, dev)
               }
           }
 )
@@ -97,9 +103,40 @@ setMethod("plotDens", signature(x   = "mcmcoutputbase",
                                 dev = "ANY"),
           function(x, dev = TRUE, ...)
           {
-              if (x@model@dist == "poisson") {
+              dist <- x@model@dist
+              if (dist == "poisson") {
                   .dens.Poisson.Base(x, dev)
+              } else if (dist == "binomial") {
+                  .dens.Binomial.Base(x, dev)
               }
+          }
+)
+
+setMethod("plotPointProc", signature(x      = "mcmcoutputhier",
+                                     dev    = "ANY"),
+          function(x, dev = TRUE, ...)
+          {
+              ## Call 'plotPointProc()' from 'mcmcoutputbase'
+              callNextMethod(x, dev, ...)
+          }
+)
+
+setMethod("plotSampRep", signature(x    = "mcmcoutputbase",
+                                   dev  = "ANY"),
+          function(x, dev = TRUE, ...) 
+          {
+              ## Call 'plotSampRep()' from 'mcmcoutputbase'
+              callNextMethod(x, dev, ...)
+          }
+)
+
+
+setMethod("plotPostDens", signature(x   = "mcmcoutputbase",
+                                    dev = "ANY"),
+          function(x, dev = TRUE, ...)
+          {
+              ## Call 'plotPostDens' from 'mcmcoutputfixhier'
+              callNextMethod(x, dev, ...)
           }
 )
 
@@ -193,22 +230,50 @@ setMethod("getClust", "mcmcoutputbase",
     for (k in 1:K) {
         plot(lambda[, k], type = "l", axes = F, 
              col = "gray20", xlab = "", ylab = "")                      
-        axis(2, las = 2, cex.axis = 0.7)
+        axis(2, las = 2, cex.axis = .7)
         mtext(side = 2, las = 2, bquote(lambda[k = .(k)]),
-              cex = 0.6, line = 3)
+              cex = .6, line = 3)
     }
     weight <- x@weight
     for (k in 1:(K - 1)) {
         plot(weight[, k], type = "l", axes = F, 
              col = "gray47", xlab = "", ylab = "")
-        axis(2, las = 2, cex.axis = 0.7)
+        axis(2, las = 2, cex.axis = .7)
         mtext(side = 2, las = 2, bquote(eta[k = .(k)]),
-              cex = 0.6, line = 3)
+              cex = .6, line = 3)
     }
     axis(1)
-    mtext(side = 1, "Iterations", cex = 0.7, line = 3)                  
+    mtext(side = 1, "Iterations", cex = .7, line = 3)                  
 }
 
+".traces.Binomial.Base" <- function(x, dev)
+{
+    K <- x@model@K
+    trace.n <- K * 2 - 1 
+    if (.check.grDevice() && dev) {
+        dev.new(title = "Traceplots")
+    }
+    par(mfrow = c(trace.n, 1), mar = c(1, 0, 0, 0),
+        oma = c(4, 5, 4, 4))
+    p <- x@par$p
+    for (k in 1:K) {
+        plot(p[, k], type = "l", axes = F, col = "gray20", 
+             xlab = "", ylab = "")
+        axis(2, las = 2, cex.axis = .7)
+        mtext(sid = 2, las = 2, bquote(p[k = .(k)]),
+              cex = .6, line = 3)
+    }
+    weight <- x@weight
+    for (k in 1:(K - 1)) {
+        plot(weight[, k], type = "l", axes = F, 
+             col = "gray47", xlab = "", ylab = "")
+        axis(2, las = 2, cex.axis = .7)
+        mtext(side = 2, las = 2, bquote(eta[k = .(k)]),
+             cex = .6, line = 3)
+    }
+    axis(1)
+    mtext(side = 1, "Iterations", cex = .7, line = 3)
+}
 ### Plot traces log-likelihood: Plots the traces of the 
 ### sampled log-likelihoods.
 ".traces.Log.Base" <- function(x, dev)
@@ -262,6 +327,25 @@ setMethod("getClust", "mcmcoutputbase",
     .symmetric.Hist(vars, lab.names)
 }
 
+".hist.Binomial.Base" <- function(x, dev)
+{
+    K <- x@model@K 
+    if (.check.grDevice() && dev) {
+        dev.new(title = "Histograms")
+    }
+    p       <- x@par$p
+    weight  <- x@weight		
+    vars    <- cbind(p, weight[, seq(1, K - 1)])
+    lab.names <- vector("list", 2 * K - 1)
+    for (k in seq(1, K)) {
+        lab.names[[k]] <- bquote(p[.(k)])
+    }
+    for (k in seq(K + 1, 2 * K - 1)) {
+        lab.names[[k]] <- bquote(eta[.(k - K)])
+    }  
+    .symmetric.Hist(vars, lab.names)
+}
+
 ### Densities
 ### Densities Poisson: Plots Kernel densities for the Poisson
 ### parameters and the weights.
@@ -277,6 +361,25 @@ setMethod("getClust", "mcmcoutputbase",
     lab.names   <- vector("list", 2 * K - 1)
     for (k in seq(1, K)) {
         lab.names[[k]]  <- bquote(lambda[.(k)])
+    }
+    for (k in seq(K + 1, 2 * K - 1)) {
+        lab.names[[k]]  <- bquote(eta[.(k - K)])
+    }
+    .symmetric.Dens(vars, lab.names)
+}
+
+".dens.Binomial.Base" <- function(x, dev)
+{
+    K   <- x@model@K
+    if (.check.grDevice() && dev) {
+        dev.new(title = "Densities")
+    }
+    p           <- x@par$p
+    weight      <- x@weight
+    vars        <- cbind(p, weight[, seq(1, K - 1)])
+    lab.names   <- vector("list", 2 * K - 1)
+    for (k in seq(1, K)) {
+        lab.names[[k]]  <- bquote(p[.(k)])
     }
     for (k in seq(K + 1, 2 * K - 1)) {
         lab.names[[k]]  <- bquote(eta[.(k - K)])

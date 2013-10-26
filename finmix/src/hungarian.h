@@ -21,8 +21,8 @@
  *
  ******************************************************************************/
 
-#ifndef __HUNGARIAN_H__
-#define __HUNGARIAN_H__
+#ifndef __FINMIX_HUNGARIAN_H__
+#define __FINMIX_HUNGARIAN_H__
 
 #include <RcppArmadillo.h>
 
@@ -90,6 +90,7 @@ void find_smallest (double &minval, const arma::mat &cost,
  *      step_five(), step_six()
  * @return uword Armadillo matrix.
  * */
+inline
 arma::umat hungarian(const arma::mat &input_cost)
 {
     const unsigned int N = input_cost.n_rows;
@@ -163,6 +164,7 @@ void step_one(unsigned int &step, arma::mat &cost,
  * @see step_three(), step_one()
  * @return void
  * */
+inline
 void step_two (unsigned int &step, const arma::mat &cost,
         arma::umat &indM, arma::ivec &rcov, 
         arma::ivec &ccov, const unsigned int &N)
@@ -198,6 +200,7 @@ void step_two (unsigned int &step, const arma::mat &cost,
  * @see hungarian(), step_four()
  * @return void
  * */
+inline
 void step_three(unsigned int &step, const arma::umat &indM,
         arma::ivec &ccov, const unsigned int &N) 
 {
@@ -242,6 +245,7 @@ void step_three(unsigned int &step, const arma::umat &indM,
  *      find_star_in_row()
  * @return void
  **/
+inline
 void step_four (unsigned int &step, const arma::mat &cost,
         arma::umat &indM, arma::ivec &rcov, arma::ivec &ccov,
         int &rpath_0, int &cpath_0, const unsigned int &N) 
@@ -303,6 +307,7 @@ void step_four (unsigned int &step, const arma::mat &cost,
  * @see step_four(), step_three()
  * @return void
  * */
+inline
 void step_five (unsigned int &step,
         arma::umat &indM, arma::ivec &rcov, 
         arma::ivec &ccov, arma::imat &path, 
@@ -356,6 +361,7 @@ void step_five (unsigned int &step,
  * @see step_four(), find_smallest()
  * @return void
  * */
+inline
 void step_six (unsigned int &step, arma::mat &cost,
         const arma::ivec &rcov, const arma::ivec &ccov, 
         const unsigned int &N) 
@@ -388,7 +394,8 @@ void step_six (unsigned int &step, arma::mat &cost,
  * @see step_four()
  * @return void
  */
-void find_noncovered_zero(int &row, int &col,
+inline
+void find_noncovered_zero (int &row, int &col,
         const arma::mat &cost, const arma::ivec &rcov, 
         const arma::ivec &ccov, const unsigned int &N)
 {
@@ -426,6 +433,7 @@ void find_noncovered_zero(int &row, int &col,
  * @see step_four()
  * @return A bool indicating if there is. 
  * */
+inline
 bool star_in_row(int &row, const arma::umat &indM,
         const unsigned int &N) 
 {
@@ -450,6 +458,7 @@ bool star_in_row(int &row, const arma::umat &indM,
  * @see step_five()
  * @return void
  * */
+inline
 void find_star_in_col (const int &col, int &row,
         const arma::umat &indM, const unsigned int &N)
 {
@@ -472,6 +481,7 @@ void find_star_in_col (const int &col, int &row,
  * @see step_four()
  * @return void
  * */
+inline
 void find_star_in_row (const int &row, int &col, 
         const arma::umat &indM, const unsigned int &N) 
 {
@@ -494,6 +504,7 @@ void find_star_in_row (const int &row, int &col,
  * @see step_five()
  * @return void
  * */
+inline
 void find_prime_in_row (const int &row, int &col,
         const arma::umat &indM, const unsigned int &N)
 {
@@ -514,6 +525,7 @@ void find_prime_in_row (const int &row, int &col,
  * @see step_five()
  * @return void
  * */
+inline
 void augment_path (const int &path_count, arma::umat &indM,
         const arma::imat &path)
 {
@@ -533,6 +545,7 @@ void augment_path (const int &path_count, arma::umat &indM,
  * @see step_five()
  * @return void
  * */
+inline
 void clear_covers (arma::ivec &rcov, arma::ivec &ccov)
 {
     rcov.fill(0);
@@ -547,6 +560,7 @@ void clear_covers (arma::ivec &rcov, arma::ivec &ccov)
  * @see step_five()
  * @return void.
  * */
+inline
 void erase_primes(arma::umat &indM, const unsigned int &N)
 {
     for (unsigned int r = 0; r < N; ++r) {
@@ -570,6 +584,7 @@ void erase_primes(arma::umat &indM, const unsigned int &N)
  * @see step_six()
  * @return void
  * */
+inline
 void find_smallest (double &minval, const arma::mat &cost, 
         const arma::ivec &rcov, const arma::ivec &ccov, 
         const unsigned int &N)
@@ -585,4 +600,4 @@ void find_smallest (double &minval, const arma::mat &cost,
     }
 }
 
-#endif /* __HUNGARIAN_H__ */
+#endif /* __FINMIX_HUNGARIAN_H__ */

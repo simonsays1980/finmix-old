@@ -36,5 +36,7 @@ class ParPoissonFix {
 				const FinmixModel&);
 		virtual ~ParPoissonFix () {}
 		void update (const PriorPoissonFix&);
+        virtual void permute (const arma::urowvec&, 
+                const arma::urowvec&);
 };
 #endif

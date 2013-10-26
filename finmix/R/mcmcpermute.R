@@ -107,6 +107,10 @@
         clust.par       <- sqrt(obj@par$lambda)
         clust.par       <- as.vector(clust.par)
         clust.center    <- sqrt(map$par$lambda)
+    } else if (dist == "binomial") {
+        clust.par       <- sqrt(obj@par$p)
+        clust.par       <- as.vector(clust.par)
+        clust.center    <- sqrt(map$par$p)
     }
     ## Apply unsupervised k-means clustering to parameters
     result.clust    <- kmeans(clust.par, centers = as.vector(clust.center))
@@ -140,9 +144,13 @@
 ### See .process.output.empty.Mcmcpermute().
 ".stephens1997a.Mcmcpermute" <- function(obj) 
 {
+    dist <- obj@model@dist
     ## Apply Stephens1997a relabeling algorithm
-    if (obj@model@dist == "poisson") {
+    if (dist == "poisson") {
         index <- .stephens1997a.poisson.Mcmcpermute(obj)
+    }
+    if (dist == "binomial") {
+        index <- .stephens1997a.binomial.Mcmcpermute(obj)
     }
     ## Create 'mcmcoutputperm' objects
     startidx    <- matrix(seq(1, obj@model@K), nrow = obj@M, 
@@ -179,6 +187,27 @@
     stephens1997a_poisson_cc(lambda, weight, startpar, perm)
 }
 
+".stephens1997a.binomial.Mcmcpermute" <- function(obj)
+{
+    M                   <- obj@M
+    K                   <- obj@model@K
+    w.mean              <- apply(obj@post$weight, 2, mean)
+    a.mean              <- apply(obj@post$par$a, 2, mean)
+    b.mean              <- apply(obj@post$par$b, 2, mean)
+    startpar            <- c(w.mean, a.mean, b.mean)   
+    p                   <- obj@par$p
+    weight              <- obj@weight
+    index               <- array(integer(), dim = c(M, K))
+    storage.mode(index) <- "integer"
+    index.out           <- matrix(seq(1, K), nrow = M, ncol = K, byrow = TRUE)
+    storage.mode(index.out) <- "integer"
+    perm                <- as.matrix(expand.grid(seq(1, K), seq(1, K)))
+    ind                 <- apply(perm, 1, function(x) all(x == x[1]))
+    perm                <- perm[!ind, ]
+    storage.mode(perm)  <- "integer"
+    stephens1997a_poisson_cc(p, weight, startpar, perm)
+}
+
 ### Stephens1997b calling function: Calls the approrpiate
 ### algorithm to perform a relabeling following Stephens (1997b) to 
 ### the sample draws and the data. The algorithm computes
@@ -196,8 +225,11 @@
 ".stephens1997b.Mcmcpermute" <- function(obj, fdata.obj) 
 {
     .check.fdata.model.Mcmcstart(fdata.obj, obj@model)
-    if (obj@model@dist == "poisson") {
-        index   <- .stephens1997b.poisson.Mcmcpermute(obj, fdata.obj)
+    dist <- obj@model@dist
+    if (dist == "poisson") {
+        index <- .stephens1997b.poisson.Mcmcpermute(obj, fdata.obj)
+    } else if (dist == "binomial") {
+        index <- .stephens1997b.binomial.Mcmcpermute(obj, fdata.obj) 
     }
     ## Create 'mcmcoutputperm' objects. 
     startidx    <- matrix(seq(1, obj@model@K), nrow = obj@M, 
@@ -214,6 +246,12 @@
 {
     stephens1997b_poisson_cc(fdata.obj@y, obj@par$lambda,
                                       obj@weight)
+}
+
+".stephens1997b.binomial.Mcmcpermute" <- function(obj, fdata.obj)
+{
+    stephens1997b_binomial_cc(fdata.obj@y, fdata.obj@T, obj@par$p,
+                              obj@weight)
 }
 
 ".process.output.Mcmcpermute" <- function(obj, obj.swap, method)

@@ -16,6 +16,7 @@
 # along with Rcpp.  If not, see <http://www.gnu.org/licenses/>.
 
 ## Class 'model' --------------------------------------------------
+setGeneric("simulate", function(model, N = 100, varargin, seed = 0) standardGeneric("simulate"))
 
 setGeneric("plotPointProc", function(x, dev = TRUE, ...) standardGeneric("plotPointProc"))
 

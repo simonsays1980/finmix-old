@@ -193,7 +193,7 @@ setMethod("hasT", "fdata",
                   return(TRUE)
               } else {
                   if (verbose) {
-                      stop(paste("Slot 'T' in 'fdata' object ",
+                      stop(paste("Slot @T in 'fdata' object ",
                                  "is empty.", sep = ""))
                   } else {
                       return(FALSE)
@@ -1128,7 +1128,7 @@ setReplaceMethod("setT", "fdata",
                                   "match dimension of slot 'y' in 'fdata' ",
                                   "object if slot 'bycolumn' is TRUE.", 
                                   sep =""))
-                }
+                }                
             }
             if (ncol(obj@T) > 1) {
                 warning(paste("Wrong dimension of slot 'T' if ",
@@ -1173,7 +1173,7 @@ setReplaceMethod("setT", "fdata",
                                "match dimension of slot 'y' in 'fdata' ",
                                "object if slot 'bycolumn' is TRUE.", 
                                sep =""))
-                }
+                }                                         
             }
             if (ncol(obj@T) > 1) {
                 stop(paste("Wrong dimension of slot 'T' if ",

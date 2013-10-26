@@ -141,7 +141,10 @@ setMethod("subseq", signature(object = "mcmcoutputhierpost",
               dist      <- object@model@dist
               if (dist == "poisson") {
                   .subseq.Poisson.Post(object, index)
+              } else if (dist == "binomial") {
+                  .subseq.binomial.Mcmcoutputfixpost(object, index)
               }
+
           }
 )
 
@@ -158,6 +161,8 @@ setMethod("swapElements", signature(object = "mcmcoutputhierpost",
                   object <- callNextMethod(object, index)
                   if (dist == "poisson") {
                       .swapElements.Poisson.Post(object, index)
+                  } else if (dist == "binomial") {
+                      .swapelements.binomial.Mcmcoutputfixpost(object, index)
                   }
               }
           }

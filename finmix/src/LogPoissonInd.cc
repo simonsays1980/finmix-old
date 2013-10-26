@@ -22,12 +22,37 @@
  ******************************************************************************/
 #include "LogPoissonInd.h"
 
+// =============================================================
+// Constructor
+// -------------------------------------------------------------
 LogPoissonInd::LogPoissonInd () : LogPoissonFix(),
 	cdpost(0.0), entropy(0.0), maxcdpost(0.0) {}
 
+/** 
+ * -------------------------------------------------------------
+ * update
+ * @brief   Updates the log-likelihoods of the Poisson model
+ *          and samples the indicators S.
+ * @par K           number of components
+ * @par y           data matrix, N x 1
+ * @par S           indicator matrix from last step, N x 1
+ * @par par         object holding the parameters
+ * @par hyperPar    object holding the hyper parameters
+ * @detail  The classification() function samples the indi-
+ *          cators and computes likelihoods and entropy. As the
+ *          model with fixed indicators does use a different 
+ *          function 'classification_fix()' it cannot be made 
+ *          use of inheritance, i.e. the LogPoissonFix::update()
+ *          function is of no use here.
+ * @see DataClass, likelihood_poisson, priormixlik_poisson,
+ *      LogPoissonFix::update()
+ * @author Lars Simon Zehnder
+ * -------------------------------------------------------------
+ **/
 void LogPoissonInd::update (const unsigned int& K, 
 	const arma::mat& y, arma::ivec &S, const arma::mat& expos,
-	const ParPoissonInd& par, const PriorPoissonInd& hyperPar)
+    const arma::vec& T, const ParPoissonInd& par, 
+    const PriorPoissonInd& hyperPar)
 {
 	
 	arma::mat lambdaM = arma::kron(expos, par.lambda);

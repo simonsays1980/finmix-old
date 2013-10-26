@@ -118,10 +118,14 @@ setMethod("plotTraces", signature(x     = "mcmcoutputpermpost",
                                   lik   = "ANY"), 
           function(x, dev = TRUE, lik = 1, ...) 
           {
+              dist <- x@model@dist
               if (lik %in% c(0, 1)) {
-                  if (x@model@dist == "poisson") {
+                  if (dist == "poisson") {
                       .permtraces.Poisson.Base(x, dev)
+                  } else if (dist == "binomial") {
+                      .permtraces.Binomial.Base(x, dev)
                   }
+
               }
               if (lik %in% c(1, 2)) {
                   ## log ##
@@ -134,9 +138,12 @@ setMethod("plotHist", signature(x   = "mcmcoutputpermpost",
                                 dev = "ANY"), 
           function(x, dev = TRUE, ...) 
           {
-              if(x@model@dist == "poisson") {
+              dist <- x@model@dist
+              if (dist == "poisson") {
                   .permhist.Poisson.Base(x, dev)
-              }		
+              }	else if (dist == "binomial") {
+                  .permhist.Binomial.Base(x, dev)
+              }
           }
 )
 
@@ -144,9 +151,12 @@ setMethod("plotDens", signature(x   = "mcmcoutputpermpost",
                                 dev = "ANY"), 
           function(x, dev = TRUE, ...) 
           {
-              if(x@model@dist == "poisson") {
+              dist <- x@model@dist
+              if (dist == "poisson") {
                   .permdens.Poisson.Base(x, dev)
-              }		
+              }	else if (dist == "binomial") {   
+                  .permdens.Binomial.Base(x, dev)
+              }
           }
 )
 
@@ -154,8 +164,11 @@ setMethod("plotPointProc", signature(x      = "mcmcoutputpermpost",
                                      dev    = "ANY"),
           function(x, dev = TRUE, ...)
           {
-              if (x@model@dist == "poisson") {
+              dist <- x@model@dist
+              if (dist == "poisson") {
                   .permpointproc.Poisson(x, dev)
+              } else if (dist == "binomial") {
+                  .permpointproc.Binomial(x, dev)
               }
           }
 )
@@ -164,8 +177,11 @@ setMethod("plotSampRep", signature(x    = "mcmcoutputpermpost",
                                    dev  = "ANY"),
           function(x, dev, ...) 
           {
-              if (x@model@dist == "poisson") {
+              dist <- x@model@dist
+              if (dist == "poisson") {
                   .permsamprep.Poisson(x, dev)
+              } else if (dist == "binomial") {
+                  .permsamprep.Binomial(x, dev)
               }
           }
 )
@@ -174,8 +190,12 @@ setMethod("plotPostDens", signature(x   = "mcmcoutputpermpost",
                                     dev = "ANY"),
           function(x, dev = TRUE, ...) 
           {
-              if (x@model@dist == "poisson") {
+              dist <- x@model@dist
+              if (dist == "poisson") {
                   .permpostdens.Poisson(x, dev)
+              } else if (dist == "binomial") {
+                  .permpostdens.Binomial(x, dev)
               }
           }
 )
+

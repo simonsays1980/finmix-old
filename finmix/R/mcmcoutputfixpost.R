@@ -110,6 +110,8 @@ setMethod("subseq", signature(object = "mcmcoutputfixpost",
               ## post ##
               if (dist == "poisson") {
                   .subseq.Poisson.Post(object, index)
+              } else if (dist == "binomial") {
+                  .subseq.binomial.Mcmcoutputfixpost(object, index)
               }
           }
 )
@@ -126,6 +128,8 @@ setMethod("swapElements", signature(object = "mcmcoutputfixpost",
                   dist <- object@model@dist
                   if (dist == "poisson") {
                       .swapElements.Poisson(object, index)
+                  } else if (dist == "binomial") {
+                      .swapelements.binomial.Mcmcoutputfixpost(object, index)
                   }
               }
           }                 
@@ -157,6 +161,29 @@ setMethod("getPost", "mcmcoutputfixpost",
 }
 
 ".swapElements.Poisson.Post" <- function(obj, index)
+{
+    ## Rcpp::export 'swap_cc' 
+    obj@post$par$a <- swap_cc(obj@post$par$a, index)
+    obj@post$par$b <- swap_cc(obj@post$par$b, index)
+    return(obj)
+}
+
+".subseq.binomial.Mcmcoutputfixpost" <- function(obj, index)
+
+{
+    if (obj@model@K == 1) {
+        obj@post$par$a <- array(obj@post$par$a[index],
+                                 dim = c(obj@M, 1))
+        obj@post$par$b <- array(obj@post$par$b[index],
+                                 dim = c(obj@M, 1))
+    } else {
+        obj@post$par$a <- obj@post$par$a[index, ]
+        obj@post$par$b <- obj@post$par$b[index, ]
+    }
+    return(obj)
+}
+
+".swapelements.binomial.Mcmcoutputfixpost" <- function(obj, index)
 {
     ## Rcpp::export 'swap_cc' 
     obj@post$par$a <- swap_cc(obj@post$par$a, index)

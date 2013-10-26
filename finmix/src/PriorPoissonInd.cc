@@ -24,14 +24,53 @@
 #include "ParPoissonInd.h"
 #include "posterior.h"
 
+// =============================================================
+// Constructor
+// -------------------------------------------------------------
+
+/**
+ * -------------------------------------------------------------
+ * PriorPoissonInd
+ * @brief   Constructs a PriorPoissonInd object from a model.
+ * @par prior   FinmixPrior object holding prior info
+ * @return  PriorPoissonInd object
+ * @detail  The only difference to a PriorPoissonFix object is
+ *          the weight vector, all other members stay the same.
+ *          This is achieved by a virtual inheritance from the 
+ *          PriorPoissonFix class. 
+ * @see FinmixPrior, PriorPoissonFix
+ * @author Lars Simon Zehnder
+ * ------------------------------------------------------------
+ **/
 PriorPoissonInd::PriorPoissonInd (const FinmixPrior& prior) :
 	PriorPoissonFix(prior),
 	weightStart(prior.weight),
 	weightPost(prior.weight) {}
-void PriorPoissonInd::update (const unsigned int& K, const arma::mat& y,
-	arma::ivec& S, const ParPoissonInd& par) 
 
+// ============================================================
+// Update
+// ------------------------------------------------------------
+
+/**
+ * ------------------------------------------------------------
+ * @brief   Updates the hyper parameters.
+ * @par hyperPar    ParPoissonInd object containing the model
+ *                  parameters
+ * @detail  Updates the hyper parameters by computing posterior
+ *          parameters for a Gamma prior for the component par-
+ *          ameters and a Dirchlet prior for the weights. 
+ *          For updating the prior of the component parameters 
+ *          it is made use of the inheritance scheme and the 
+ *          corresponding update member function of the 
+ *          ParPoissonFix class is called.
+ * @see PriorPoissonFix::update, ParPoissonInd, 
+ *      posterior_multinomial
+ * @author  Lars Simon Zehnder
+ * ------------------------------------------------------------
+ **/
+void PriorPoissonInd::update (const unsigned int& K, const arma::mat& y,
+	arma::ivec& S, const arma::vec& T, const ParPoissonInd& par) 
 {
-	PriorPoissonFix::update(K, y, S, par);
+	PriorPoissonFix::update(K, y, S, T, par);
 	weightPost = posterior_multinomial(K, S, weightStart);
 }

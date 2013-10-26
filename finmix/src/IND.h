@@ -25,9 +25,48 @@
 
 #include <RcppArmadillo.h>
 
+// ===================================================================
+// IND mixin layer
+// -------------------------------------------------------------------
+/*
+ * @brief   Mixin layer to implement the collaboration between 'Node'
+ *          and 'Output' objects in case of Gibbs sampling with 
+ *          indicators.
+ * @par Super   next mixin layer in the application
+ * @detail  Any implemented mixin layer describes the whole collabo-
+ *          ration between 'Node' and 'Output' object to perform a
+ *          Gibbs sampling of posterior parameters. The IND mixin
+ *          layer refines thereby its 'Super' class by defining 
+ *          new inner mixins 'Node' and 'Output' with additional
+ *          variables needed to perform all actions for Gibbs 
+ *          sampling with indicators. These are e.g. variables 
+ *          neded to perform the permutations for random permutation
+ *          Gibbs sampling. 
+ * @see FIX, HIER, POST, ADAPTER, BASE
+ * @author Lars SImon Zehnder
+ * ------------------------------------------------------------------
+ */
 template <typename Super> 
 class IND : public Super {
 	public:
+        /**
+         * ---------------------------------------------------------
+         * Node mixin 
+         * ---------------------------------------------------------
+         * 
+         * @brief   Holds all variables and method to perform the 
+         *          steps of a Gibbs sampler. 
+         * @detail  This class inherits directly from the 'Super'
+         *          class' 'Node' mixin. It defines the new var-
+         *          iable 'swapIndex' needed for random permutation
+         *          Gibbs sampling including classification sampling
+         *          and permutating. The workhorse of this mixin is 
+         *          the inherited virtual method 'update()' that 
+         *          performs the update step and calls any 'update()'
+         *          function of related classes.
+         * @see FIX, HIER, POST, ADAPTER, BASE
+         * --------------------------------------------------------
+         */
 		class Node : public Super::Node {
 			public: 
 				arma::urowvec swapIndex;
@@ -39,6 +78,25 @@ class IND : public Super {
 				virtual ~Node () {}
 				virtual void update (); 
 		};
+        /**
+         * -------------------------------------------------------
+         * Output mixin
+         * -------------------------------------------------------
+         *
+         * @brief   Stores all sampled parameters and additional 
+         *          information in container pointers. 
+         * @detail  This class inherits directly from the 'Super'
+         *          class' 'Output' mixin. It defines the new
+         *          container pointers needed to store any addi-
+         *          tional information from sampling indicators.
+         *          Reusable functionality is inherited from 
+         *          'Super's 'Output' class. The workhorse of this
+         *          inner mixin is the 'store()' method that per-
+         *          forms the storing process thereby calling all
+         *          'store()' methods of related classes.
+         * @see FIX, BASE, HIER, POST, ADAPTER
+         * ------------------------------------------------------
+         */
 		class Output : public Super::Output {
 			public:
 				arma::mat* weight;
@@ -64,6 +122,21 @@ class IND : public Super {
 		virtual void store (const unsigned int&);
 };
 
+// ============================================================
+// Node mixin definitions
+// ------------------------------------------------------------
+
+/**
+ * ------------------------------------------------------------
+ * Node::Node
+ * @brief   Constructor of inner mixin 'Node'
+ * @detail  Calls in its initialization list the constructor of
+ *          its super class that takes the same parameters.
+ * @see Super::Node::Node, FinmixModel, FinmixPrior,
+ *      FinmixMCMC
+ * @author  Lars Simon Zehnder
+ * ------------------------------------------------------------
+ **/
 template <typename Super>
 IND <Super>::Node::Node (const FinmixData& data, 
 	const FinmixModel& model, const FinmixPrior& prior,
@@ -71,6 +144,17 @@ IND <Super>::Node::Node (const FinmixData& data,
 		Super::Node(data, model, prior, mcmc),
 		swapIndex(model.K) {}
 
+/**
+ * -----------------------------------------------------------
+ * Node::update
+ * @brief   Updates the 'node' object.
+ * @detail  Virtual. Calls 'Super::Node::update()', to perform
+ *          any updates on parameters and then starts random 
+ *          permutation of sampled parameters and indicators.
+ * @see Super::Node::update()
+ * @author  Lars Simon Zehnder
+ * -----------------------------------------------------------
+ **/
 template <typename Super>
 void IND <Super>::Node::update () 
 {	
@@ -87,6 +171,32 @@ void IND <Super>::Node::update ()
 	}	
 }
 
+// ==========================================================
+// Output mixin definitions
+// ----------------------------------------------------------
+
+/**
+ * ----------------------------------------------------------
+ * Output::Output
+ * @brief   Constructs an object of class 'Output' inside of
+ *          the mixin layer.
+ * @par classS4 object of class Rcpp::S4
+ * @detail  Calls in its initialization list the constructor
+ *          of the super class that takes the same parameter.
+ *          'classS4' is an R S4 class object holding a 
+ *          certain structure of containers to store sampled
+ *          parameters, log-likelihoods, etc. Note, the 
+ *          Rcpp::S4 object references in its objects to
+ *          memory allocated in R. To avoid copying pointers
+ *          are used to represent the containers in the C++
+ *          application. For each Armadillo object its
+ *          advanced constructor is called to reuse auxiliary
+ *          memory and fix the size.
+ * @see FIX::Output::Output, HIER::Output::Output,
+ *      Rcpp::S4, ?S4 (in R), arma::mat
+ * @author  Lars Simon Zehnder
+ * ----------------------------------------------------------
+ **/
 template <typename Super>
 IND <Super>::Output::Output (const Rcpp::S4& classS4) : 
 	Super::Output(classS4) 
@@ -112,6 +222,23 @@ IND <Super>::Output::Output (const Rcpp::S4& classS4) :
 	clust = new arma::ivec(tmpClust.begin(), N, false, true);
 }
 
+/**
+ * ---------------------------------------------------------
+ * Output::store
+ * @brief   Stores the sampled parameters into containers.
+ * @par m       iteration count
+ * @par node    object of class this->Node
+ * @detail  Takes the iteration number and a 'Node' object 
+ *          holding all information from one sampling step
+ *          and stores it to the containers pointed to in-
+ *          side the 'Output' class. It thereby always 
+ *          checks if the iteration is part of the burnin 
+ *          phase or the sampling phase, if indicators
+ *          should be stored at all, etc.
+ * @see FIX::Output::store, HIER::Output::store
+ * @author Lars Simon Zehnder
+ * ---------------------------------------------------------
+ **/
 template <typename Super> 
 void IND <Super>::Output::store (const unsigned int& m,
 	Node& node)
@@ -142,6 +269,33 @@ void IND <Super>::Output::store (const unsigned int& m,
 	}
 }
 
+// ========================================================
+// IND mixin layer
+// --------------------------------------------------------
+
+/**
+ * --------------------------------------------------------
+ * IND<Super>::IND
+ * @brief   Constructs an object of the parameterized mixin
+ *          layer.
+ * @par data    object of class FinmixData, holds the data
+ * @par model   object of class FinmixModel, holds model
+ *              information 
+ * @par prior   object of class FinmixPrior, holds prior
+ *              information
+ * @par mcmc    object of class FinmixMCMC, holds info for 
+ *              algorithmic configurations
+ * @par classS4 object of class Rcpp::S4 to pass output
+ *              container pointer
+ * @detail  Note, that this constructor must include all
+ *          parameters needed in construction of the inner
+ *          mixins. Calls the constructor of its Super 
+ *          layer in initializing list.
+ * @see Super, FinmixData, FinmixModel, FinmixPrior, 
+ *      FinmixMCMC, Rcpp::S4
+ * @author  Lars Simon Zehnder
+ * -------------------------------------------------------
+ **/
 template <typename Super>
 IND <Super>::IND (const FinmixData& data, const FinmixModel& model,
 	const FinmixPrior& prior, const FinmixMCMC& mcmc,
@@ -150,12 +304,32 @@ IND <Super>::IND (const FinmixData& data, const FinmixModel& model,
 		node(data, model, prior, mcmc),
 		output(classS4) {}
 
+/**
+ * -------------------------------------------------------
+ * IND<Super>::update
+ * @brief   Triggers the update process for each step
+ *          the sampler. Passes responsibility to 'Node's
+ *          'update()' method.
+ * @see Node::update
+ * @author  Lars Simon Zehnder
+ * -------------------------------------------------------
+ **/
 template <typename Super>
 void IND <Super>::update ()
 {
 	node.update();
 }
 
+/**
+ * -------------------------------------------------------
+ * IND<Super>::store
+ * @brief   Triggers the store process for each step of
+ *          the sampler. Passes responsibility to 'Output's
+ *          'store()' method.
+ * @see Output::store
+ * @author  Lars Simon Zehnder
+ * -------------------------------------------------------
+ **/
 template <typename Super>
 void IND <Super>::store (const unsigned int& m)
 {

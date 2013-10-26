@@ -71,9 +71,12 @@ setMethod("plotTraces", signature(x     = "mcmcoutputpermfix",
                                   lik   = "ANY"), 
 	function(x, dev = TRUE, lik = 1, ...) 
     {
+        dist <- x@model@dist
         if (lik %in% c(0, 1)) {
-            if(x@model@dist == "poisson") {
+            if(dist == "poisson") {
                 .permtraces.Poisson(x, dev)
+            } else if (dist == "binomial") {
+                .permtraces.Binomial(x, dev)
             }
         }
         if (lik %in% c(1, 2)) {
@@ -87,8 +90,11 @@ setMethod("plotHist", signature(x   = "mcmcoutputpermfix",
                                 dev = "ANY"), 
 	function(x, dev = TRUE, ...) 
     {
-        if(x@model@dist == "poisson") {
+        dist <- x@model@dist
+        if(dist == "poisson") {
             .permhist.Poisson(x, dev)
+        } else if (dist == "binomial") {
+            .permhist.Binomial(x, dev)
         }
     }
 )
@@ -97,8 +103,11 @@ setMethod("plotDens", signature(x   = "mcmcoutputpermfix",
                                 dev = "ANY"),
           function(x, dev = TRUE, ...) 
           {
-              if (x@model@dist == "poisson") {
+              dist <- x@model@dist
+              if (dist == "poisson") {
                   .permdens.Poisson(x, dev)
+              } else if (dist == "binomial") {
+                  .permdens.Binomial(x, dev)
               }
           }
 )
@@ -107,8 +116,11 @@ setMethod("plotPointProc", signature(x      = "mcmcoutputpermfix",
                                      dev    = "ANY"),
           function(x, dev = TRUE, ...)
           {
-              if (x@model@dist == "poisson") {
+              dist <- x@model@dist
+              if (dist == "poisson") {
                   .permpointproc.Poisson(x, dev)
+              } else if (dist == "binomial") {
+                  .permpointproc.Binomial(x, dev)
               }
           }
 )
@@ -117,8 +129,11 @@ setMethod("plotSampRep", signature(x    = "mcmcoutputpermfix",
                                    dev  = "ANY"),
           function(x, dev, ...) 
           {
-              if (x@model@dist == "poisson") {
+              dist <- x@model@dist
+              if (dist == "poisson") {
                   .permsamprep.Poisson(x, dev)
+              } else if (dist == "binomial") {
+                  .permsamprep.Binomial(x, dev)
               }
           }
 )
@@ -127,8 +142,11 @@ setMethod("plotPostDens", signature(x   = "mcmcoutputpermfix",
                                     dev = "ANY"),
           function(x, dev = TRUE, ...) 
           {
-              if (x@model@dist == "poisson") {
+              dist <- x@model@dist
+              if (dist == "poisson") {
                   .permpostdens.Poisson(x, dev)
+              } else if (dist == "binomial") {
+                  .permpostdens.Binomial(x, dev)
               }
           }
 )
@@ -158,6 +176,27 @@ setMethod("plotPostDens", signature(x   = "mcmcoutputpermfix",
     axis(1)
     mtext(side = 1, "Iterations", cex = 0.7, line = 3)
 }	
+
+".permtraces.Binomial" <- function(x, dev)
+{
+    K <- x@model@K
+    trace.n <- K
+    if (.check.grDevice() && dev) {	
+        dev.new(title = "Traceplots")
+    }
+    par(mfrow = c(trace.n, 1), mar = c(1, 0, 0, 0), 
+        oma = c(4, 5, 4,4))
+    p <- x@parperm$p
+    for (k in 1:K) {
+        plot(p[, k], type = "l", axes = F, 
+             col = "gray20", xlab = "", ylab = "")
+        axis(2, las = 2, cex.axis = 0.7)
+        mtext(side = 2, las = 2, bquote(p[k = .(k)]), 
+              cex = 0.6, line = 3)
+	}
+    axis(1)
+    mtext(side = 1, "Iterations", cex = 0.7, line = 3)
+}
 
 ### Traces log-likelihood: Plots the traces of the log-
 ### likelihoods.
@@ -201,6 +240,19 @@ setMethod("plotPostDens", signature(x   = "mcmcoutputpermfix",
     .symmetric.Hist(lambda, lab.names)
 }
 
+".permhist.Binomial" <- function(x, dev)
+{
+    K <- x@model@K 
+    if (.check.grDevice() && dev) {
+        dev.new(title = "Histograms (permuted)")
+    }
+    p <- x@parperm$p
+    lab.names <- vector("list", K)
+    for (k in 1:K) {
+        lab.names[[k]] <- bquote(p[.(k)])
+    }
+    .symmetric.Hist(p, lab.names)
+}
 ### Densities
 ### Densities Poisson: Plots densities for all Poisson
 ### parameters.
@@ -216,6 +268,20 @@ setMethod("plotPostDens", signature(x   = "mcmcoutputpermfix",
         lab.names[[k]] <- bquote(lambda[.(k)])
     }
     .symmetric.Dens(lambda, lab.names)
+}
+
+".permdens.Binomial" <- function(x, dev)
+{
+    K <- x@model@K 
+    if (.check.grDevice() && dev) {
+        dev.new(title = "Densities (permuted)")
+    }
+    p           <- x@parperm$p
+    lab.names   <- vector("list", K)
+    for (k in 1:K) {
+        lab.names[[k]] <- bquote(p[.(k)])
+    }
+    .symmetric.Dens(p, lab.names)
 }
 
 ### Plot Point Processes
@@ -245,6 +311,31 @@ setMethod("plotPostDens", signature(x   = "mcmcoutputpermfix",
          cex = .7, cex.axis = .7, cex.lab = .7,
          main = "", ylab = "", xlab = "")
     mtext(side = 1, bquote(lambda), cex = .7, 
+          cex.lab = .7, line = 3)
+    legend("topright", legend = do.call(expression, 
+                                        legend.names),
+           col = col.grid, fill = col.grid)
+}
+
+".permpointproc.Binomial" <- function(x, dev)
+{
+    K   <- x@model@K
+    M   <- x@M
+    if (.check.grDevice() && dev) {
+        dev.new(title = "Point Process Representation (MCMC permuted)")
+    }
+    y.grid  <- replicate(K, rnorm(M))
+    p       <- x@par$p
+    col.grid <- gray.colors(K, start = 0, 
+                            end = 0.5)
+    legend.names    <- vector("list", K)
+    for (k in seq(1, K)) {
+        legend.names[[k]]   <- bquote(p[.(k)])
+    }
+    plot(p, y.grid, pch = 20, col = col.grid,
+         cex = .7, cex.axis = .7, cex.lab = .7,
+         main = "", ylab = "", xlab = "")
+    mtext(side = 1, bquote(p), cex = .7, 
           cex.lab = .7, line = 3)
     legend("topright", legend = do.call(expression, 
                                         legend.names),
@@ -285,6 +376,36 @@ setMethod("plotPostDens", signature(x   = "mcmcoutputpermfix",
 
 }
 
+".permsamprep.Binomial" <- function(x, dev)
+{
+    K       <- x@model@K
+    if (K == 1) {
+        warning(paste("Sampling representation is only ",
+                      "available for mixture models with ",
+                      "K > 1.", sep = ""))
+        return(FALSE)
+    }
+    M       <- x@M
+    n       <- min(2000, x@M)
+    n.perm  <- choose(K, 2) * factorial(2)
+    p       <- x@parperm$p
+    if (.check.grDevice() && dev) {
+        dev.new(title = "Sampling Representation (MCMC permuted)")
+    }
+    comb    <- as.matrix(expand.grid(seq(1, K), seq(1, K)))
+    comb    <- comb[which(comb[, 1] != comb[, 2]), ]
+    p       <- p[seq(1, n), ]
+    p       <- matrix(p[,comb], nrow = n * n.perm, ncol = 2)
+    plot(p, col = "gray47", cex.lab = .7, cex.axis = .7,
+         cex = .7, pch = 20, main = "", xlab = "", ylab = "")
+    abline(0, 1, lty = 1)
+    mtext(side = 1, bquote(p), cex = .7, cex.lab = .7,
+          line = 3)
+    mtext(side = 2, bquote(p), cex = .7, cex.lab = .7,
+          line = 3)
+
+}
+
 ### Posterior Density
 ### Posterior Density Poisson: Plots a contour plot of the 
 ### posterior density of the sampled parameters for K = 2.
@@ -310,6 +431,40 @@ setMethod("plotPostDens", signature(x   = "mcmcoutputpermfix",
         mtext(side = 1, bquote(lambda[1]), cex = .7, 
               cex.lab = .7, line = 3)
         mtext(side = 2, bquote(lambda[2]), cex = .7,
+              cex.lab = .7, line = 3)
+        if (.check.grDevice() && dev) {
+            dev.new(title = "Posterior Density Persepctive Plot (MCMC)")
+        }
+        persp(dens$x1, dens$x2, dens$fhat, col = "gray65", 
+              border = "gray47", theta = 55, phi = 30, 
+              expand = .5, lphi = 180, ltheta = 90, 
+              r = 40, d = .1, ticktype = "detailed", zlab = 
+              "Density", xlab = "k = 1" , ylab = "k = 2")
+    }
+}
+
+".permpostdens.Binomial" <- function(x, dev)
+{
+    K   <- x@model@K
+    if (K != 2) {
+        warning(paste("A plot of the posterior density is ",
+                      "available only for K = 2.", sep = ""))
+    } else {
+        M   <- x@M
+        n   <- min(2000, M)
+        p   <- x@parperm$p
+        p   <- p[seq(1, n), ]
+        dens    <- bkde2D(p, bandwidth = c(sd(p[, 1]),
+                                           sd(p[, 2])))
+        if (.check.grDevice() && dev) {
+            dev.new(title = "Posterior Density Contour Plot (MCMC)")
+        } 
+        contour(dens$x1, dens$x2, dens$fhat, cex = .7, 
+                cex.lab = .7, cex.axis = .7, col = "gray47", 
+                main = "", xlab = "", ylab = "")
+        mtext(side = 1, bquote(p[1]), cex = .7, 
+              cex.lab = .7, line = 3)
+        mtext(side = 2, bquote(p[2]), cex = .7,
               cex.lab = .7, line = 3)
         if (.check.grDevice() && dev) {
             dev.new(title = "Posterior Density Persepctive Plot (MCMC)")

@@ -61,9 +61,12 @@ setMethod("plotTraces", signature(x     = "mcmcoutputfix",
                                   lik   = "ANY"), 
           function(x, dev = TRUE, lik = 1, ...) 
           {
+              dist <- x@model@K
               if (lik %in% c(0, 1)) {
-                  if(x@model@dist == "poisson") {
+                  if(dist == "poisson") {
                       .traces.Poisson(x, dev)
+                  } else if (dist == "binomial") {
+                      .traces.Binomial(x, dev)    
                   }
               }
               if (lik %in% c(1, 2)) {
@@ -77,8 +80,11 @@ setMethod("plotHist", signature(x   = "mcmcoutputfix",
                                 dev = "ANY"), 
           function(x, dev = TRUE, ...) 
           {
-              if(x@model@dist == "poisson") {
+              dist <- x@model@dist
+              if(dist == "poisson") {
                   .hist.Poisson(x, dev)
+              } else if (dist == "binomial") {
+                  .hist.Binomial(x, dev)
               }
           }
 )
@@ -87,8 +93,11 @@ setMethod("plotDens", signature(x   = "mcmcoutputfix",
                                 dev = "ANY"),
           function(x, dev = TRUE, ...)
           {
-              if(x@model@dist == "poisson") {
+              dist <- x@model@dist
+              if (dist == "poisson") {
                   .dens.Poisson(x, dev)
+              } else if (dist == "binomial") {
+                  .dens.Binomial(x, dev)
               }
           }
 )
@@ -97,8 +106,11 @@ setMethod("plotPointProc", signature(x      = "mcmcoutputfix",
                                      dev    = "ANY"),
           function(x, dev = TRUE, ...)
           {
-              if (x@model@dist == "poisson") {
+              dist <- x@model@dist
+              if (dist == "poisson") {
                   .pointproc.Poisson(x, dev)
+              } else if (dist == "binomial") {
+                  .pointproc.Binomial(x, dev)
               }
           }
 )
@@ -107,8 +119,11 @@ setMethod("plotSampRep", signature(x    = "mcmcoutputfix",
                                    dev  = "ANY"),
           function(x, dev, ...) 
           {
-              if (x@model@dist == "poisson") {
+              dist <- x@model@dist
+              if (dist == "poisson") {
                   .samprep.Poisson(x, dev)
+              } else if (dist == "binomial") {
+                  .samprep.Binomial(x, dev)
               }
           }
 )
@@ -117,8 +132,11 @@ setMethod("plotPostDens", signature(x   = "mcmcoutputfix",
                                     dev = "ANY"),
           function(x, dev = TRUE, ...) 
           {
-              if (x@model@dist == "poisson") {
+              dist <- x@model@dist
+              if (dist == "poisson") {
                   .postdens.Poisson(x, dev)
+              } else if (dist == "binomial") {
+                  .postdens.Binomial(x, dev)
               }
           }
 )
@@ -135,6 +153,8 @@ setMethod("subseq", signature(object    = "mcmcoutputfix",
               ## par ##
               if(dist == "poisson") {
                   .subseq.Poisson(object, index)
+              } else if (dist == "binomial") {
+                  .subseq.Binomial(object, index)
               }
           }
 )
@@ -150,6 +170,8 @@ setMethod("swapElements", signature(object  = "mcmcoutputfix",
                   dist <- object@model@dist
                   if (dist == "poisson") {
                       .swapElements.Poisson(object, index)
+                  } else if (dist == "binomial") {
+                      .swapElements.Binomial(object, index)
                   }
               }
           }
@@ -224,17 +246,38 @@ setMethod("getPrior", "mcmcoutputfix",
         dev.new(title = "Traceplots")
     }
     par(mfrow = c(trace.n, 1), mar = c(1, 0, 0, 0), 
-        oma = c(4, 5, 4,4))
+        oma = c(4, 5, 4, 4))
     lambda <- x@par$lambda
     for (k in 1:K) {
         plot(lambda[, k], type = "l", axes = F, 
              col = "gray20", xlab = "", ylab = "")
-        axis(2, las = 2, cex.axis = 0.7)
+        axis(2, las = 2, cex.axis = .7)
         mtext(side = 2, las = 2, bquote(lambda[k = .(k)]), 
-              cex = 0.6, line = 3)
+              cex = .6, line = 3)
     }
     axis(1)
-    mtext(side = 1, "Iterations", cex = 0.7, line = 3)		
+    mtext(side = 1, "Iterations", cex = .7, line = 3)		
+}
+
+".traces.Binomial" <- function(x, dev)
+{
+    K <- x@model@K
+    trace.n <- K
+    if (.check.grDevice() && dev) {
+        dev.new(title = "Traceplots")        
+    } 
+    par(mfrow = c(trace.n, 1), mar = c(1, 0, 0, 0),
+        oma = c(4, 5, 4, 4))
+    p <- x@par$p
+    for (k in 1:K) {
+        plot(p[, k], type = "l", axes = F, col = "gray20",
+             xlab = "", ylab = "")
+        axis(2, las = 2, cex.axis = .7)
+        mtext(side = 2, las = 2, bquote(p[k = .(k)]),
+              cex = .6, line = 3)
+    }
+    axis(1)
+    mtext(side = 1, "Iterations", cex = .7, line = 3)
 }
 
 ### Traces Poisson: Plots the traces of MCMC samples
@@ -285,6 +328,24 @@ setMethod("getPrior", "mcmcoutputfix",
     }
 }
 
+".hist.Binomial" <- function(x, dev)
+{
+    K <- x@model@K 
+    if (.check.grDevice() && dev) {
+        dev.new(title = "Histograms")
+    }
+    p <- x@par$p
+    if (K == 1) {
+        .symmetric.Hist(p, list(bquote(p)))
+    } else {
+        lab.names <- vector("list", K)
+        for (k in 1:K) {
+            lab.names[[k]] <- bquote(p[.(k)])
+        }
+        .symmetric.Hist(p, lab.names)
+    }
+}
+
 ### Plot Densities
 ### Plot Dens Poisson: Plots Kernel densities for each
 ### component parameter.
@@ -306,6 +367,24 @@ setMethod("getPrior", "mcmcoutputfix",
     }
 }
 
+".dens.Binomial" <- function(x, dev)
+{
+    K   <- x@model@K
+    if (.check.grDevice() && dev) {
+        dev.new(title = "Densities")
+    }
+    p  <- x@par$p
+    if (K == 1) {
+        .symmetric.Dens(p, list(bquote(p)))
+    } else {
+        lab.names   <- vector("list", K)
+        for (k in seq(1, K)) {
+            lab.names[[k]]  <- bquote(p[.(k)])
+        }
+        .symmetric.Dens(p, lab.names)
+    }
+}
+
 ### Plot Point Processes
 ### Plot Point Process Poisson: Plots the point process
 ### for the MCMC draws for lambda. The values are plotted
@@ -315,7 +394,7 @@ setMethod("getPrior", "mcmcoutputfix",
     K   <- x@model@K
     M   <- x@M
     if (.check.grDevice() && dev) {
-        dev.new("Point Process Representation (MCMC)")
+        dev.new(title = "Point Process Representation (MCMC)")
     }
     y.grid  <- replicate(K, rnorm(M))
     if (median(x@par$lambda) < 1) {
@@ -333,6 +412,31 @@ setMethod("getPrior", "mcmcoutputfix",
          cex = .7, cex.axis = .7, cex.lab = .7,
          main = "", ylab = "", xlab = "")
     mtext(side = 1, bquote(lambda), cex = .7, 
+          cex.lab = .7, line = 3)
+    legend("topright", legend = do.call(expression, 
+                                        legend.names),
+           col = col.grid, fill = col.grid)
+}
+
+".pointproc.Binomial" <- function(x, dev)
+{
+    K   <- x@model@K
+    M   <- x@M
+    if (.check.grDevice() && dev) {
+        dev.new(title = "Point Process Representation (MCMC)")
+    }
+    y.grid  <- replicate(K, rnorm(M))
+    p <- x@par$p
+    col.grid <- gray.colors(K, start = 0, 
+                            end = 0.5)
+    legend.names    <- vector("list", K)
+    for (k in seq(1, K)) {
+        legend.names[[k]]   <- bquote(p[.(k)])
+    }
+    plot(p, y.grid, pch = 20, col = col.grid,
+         cex = .7, cex.axis = .7, cex.lab = .7,
+         main = "", ylab = "", xlab = "")
+    mtext(side = 1, bquote(p), cex = .7, 
           cex.lab = .7, line = 3)
     legend("topright", legend = do.call(expression, 
                                         legend.names),
@@ -357,7 +461,7 @@ setMethod("getPrior", "mcmcoutputfix",
     n.perm  <- choose(K, 2) * factorial(2)
     lambda  <- x@par$lambda
     if (.check.grDevice() && dev) {
-        dev.new(title = "Sampling Representation")
+        dev.new(title = "Sampling Representation (MCMC)")
     }
     comb    <- as.matrix(expand.grid(seq(1, K), seq(1, K)))
     comb    <- comb[which(comb[, 1] != comb[, 2]), ]
@@ -369,6 +473,36 @@ setMethod("getPrior", "mcmcoutputfix",
     mtext(side = 1, bquote(lambda), cex = .7, cex.lab = .7,
           line = 3)
     mtext(side = 2, bquote(lambda), cex = .7, cex.lab = .7,
+          line = 3)
+
+}
+
+".samprep.Binomial" <- function(x, dev)
+{
+    K       <- x@model@K
+    if (K == 1) {
+        warning(paste("Sampling representation is only ",
+                      "available for mixture models with ",
+                      "K > 1.", sep = ""))
+        return(FALSE)
+    }
+    M       <- x@M
+    n       <- min(2000, x@M)
+    n.perm  <- choose(K, 2) * factorial(2)
+    p       <- x@par$p
+    if (.check.grDevice() && dev) {
+        dev.new(title = "Sampling Representation")
+    }
+    comb    <- as.matrix(expand.grid(seq(1, K), seq(1, K)))
+    comb    <- comb[which(comb[, 1] != comb[, 2]), ]
+    p       <- p[seq(1, n), ]
+    p       <- matrix(p[,comb], nrow = n * n.perm, ncol = 2)
+    plot(p, col = "gray47", cex.lab = .7, cex.axis = .7,
+         cex = .7, pch = 20, main = "", xlab = "", ylab = "")
+    abline(0, 1, lty = 1)
+    mtext(side = 1, bquote(p), cex = .7, cex.lab = .7,
+          line = 3)
+    mtext(side = 2, bquote(p), cex = .7, cex.lab = .7,
           line = 3)
 
 }
@@ -400,7 +534,41 @@ setMethod("getPrior", "mcmcoutputfix",
         mtext(side = 2, bquote(lambda[2]), cex = .7,
               cex.lab = .7, line = 3)
         if (.check.grDevice() && dev) {
-            dev.new(title = "Posterior Density Persepctive Plot (MCMC)")
+            dev.new(title = "Posterior Density Perspective Plot (MCMC)")
+        }
+        persp(dens$x1, dens$x2, dens$fhat, col = "gray65", 
+              border = "gray47", theta = 55, phi = 30, 
+              expand = .5, lphi = 180, ltheta = 90, 
+              r = 40, d = .1, ticktype = "detailed", zlab = 
+              "Density", xlab = "k = 1" , ylab = "k = 2")
+    }
+}
+
+".postdens.Binomial" <- function(x, dev)
+{
+    K   <- x@model@K
+    if (K != 2) {
+        warning(paste("A plot of the posterior density is ",
+                      "available only for K = 2.", sep = ""))
+    } else {
+        M       <- x@M
+        n       <- min(2000, M)
+        p       <- x@par$p
+        p       <- p[seq(1, n), ]
+        dens    <- bkde2D(p, bandwidth = c(sd(p[, 1]),
+                                           sd(p[, 2])))
+        if (.check.grDevice() && dev) {
+            dev.new(title = "Posterior Density Contour Plot (MCMC)")
+        } 
+        contour(dens$x1, dens$x2, dens$fhat, cex = .7, 
+                cex.lab = .7, cex.axis = .7, col = "gray47", 
+                main = "", xlab = "", ylab = "")
+        mtext(side = 1, bquote(p[1]), cex = .7, 
+              cex.lab = .7, line = 3)
+        mtext(side = 2, bquote(p[2]), cex = .7,
+              cex.lab = .7, line = 3)
+        if (.check.grDevice() && dev) {
+            dev.new(title = "Posterior Density Perspective Plot (MCMC)")
         }
         persp(dens$x1, dens$x2, dens$fhat, col = "gray65", 
               border = "gray47", theta = 55, phi = 30, 
@@ -427,7 +595,7 @@ setMethod("getPrior", "mcmcoutputfix",
 ### MCMC Poisson parameter samples. 
 ".subseq.Poisson" <- function(obj, index) 
 {
-    if(obj@model@K == 1) {
+    if (obj@model@K == 1) {
         obj@par$lambda <- matrix(obj@par$lambda[index], 
                                     nrow = obj@M, ncol = 1)
     } else {
@@ -436,6 +604,18 @@ setMethod("getPrior", "mcmcoutputfix",
     return(obj)
 }
 
+### 
+
+".subseq.Binomial" <- function(obj, index) 
+{
+    if (obj@model@K == 1) {
+        obj@par$p <- matrix(obj@par$p[index], nrow = obj@M,
+                            ncol = 1)
+    } else {
+        obj@par$p <- obj@par$p[index,]
+    }
+    return(obj)
+}
 ### Log swapElements
 ### Logic swapElements Poisson: This function permutes
 ### the elements in the MCMC sample for Poisson 
@@ -447,6 +627,14 @@ setMethod("getPrior", "mcmcoutputfix",
     return(obj)
 }
 
+###
+
+".swapElements.Binomial" <- function(obj, index) 
+{
+    ## Rcpp::export 'swap_cc'
+    obj@par$p <- swap_cc(obj@par$p, index)
+    return(obj)
+}
 ### Validity
 ### Validity subseq: The index given to 'subseq()' must 
 ### have dimension M x 1 and must contain logical values.

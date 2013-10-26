@@ -108,11 +108,11 @@
 ".likelihood.binomial" <- function(y, T, p) {
 
 	N <- nrow(y)
-	K <- ncol(p)
+	K <- length(p)
 	nst <- nrow(T)
 	
 	y <- matrix(y, nrow = N, ncol = K)
-	T <- matrix(T, nrow = N, ncol = K)
+  	T <- matrix(T, nrow = N, ncol = K, byrow = TRUE)        
 	
 	loglik <- lgamma(T + 1) - lgamma(T - y + 1) - lgamma(y + 1)
 	loglik <- loglik + t((apply(y, 1, "*", log(p)))) + t((apply(T - y, 1, "*", log(1 - p))))

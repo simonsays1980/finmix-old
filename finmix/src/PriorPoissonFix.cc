@@ -40,7 +40,7 @@ PriorPoissonFix::PriorPoissonFix (const FinmixPrior& prior) :
 }
 
 void PriorPoissonFix::update (const unsigned int& K, const arma::mat& y,
-			arma::ivec& S, const ParPoissonFix& par)  
+			arma::ivec& S, const arma::vec& T, const ParPoissonFix& par)  
 {
 	if (K == 1) {
 		aPost(0) = aStart(0) + arma::accu(y);
@@ -55,11 +55,11 @@ void PriorPoissonFix::update (const unsigned int& K, const arma::mat& y,
 		}
 		arma::umat ind = (repS == compM);
 		arma::mat indDouble = arma::conv_to<arma::mat>::from(ind);
-		repY %= indDouble;
-		arma::rowvec prod = sum(repY, 0);
-		arma::rowvec sprod = sum(indDouble, 0);
-		aPost = aStart + prod;
-		bPost = bStart + sprod;
+		repY               %= indDouble;
+		arma::rowvec sprod  = sum(repY, 0);
+		arma::rowvec sind   = sum(indDouble, 0);
+		aPost               = aStart + sprod;
+		bPost               = bStart + sind;
 	}
 }
 

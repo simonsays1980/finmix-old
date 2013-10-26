@@ -13,8 +13,8 @@ BEGIN_RCPP
     SEXP __sexp_result;
     {
         Rcpp::RNGScope __rngScope;
-        Rcpp::NumericMatrix values = Rcpp::as<Rcpp::NumericMatrix >(valuesSEXP);
-        Rcpp::IntegerMatrix index = Rcpp::as<Rcpp::IntegerMatrix >(indexSEXP);
+        Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type values(valuesSEXP );
+        Rcpp::traits::input_parameter< Rcpp::IntegerMatrix >::type index(indexSEXP );
         Rcpp::NumericMatrix __result = swap_cc(values, index);
         PROTECT(__sexp_result = Rcpp::wrap(__result));
     }
@@ -29,8 +29,8 @@ BEGIN_RCPP
     SEXP __sexp_result;
     {
         Rcpp::RNGScope __rngScope;
-        Rcpp::IntegerMatrix values = Rcpp::as<Rcpp::IntegerMatrix >(valuesSEXP);
-        Rcpp::IntegerMatrix index = Rcpp::as<Rcpp::IntegerMatrix >(indexSEXP);
+        Rcpp::traits::input_parameter< Rcpp::IntegerMatrix >::type values(valuesSEXP );
+        Rcpp::traits::input_parameter< Rcpp::IntegerMatrix >::type index(indexSEXP );
         Rcpp::IntegerMatrix __result = swapInteger_cc(values, index);
         PROTECT(__sexp_result = Rcpp::wrap(__result));
     }
@@ -45,8 +45,8 @@ BEGIN_RCPP
     SEXP __sexp_result;
     {
         Rcpp::RNGScope __rngScope;
-        Rcpp::IntegerMatrix values = Rcpp::as<Rcpp::IntegerMatrix >(valuesSEXP);
-        Rcpp::IntegerMatrix index = Rcpp::as<Rcpp::IntegerMatrix >(indexSEXP);
+        Rcpp::traits::input_parameter< Rcpp::IntegerMatrix >::type values(valuesSEXP );
+        Rcpp::traits::input_parameter< Rcpp::IntegerMatrix >::type index(indexSEXP );
         Rcpp::IntegerMatrix __result = swapInd_cc(values, index);
         PROTECT(__sexp_result = Rcpp::wrap(__result));
     }
@@ -61,8 +61,8 @@ BEGIN_RCPP
     SEXP __sexp_result;
     {
         Rcpp::RNGScope __rngScope;
-        Rcpp::IntegerVector values = Rcpp::as<Rcpp::IntegerVector >(valuesSEXP);
-        Rcpp::IntegerMatrix index = Rcpp::as<Rcpp::IntegerMatrix >(indexSEXP);
+        Rcpp::traits::input_parameter< Rcpp::IntegerVector >::type values(valuesSEXP );
+        Rcpp::traits::input_parameter< Rcpp::IntegerMatrix >::type index(indexSEXP );
         Rcpp::IntegerVector __result = swapST_cc(values, index);
         PROTECT(__sexp_result = Rcpp::wrap(__result));
     }
@@ -77,9 +77,9 @@ BEGIN_RCPP
     SEXP __sexp_result;
     {
         Rcpp::RNGScope __rngScope;
-        Rcpp::NumericMatrix values = Rcpp::as<Rcpp::NumericMatrix >(valuesSEXP);
-        Rcpp::NumericVector shape = Rcpp::as<Rcpp::NumericVector >(shapeSEXP);
-        Rcpp::NumericVector rate = Rcpp::as<Rcpp::NumericVector >(rateSEXP);
+        Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type values(valuesSEXP );
+        Rcpp::traits::input_parameter< Rcpp::NumericVector >::type shape(shapeSEXP );
+        Rcpp::traits::input_parameter< Rcpp::NumericVector >::type rate(rateSEXP );
         Rcpp::NumericMatrix __result = ldgamma_cc(values, shape, rate);
         PROTECT(__sexp_result = Rcpp::wrap(__result));
     }
@@ -94,9 +94,9 @@ BEGIN_RCPP
     SEXP __sexp_result;
     {
         Rcpp::RNGScope __rngScope;
-        Rcpp::NumericMatrix values = Rcpp::as<Rcpp::NumericMatrix >(valuesSEXP);
-        Rcpp::NumericVector shape = Rcpp::as<Rcpp::NumericVector >(shapeSEXP);
-        Rcpp::NumericVector rate = Rcpp::as<Rcpp::NumericVector >(rateSEXP);
+        Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type values(valuesSEXP );
+        Rcpp::traits::input_parameter< Rcpp::NumericVector >::type shape(shapeSEXP );
+        Rcpp::traits::input_parameter< Rcpp::NumericVector >::type rate(rateSEXP );
         arma::mat __result = dgamma_cc(values, shape, rate);
         PROTECT(__sexp_result = Rcpp::wrap(__result));
     }
@@ -111,8 +111,8 @@ BEGIN_RCPP
     SEXP __sexp_result;
     {
         Rcpp::RNGScope __rngScope;
-        Rcpp::NumericMatrix values = Rcpp::as<Rcpp::NumericMatrix >(valuesSEXP);
-        Rcpp::NumericVector par = Rcpp::as<Rcpp::NumericVector >(parSEXP);
+        Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type values(valuesSEXP );
+        Rcpp::traits::input_parameter< Rcpp::NumericVector >::type par(parSEXP );
         Rcpp::NumericVector __result = lddirichlet_cc(values, par);
         PROTECT(__sexp_result = Rcpp::wrap(__result));
     }
@@ -127,29 +127,9 @@ BEGIN_RCPP
     SEXP __sexp_result;
     {
         Rcpp::RNGScope __rngScope;
-        Rcpp::NumericMatrix values = Rcpp::as<Rcpp::NumericMatrix >(valuesSEXP);
-        Rcpp::NumericVector par = Rcpp::as<Rcpp::NumericVector >(parSEXP);
+        Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type values(valuesSEXP );
+        Rcpp::traits::input_parameter< Rcpp::NumericVector >::type par(parSEXP );
         arma::vec __result = ddirichlet_cc(values, par);
-        PROTECT(__sexp_result = Rcpp::wrap(__result));
-    }
-    UNPROTECT(1);
-    return __sexp_result;
-END_RCPP
-}
-// maxlabel_poisson_cc
-arma::imat maxlabel_poisson_cc(const arma::mat values1, const arma::mat values2, const arma::vec shape, const arma::vec rate, const arma::vec dirich, const arma::umat perm);
-RcppExport SEXP finmix_maxlabel_poisson_cc(SEXP values1SEXP, SEXP values2SEXP, SEXP shapeSEXP, SEXP rateSEXP, SEXP dirichSEXP, SEXP permSEXP) {
-BEGIN_RCPP
-    SEXP __sexp_result;
-    {
-        Rcpp::RNGScope __rngScope;
-        arma::mat values1 = Rcpp::as<arma::mat >(values1SEXP);
-        arma::mat values2 = Rcpp::as<arma::mat >(values2SEXP);
-        arma::vec shape = Rcpp::as<arma::vec >(shapeSEXP);
-        arma::vec rate = Rcpp::as<arma::vec >(rateSEXP);
-        arma::vec dirich = Rcpp::as<arma::vec >(dirichSEXP);
-        arma::umat perm = Rcpp::as<arma::umat >(permSEXP);
-        arma::imat __result = maxlabel_poisson_cc(values1, values2, shape, rate, dirich, perm);
         PROTECT(__sexp_result = Rcpp::wrap(__result));
     }
     UNPROTECT(1);
@@ -163,7 +143,7 @@ BEGIN_RCPP
     SEXP __sexp_result;
     {
         Rcpp::RNGScope __rngScope;
-        arma::mat cost = Rcpp::as<arma::mat >(costSEXP);
+        Rcpp::traits::input_parameter< const arma::mat >::type cost(costSEXP );
         arma::imat __result = hungarian_cc(cost);
         PROTECT(__sexp_result = Rcpp::wrap(__result));
     }
@@ -178,11 +158,29 @@ BEGIN_RCPP
     SEXP __sexp_result;
     {
         Rcpp::RNGScope __rngScope;
-        Rcpp::NumericMatrix values1 = Rcpp::as<Rcpp::NumericMatrix >(values1SEXP);
-        Rcpp::NumericMatrix values2 = Rcpp::as<Rcpp::NumericMatrix >(values2SEXP);
-        arma::vec pars = Rcpp::as<arma::vec >(parsSEXP);
-        arma::umat perm = Rcpp::as<arma::umat >(permSEXP);
+        Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type values1(values1SEXP );
+        Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type values2(values2SEXP );
+        Rcpp::traits::input_parameter< arma::vec >::type pars(parsSEXP );
+        Rcpp::traits::input_parameter< const arma::umat >::type perm(permSEXP );
         arma::imat __result = stephens1997a_poisson_cc(values1, values2, pars, perm);
+        PROTECT(__sexp_result = Rcpp::wrap(__result));
+    }
+    UNPROTECT(1);
+    return __sexp_result;
+END_RCPP
+}
+// stephens1997a_binomial_cc
+arma::imat stephens1997a_binomial_cc(const Rcpp::NumericMatrix values1, const Rcpp::NumericMatrix values2, arma::vec pars, const arma::umat perm);
+RcppExport SEXP finmix_stephens1997a_binomial_cc(SEXP values1SEXP, SEXP values2SEXP, SEXP parsSEXP, SEXP permSEXP) {
+BEGIN_RCPP
+    SEXP __sexp_result;
+    {
+        Rcpp::RNGScope __rngScope;
+        Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type values1(values1SEXP );
+        Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type values2(values2SEXP );
+        Rcpp::traits::input_parameter< arma::vec >::type pars(parsSEXP );
+        Rcpp::traits::input_parameter< const arma::umat >::type perm(permSEXP );
+        arma::imat __result = stephens1997a_binomial_cc(values1, values2, pars, perm);
         PROTECT(__sexp_result = Rcpp::wrap(__result));
     }
     UNPROTECT(1);
@@ -196,10 +194,28 @@ BEGIN_RCPP
     SEXP __sexp_result;
     {
         Rcpp::RNGScope __rngScope;
-        Rcpp::NumericVector values = Rcpp::as<Rcpp::NumericVector >(valuesSEXP);
-        Rcpp::NumericMatrix comp_par = Rcpp::as<Rcpp::NumericMatrix >(comp_parSEXP);
-        Rcpp::NumericMatrix weight_par = Rcpp::as<Rcpp::NumericMatrix >(weight_parSEXP);
+        Rcpp::traits::input_parameter< const Rcpp::NumericVector >::type values(valuesSEXP );
+        Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type comp_par(comp_parSEXP );
+        Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type weight_par(weight_parSEXP );
         arma::imat __result = stephens1997b_poisson_cc(values, comp_par, weight_par);
+        PROTECT(__sexp_result = Rcpp::wrap(__result));
+    }
+    UNPROTECT(1);
+    return __sexp_result;
+END_RCPP
+}
+// stephens1997b_binomial_cc
+arma::imat stephens1997b_binomial_cc(const Rcpp::NumericVector values, const Rcpp::NumericVector reps, const Rcpp::NumericMatrix comp_par, const Rcpp::NumericMatrix weight_par);
+RcppExport SEXP finmix_stephens1997b_binomial_cc(SEXP valuesSEXP, SEXP repsSEXP, SEXP comp_parSEXP, SEXP weight_parSEXP) {
+BEGIN_RCPP
+    SEXP __sexp_result;
+    {
+        Rcpp::RNGScope __rngScope;
+        Rcpp::traits::input_parameter< const Rcpp::NumericVector >::type values(valuesSEXP );
+        Rcpp::traits::input_parameter< const Rcpp::NumericVector >::type reps(repsSEXP );
+        Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type comp_par(comp_parSEXP );
+        Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type weight_par(weight_parSEXP );
+        arma::imat __result = stephens1997b_binomial_cc(values, reps, comp_par, weight_par);
         PROTECT(__sexp_result = Rcpp::wrap(__result));
     }
     UNPROTECT(1);

@@ -244,7 +244,7 @@ setMethod("getPostS", "dataclass",
         }
         .likelihood.poisson(datam, lambda)
     } else if(dist == "binomial") {
-        .likelihood.binomial(datam, model.obj@T, model.obj@par$p)					
+        .likelihood.binomial(datam, fdata.obj@T, model.obj@par$p)					
     } else if(dist == "normult") {
         model.obj   <- .check.Logdet.Norstud(model.obj)
         .likelihood.normult(datam, model.obj@par$mu, 
