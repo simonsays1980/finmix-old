@@ -125,6 +125,8 @@ setMethod("getCorr", "studmultmodelmoments",
     sigma       <- object@model@par$sigma
     df          <- object@model@par$df
     weight      <- object@model@weight
+    K           <- object@model@K
+    r           <- object@model@r
     names       <- rep("", object@model@r)
     for (i in seq(1, object@model@r)) {
         names[i] <- paste("r=", i, sep = "")
@@ -135,14 +137,17 @@ setMethod("getCorr", "studmultmodelmoments",
         object@W    <- apply(sweep(sigma, MARGIN = 3, 
                                    weight * df/(df - 2), '*'),
                              c(1, 2), sum, na.rm = TRUE)
-        object@var  <- object@W + apply(apply(mu, 2, 
-                                              tcrossprod, mu),
-                                        1, '*',
-                                        weight)
+        mucross     <- 0.0
+        for ( k in 1:K ) {
+            mucross <- mucross + tcrossprod( mu[,k] ) * weight[k]
+        }
+        object@var  <- object@W + mucross
         object@var  <- object@var - object@mean %*% t(object@mean)
         diffm       <- mu - object@mean
-        object@B    <- apply(apply(diffm, 1, tcrossprod, diffm),
-                             1, '*', weight)
+        object@B    <- array( 0.0 , dim = c( r, r) )
+        for (k in 1:K ) {
+            object@B    <- object@B + tcrossprod( diffm[,k] ) * weight[k]
+        }
         cd          <- diag(1/diag(object@var)^.5)
         object@corr <- cd %*% object@var %*% cd
         object@Rtr  <- 1 - sum(diag(object@W))/sum(diag(object@var))

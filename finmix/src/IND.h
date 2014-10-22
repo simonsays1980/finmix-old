@@ -106,7 +106,7 @@ class IND : public Super {
 				arma::imat* S;
 				arma::imat* NK;
 				arma::ivec* clust;
-				Output (const Rcpp::S4&);
+				Output (Rcpp::S4&);
 				virtual ~Output () {}
 				virtual void store (const unsigned int&,
 					Node&);
@@ -116,7 +116,7 @@ class IND : public Super {
 
 		IND (const FinmixData&, const FinmixModel&,
 			const FinmixPrior&, const FinmixMCMC&,
-			const Rcpp::S4&);
+			Rcpp::S4&);
 		virtual ~IND () {}
 		virtual void update ();
 		virtual void store (const unsigned int&);
@@ -157,18 +157,18 @@ IND <Super>::Node::Node (const FinmixData& data,
  **/
 template <typename Super>
 void IND <Super>::Node::update () 
-{	
+{
 	Super::Node::update();
 	if (Super::Node::RANPERM && arma::sum(Super::Node::compIndex2) !=
 		Super::Node::K) {
-		Super::Node::par.weight(Super::Node::compIndex) = 
+   		Super::Node::par.weight(Super::Node::compIndex) =             
 			Super::Node::par.weight(Super::Node::permIndex);
-		swapIndex = arma::sort_index(Super::Node::permIndex);
-		for(unsigned int i = 0; i < Super::Node::N; ++i) {
+        swapIndex = arma::sort_index(Super::Node::permIndex);
+        for(unsigned int i = 0; i < Super::Node::N; ++i) {
 			Super::Node::S(i) = (int) swapIndex((unsigned int) 
 				(Super::Node::S(i) - 1)) + 1;
 		}	
-	}	
+	}
 }
 
 // ==========================================================
@@ -198,7 +198,7 @@ void IND <Super>::Node::update ()
  * ----------------------------------------------------------
  **/
 template <typename Super>
-IND <Super>::Output::Output (const Rcpp::S4& classS4) : 
+IND <Super>::Output::Output (Rcpp::S4& classS4) : 
 	Super::Output(classS4) 
 {
 	Rcpp::NumericMatrix tmpWeight((SEXP) classS4.slot("weight"));
@@ -299,7 +299,7 @@ void IND <Super>::Output::store (const unsigned int& m,
 template <typename Super>
 IND <Super>::IND (const FinmixData& data, const FinmixModel& model,
 	const FinmixPrior& prior, const FinmixMCMC& mcmc,
-	const Rcpp::S4& classS4) :
+	Rcpp::S4& classS4) :
 		Super(data, model, prior, mcmc, classS4),
 		node(data, model, prior, mcmc),
 		output(classS4) {}

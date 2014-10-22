@@ -51,7 +51,7 @@ void PriorBinomialFix::update (const unsigned int& K, const arma::mat& y,
         arma::rowvec sprod  = sum(repY, 0);
         arma::rowvec sind   = sum(repT, 0);
         aPost               = aStart + sprod;
-        bPost               = bStart + sind - sprod;       
+        bPost               = bStart + sind - sprod;      
     }
 }
 

@@ -57,7 +57,7 @@ class ADAPTER : public Super, public BASE {
 	public:
 		ADAPTER () {}
 		ADAPTER (const FinmixData&, const FinmixModel&, const 
-			FinmixPrior&, const FinmixMCMC&, const Rcpp::S4&);
+			FinmixPrior&, const FinmixMCMC&, Rcpp::S4&);
 		virtual void update ();
 		virtual void store (const unsigned int&);
 };
@@ -87,7 +87,7 @@ class ADAPTER : public Super, public BASE {
  **/
 template <typename Super>
 ADAPTER <Super>::ADAPTER (const FinmixData& data, const FinmixModel& model, const
-	FinmixPrior& prior, const FinmixMCMC& mcmc, const Rcpp::S4& classS4) :
+	FinmixPrior& prior, const FinmixMCMC& mcmc, Rcpp::S4& classS4) :
 		Super(data, model, prior, mcmc, classS4), BASE() {}
 
 /**

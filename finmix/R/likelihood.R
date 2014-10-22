@@ -66,7 +66,7 @@
 ".likelihood.exponential" <- function(y, lambda) {
 	
 	N <- nrow(y) 
-	K <- ncol(lambda)
+	K <- length(lambda)
 	y <- matrix(y, nrow = N, ncol = K)
 	
 	lambda <- matrix(lambda, nrow = N, ncol = K, byrow = TRUE)

@@ -15,14 +15,14 @@
 # You should have received a copy of the GNU General Public License
 # along with finmix. If not, see <http://www.gnu.org/licenses/>.
 
-.mcmcoutputpermfixpost <- setClass("mcmcoutputpermfixpost",
-                                   contains = c("mcmcpermfixpost", 
-                                                "mcmcoutputfixpost"),
-                                   validity = function(object) 
-                                   {
-                                       ## else: OK
-                                       TRUE
-                                   }
+.mcmcoutputpermfixpost <- setClass( "mcmcoutputpermfixpost",
+                                    contains = c( "mcmcpermfixpost", 
+                                                  "mcmcoutputfixpost" ),
+                                    validity = function( object ) 
+                                    {
+                                        ## else: OK
+                                        TRUE
+                                    }
 )
 
 setMethod("initialize", "mcmcoutputpermfixpost",
@@ -74,88 +74,144 @@ setMethod("show", "mcmcoutputpermfixpost",
           }
 )
 
-setMethod("plotTraces", signature(x     = "mcmcoutputpermfixpost", 
-                                  dev   = "ANY",
-                                  lik   = "ANY"), 
-          function(x, dev = TRUE, lik = 1, ...) 
+setMethod( "plotTraces", signature( x     = "mcmcoutputpermfixpost", 
+                                    dev   = "ANY",
+                                    lik   = "ANY",
+                                    col   = "ANY" ), 
+          function( x, dev = TRUE, lik = 1, col = FALSE, ... ) 
           {
               dist <- x@model@dist
-              if (lik %in% c(0, 1)) {
-                  if (dist == "poisson") {
-                      .permtraces.Poisson(x, dev)
-                  } else if (dist == "binomial") {
-                      .permtraces.Binomial(x, dev)
+              if ( lik %in% c( 0, 1 ) ) {
+                  if ( dist == "poisson" ) {
+                      .permtraces.Poisson( x, dev )
+                  } else if (dist == "binomial" ) {
+                      .permtraces.Binomial( x, dev )
+                  } else if ( dist == "exponential" ) {
+                      .permtraces.Exponential( x, dev )
+                  } else if ( dist == "normal" ) {
+                      .permtraces.Normal( x, dev )
+                  } else if ( dist == "student" ) {
+                      .permtraces.Student( x, dev )
+                  } else if ( dist == "normult" ) {
+                      .permtraces.Normult( x, dev, col )
+                  } else if ( dist == "studmult" ) {
+                      .permtraces.Studmult( x, dev, col )
                   }
               }
-              if (lik %in% c(1, 2)) {
+              if ( lik %in% c( 1, 2 ) ) {
                   ## log ##
-                  .permtraces.Log(x, dev)
+                  .permtraces.Log( x, dev )
               }
           }
 )
 
-setMethod("plotHist", signature(x = "mcmcoutputpermfixpost", 
-                                dev = "ANY"), 
-          function(x, dev = TRUE, ...) 
-          {
-              dist <- x@model@dist
-              if (dist == "poisson") {
-                  .permhist.Poisson(x, dev)
-              }	else if (dist == "binomial") {
-                  .permhist.Binomial(x, dev)
-              }
+setMethod( "plotHist", signature( x = "mcmcoutputpermfixpost", 
+                                  dev = "ANY" ), 
+           function( x, dev = TRUE, ... ) 
+           {
+               dist <- x@model@dist
+               if ( dist == "poisson" ) {
+                   .permhist.Poisson( x, dev )
+               } else if ( dist == "binomial" ) {
+                   .permhist.Binomial( x, dev )
+               } else if ( dist == "exponential" ) {
+                   .permhist.Exponential( x, dev )
+               } else if ( dist == "normal" ) {
+                   .permhist.Normal( x, dev )
+               } else if ( dist == "student" ) {
+                   .permhist.Student( x, dev )
+               } else if ( dist == "normult" ) {
+                   .permhist.Normult( x, dev )
+               } else if ( dist == "studmult" ) {
+                   .permhist.Studmult( x, dev )
+               }
           }
 )
 
-setMethod("plotDens", signature(x   = "mcmcoutputpermfixpost", 
-                                dev = "ANY"), 
-          function(x, dev = TRUE, ...) 
-          {
-              dist <- x@model@dist
-              if (dist == "poisson") {
-                  .permdens.Poisson(x, dev)
-              }	else if (dist == "binomial") {
-                  .permdens.Binomial(x, dev)
-              }
-          }
+setMethod( "plotDens", signature( x   = "mcmcoutputpermfixpost", 
+                                  dev = "ANY" ), 
+           function( x, dev = TRUE, ... ) 
+           {
+               dist <- x@model@dist
+               if ( dist == "poisson" ) {
+                   .permdens.Poisson( x, dev )
+               } else if ( dist == "binomial" ) {
+                   .permdens.Binomial( x, dev )
+               } else if ( dist == "exponential" ) {
+                   .permdens.Exponential( x, dev )
+               } else if ( dist == "normal" ) {
+                   .permdens.Normal( x, dev )
+               } else if ( dist == "student" ) {
+                   .permdens.Student( x, dev )
+               } else if ( dist == "normult" ) {
+                   .permdens.Normult( x, dev )
+               } else if ( dist == "studmult" ) {
+                   .permdens.Studmult( x, dev )
+               }
+
+           }
 )
 
-setMethod("plotPointProc", signature(x      = "mcmcoutputpermfixpost",
-                                     dev    = "ANY"),
-          function(x, dev = TRUE, ...)
-          {
-              dist <- x@model@dist
-              if (dist == "poisson") {
-                  .permpointproc.Poisson(x, dev)
-              } else if (dist == "binomial") {
-                  .permpointproc.Binomial(x, dev)
-              }
-          }
+setMethod( "plotPointProc", signature( x      = "mcmcoutputpermfixpost",
+                                       dev    = "ANY" ),
+            function( x, dev = TRUE, ... )
+            {
+                dist <- x@model@dist
+                if ( dist %in% c( "poisson", "exponential" ) ) {
+                    .permpointproc.Poisson( x, dev )
+                } else if ( dist == "binomial" ) {
+                    .permpointproc.Binomial( x, dev )
+                } else if ( dist == "exponential" ) {
+                    .permpointproc.Exponential( x, dev )
+                } else if ( dist %in% c( "normal", "student" ) ) {
+                    .permpointproc.Normal( x, dev )
+                } else if ( dist %in% c( "normult", "studmult" ) ) {
+                    .permpointproc.Normult( x, dev )
+                }
+            }
 )
 
-setMethod("plotSampRep", signature(x    = "mcmcoutputpermfixpost",
-                                   dev  = "ANY"),
-          function(x, dev, ...) 
-          {
-              dist <- x@model@dist
-              if (dist == "poisson") {
-                  .permsamprep.Poisson(x, dev)
-              } else if (dist == "binomial") {
-                  .permsamprep.Binomial(x, dev)
-              }
-          }
+setMethod( "plotSampRep", signature( x    = "mcmcoutputpermfixpost",
+                                     dev  = "ANY" ),
+           function( x, dev, ... ) 
+           {
+               dist <- x@model@dist
+               if ( dist == "poisson" ) {
+                   .permsamprep.Poisson( x, dev )
+               } else if ( dist == "binomial" ) {
+                   .permsamprep.Binomial( x, dev )                                      
+               } else if ( dist == "exponential" ) {
+                   .permsamprep.Exponential( x, dev )
+               } else if ( dist == "normal" ) {
+                   .permsamprep.Normal( x, dev )
+               } else if ( dist == "student" ) {
+                   .permsamprep( x, dev )
+               } else if ( dist == "normult" ) {
+                   .permsamprep.Normal( x, dev)
+               } else if ( dist == "studmult" ) {
+                   .permsamprep.Studmult( x, dev )
+               }
+           }
 )
 
-setMethod("plotPostDens", signature(x   = "mcmcoutputpermfixpost",
-                                    dev = "ANY"),
-          function(x, dev = TRUE, ...) 
-          {
-              dist <- x@model@dist
-              if (dist == "poisson") {
-                  .permpostdens.Poisson(x, dev)
-              } else if (dist == "binomial") {
-                  .permpostdens.Binomial(x, dev)
-              }
-          }
+setMethod( "plotPostDens", signature( x   = "mcmcoutputpermfixpost",
+                                      dev = "ANY" ),
+           function( x, dev = TRUE, ... ) 
+           {
+               dist <- x@model@dist
+               if ( dist %in% c( "poisson", "exponential" ) ) {
+                   .permpostdens.Poisson( x, dev )
+               } else if ( dist == "binomial" ) {
+                   .permpostdens.Binomial( x, dev )
+               } else if ( dist == "normal" ) {
+                   .permpostdens.Normal( x, dev )
+               } else if ( dist == "student" ) {
+                   .permpostdens.Student( x, dev )
+               } else if ( dist == "normult" ){
+                   .permpostdens.Normult( x, dev )
+               } else if ( dist == "studmult" ) {
+                   .permpostdens.Studmult( x, dev )
+               }
+           }
 )
 

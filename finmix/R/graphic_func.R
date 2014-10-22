@@ -215,15 +215,15 @@
 ### This function plots a histogram with 'finmix' specific
 ### settings. In addition it uses 'rug()' to plot the data 
 ### points.
-".comb.Hist" <- function(y, lab.name)
+".comb.Hist" <- function( y, lab.name )
 {
-    hist(y, col = "gray65", 
-         border = "white", cex = 0.7,
-         cex.axis = 0.7, freq = TRUE,
-         xlab = "", main = "", cex.lab = 0.7)
-    rug(y, col = "gray47")
-    mtext(side = 1, do.call(bquote,lab.name), 
-          cex = 0.7, line = 3)
+    hist( y, col = "gray65", 
+          border = "white", cex = 0.7,
+          cex.axis = 0.7, freq = TRUE,
+          xlab = "", main = "", cex.lab = 0.7 )
+    rug( y, col = "gray47" )
+    mtext( side = 1, do.call( bquote, lab.name ), 
+           cex = 0.7, line = 3 )
 }
 
 ### This function plots a Kernel density with 'finmix' specific

@@ -28,6 +28,22 @@ class PostOutBinomialInd : public PostOutBinomialFix {
                 const PriorBinomialInd&); 
             
 };
+
+PostOutBinomialInd::PostOutBinomialInd (const Rcpp::List& list) :
+    PostOutBinomialFix(list) 
+{
+    Rcpp::NumericMatrix tmpWeight((SEXP) list["weight"]);
+    const unsigned int M = tmpWeight.nrow();
+    const unsigned int K = tmpWeight.ncol();
+    weight = new arma::mat(tmpWeight.begin(), M, K, false, true);
+}
+
+void PostOutBinomialInd::store(const unsigned int& m,
+        const PriorBinomialInd& hyperPar)
+{
+    PostOutBinomialFix::store(m, hyperPar);
+    (*weight).row(m) = hyperPar.weightPost;
+}
 #endif /* __FINMIX_POSTOUTBINOMIALIND_H__ */
 
 

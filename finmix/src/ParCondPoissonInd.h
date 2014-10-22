@@ -8,7 +8,7 @@
  *
  * finmix is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published
- * by the Free Software Foundatio, either version 3 of the License, or
+ * by the Free Software Foundation, either version 3 of the License, or
  * any later version.
  *
  * finmix is distributed in the hope that it will be useful,
@@ -17,23 +17,23 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with 'finmix'. If not, see <http://www.gnu.org/licenses/>.
+ * along with finmix. If not, see <http://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-#ifndef PARCONDPOISSONIND_H
-#define PARCONDPOISSONIND_H
+#ifndef __FINMIX_PARCONDPOISSONIND_H_
+#define __FINMIX_PARCONDPOISSONIND_H_
 
 #include <RcppArmadillo.h>
-#include "ParPoissonInd.h"
 #include "ParCondPoissonFix.h"
 #include "PriorCondPoissonInd.h"
 
-class ParCondPoissonInd : public ParPoissonInd,
-	public ParCondPoissonFix {
-	public:	
+class ParCondPoissonInd : virtual public ParCondPoissonFix {
+	public:
+		arma::rowvec weight;
+		
 		ParCondPoissonInd (const bool&, 
 			const FinmixModel&);
 		virtual ~ParCondPoissonInd () {}
-		void update (PriorCondPoissonInd&);
+		void update (const PriorCondPoissonInd&);
 };
-#endif
+#endif // __FINMIX_PARCONDPOISSONIND_H_

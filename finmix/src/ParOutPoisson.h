@@ -34,4 +34,52 @@ class ParOutPoisson {
 		ParOutPoisson (const Rcpp::List&); 
 		void store(const unsigned int&, const ParPoissonFix&);
 };
+
+// =============================================================
+// Constructor
+// -------------------------------------------------------------
+
+/**
+ * -------------------------------------------------------------
+ * ParOutPoisson
+ * @brief   Constructs a ParOutPoisson from an Rcpp::List
+ *          object. Reuses memory allocated in R.
+ * @par list    Rcpp::List object containing an R 'array'
+ *              object, M x K, to store the sampled para-
+ *              meters
+ * @return  ParOutPoisson object
+ * @detail  Reusage of memory allocated in R is done via the 
+ *          Rcpp API and passing a pointer to the Armadillo
+ *          matrix.
+ * @see arma::mat::mat(), Rcpp::List
+ * @author Lars Simon Zehnder
+ * ------------------------------------------------------------
+ **/
+ParOutPoisson::ParOutPoisson(const Rcpp::List& list) 
+{
+	Rcpp::NumericMatrix tmpLambda((SEXP) list["lambda"]);
+	const unsigned int M = tmpLambda.nrow();
+	const unsigned int K = tmpLambda.ncol();
+	lambda = new arma::mat(tmpLambda.begin(), M, K, false, true); 
+} 
+
+// =============================================================
+// Store
+// -------------------------------------------------------------
+
+/** 
+ * -------------------------------------------------------------
+ * store
+ * @brief   Stores the sampled parameters from step 'm'.
+ * @par m   iteration step
+ * @par par object of class ParPoissonFix holding the sampled
+ *          parameters from step 'm'
+ * @see ParPoissonFix
+ * @author Lars Simon Zehnder
+ * -------------------------------------------------------------
+ **/
+void ParOutPoisson::store (const unsigned int& m, const ParPoissonFix& par)
+{
+	(*lambda).row(m) = par.lambda;
+}
 #endif

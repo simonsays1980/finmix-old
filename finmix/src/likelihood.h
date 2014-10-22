@@ -23,6 +23,8 @@
 #ifndef LIKELIHOOD_H
 #define LIKELIHOOD_H
 
+#define _USE_MATH_DEFINES
+#include <math.h>
 #include <RcppArmadillo.h> 
 #include <algorithm> 		// C++ Standard Library algorithms (math functions)
 #include <R.h>       		// to interface with R 
@@ -175,6 +177,16 @@ likelihood_ggamma(const arma::rowvec& lambda,
 	return lik;
 }
 
+inline double 
+likelihood_cgamma (const double lambda, const double& a, 
+        const double& b, const double& m)
+{
+    double output = a * std::log(b) + (a - 1)
+        * std::log(lambda - m) - b * (lambda - m)
+        - R::lgammafn(a);
+    return output;
+}
+
 // ===========================================================
 // Binomial likelihood
 // -----------------------------------------------------------
@@ -231,5 +243,152 @@ liklist likelihood_binomial (const arma::mat& Y,
    }
    liklist l_list(lh, maxl, loglik);
    return l_list;
+}
+
+// ===========================================================
+// Exponential likelihood
+// -----------------------------------------------------------
+
+/**
+ * -----------------------------------------------------------
+ * likelihood_exponential
+ * @brief   Computes likelihood for a Exponential model with 
+ *          exposures.
+ * @note    this is the default function called 
+ * @par Y       data values, N x 1
+ * @par lambda  parameter matrix,  N x K
+ * @par T       repetitions, N x 1
+ * @return  liklist struct with likelihood values
+ * @details the likelihood is computed as well as the log-
+ *          likelihood and the maximum of the likelihood 
+ *          over components.
+ * @see liklist
+ * @author Lars Simon Zehnder
+ * -----------------------------------------------------------
+ **/
+inline
+liklist likelihood_exponential (const arma::mat& Y, 
+        arma::rowvec lambda)
+{
+    const unsigned int N = Y.n_rows;
+    const unsigned int K = lambda.n_elem;
+    arma::mat loglik     = arma::ones(N, K);
+    arma::mat repY       = arma::repmat(Y, 1, K);  
+    arma::mat lh(N, K);
+
+    for (unsigned int k = 0; k < K; ++k) {
+        lambda(k) = std::max(lambda(k), 1e-4);
+    }
+    loglik.each_row() %= arma::log(lambda);
+    for (unsigned int i = 0; i < N; ++i) {
+        loglik.row(i) -= repY.row(i) % lambda;
+    }
+    arma::vec maxl = arma::max(loglik, 1);
+    for (unsigned int k = 0; k < K; ++k) {
+        lh.col(k) = arma::exp(loglik.col(k) - maxl);
+    }
+    liklist l_list(lh, maxl, loglik);
+    return l_list;
+}
+
+inline
+liklist likelihood_normal (const arma::mat& y,
+        const arma::rowvec mu, const arma::rowvec& sigma)
+{
+    const unsigned int N = y.n_rows;
+    const unsigned int K = mu.n_elem;
+    arma::mat loglik(N, K);
+    arma::mat lh(N, K);
+    for (unsigned int k = 0; k < K; ++k) {
+        loglik.col(k) = arma::pow(y - mu(k), 2.0) / sigma(k);
+        loglik.col(k) += std::log(sigma(k));
+        loglik.col(k) += std::log(2.0 * M_PI);
+        loglik.col(k) *= -0.5;
+    }
+    arma::vec maxl = arma::max(loglik, 1);
+    for (unsigned int k = 0; k < K; ++k) {
+        lh.col(k) = arma::exp(loglik.col(k) - maxl);
+    }
+    liklist l_list(lh, maxl, loglik);
+    return l_list;
+}
+
+inline
+liklist likelihood_normult (const arma::mat& y, 
+        const arma::mat& mu, const arma::cube& sigma) 
+{
+    const unsigned int K = mu.n_cols;
+    const unsigned int r = mu.n_rows;
+    const unsigned int N = y.n_rows;
+    arma::mat loglik(N, K);
+    arma::mat lh(N, K);
+    double llh1 = -0.5 * r * std::log(2 * M_PI);
+    loglik.fill(llh1);
+    for( unsigned int k = 0; k < K; ++k) {
+        arma::mat Qinv  = arma::inv(sigma.slice(k));
+        arma::mat eps   = y;
+        eps.each_row()  -= arma::trans(mu.col(k));
+        loglik.col(k)   += 0.5 * arma::det(Qinv);
+        loglik.col(k)   -= 0.5 * arma::sum((eps * Qinv) % eps, 1);        
+    }
+    arma::vec maxl = arma::max(loglik, 1);
+    for (unsigned int k = 0; k < K; ++k) {
+        lh.col(k) = arma::exp(loglik.col(k) - maxl);
+    }
+    liklist l_list(lh, maxl, loglik);
+    return l_list;
+}
+
+inline
+liklist likelihood_student (const arma::mat& y, 
+        const arma::rowvec& mu, const arma::rowvec& sigma,
+        const arma::rowvec& df)
+{
+    const unsigned int N = y.n_rows;
+    const unsigned int K = mu.n_elem;
+    arma::mat loglik(N, K);
+    arma::mat lh(N, K);
+    arma::vec err(N);
+    for (unsigned int k = 0; k < K; ++k) {
+        err             = arma::pow(y - mu(k), 2.0) / sigma(k);        
+        loglik.col(k)   = -(df(k) + 1.0) / 2.0 * arma::log(1.0 + err / df(k));                       
+        loglik.col(k)   += R::lgammafn((df(k) + 1.0) / 2.0)
+            - R::lgammafn(df(k) / 2.0);
+        loglik.col(k)   -= 0.5 * (std::log(df(k) * M_PI) + std::log(sigma(k)));            
+    }
+    arma::vec maxl = arma::max(loglik, 1);
+    for (unsigned int k = 0; k < K; ++k) {
+        lh.col(k) = arma::exp(loglik.col(k) - maxl);
+    }
+    liklist l_list(lh, maxl, loglik);
+    return l_list;
+}
+
+inline
+liklist likelihood_studmult (const arma::mat& y,
+        const arma::mat& mu, const arma::cube& sigmainv,
+        const arma::rowvec& df) 
+{
+    const unsigned int K    = mu.n_cols;
+    const unsigned int r    = mu.n_rows;
+    const unsigned int N    = y.n_rows;
+    arma::mat loglik(N, K);
+    arma::mat lh(N, K);
+    for (unsigned int k = 0; k < K; ++k) {
+        arma::mat eps   = y;
+        eps.each_row()  -= arma::trans(mu.col(k));
+        arma::mat err   = arma::sum((eps * sigmainv.slice(k)) % eps, 1); 
+        arma::mat tmp   = eps * sigmainv.slice(k);
+        loglik.col(k)   = R::lgammafn((df(k) + r) / 2) - R::lgammafn(df(k) / 2) 
+            + 0.5 * std::log(arma::det(sigmainv.slice(k))) - 0.5 * r * std::log(df(k) * M_PI) 
+            - (df(k) + r) / 2 * arma::log(1.0 + err / df(k));
+
+    }
+    arma::vec maxl  = arma::max(loglik, 1);
+    for (unsigned int k = 0; k < K; ++k) {
+        lh.col(k)   = arma::exp(loglik.col(k) - maxl);
+    }
+    liklist l_list(lh, maxl, loglik);
+    return l_list;
 }
 #endif

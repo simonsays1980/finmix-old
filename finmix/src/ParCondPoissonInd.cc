@@ -17,18 +17,22 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with 'finmix'. If not, see <http://www.gnu.org/licenses/>.
+ * along with finmix. If not, see <http://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
 #include "ParCondPoissonInd.h"
 
 ParCondPoissonInd::ParCondPoissonInd (const bool& STARTPAR, 
 	const FinmixModel& model) :
-		ParPoissonFix(STARTPAR, model),
-		ParPoissonInd(STARTPAR, model),
-		ParCondPoissonFix(STARTPAR, model) {}
+		ParCondPoissonFix(STARTPAR, model), 
+		weight(model.K) 
+{
+	if (!STARTPAR && model.K > 1) {
+		weight = model.weight;
+	}
+}
 
-void ParCondPoissonInd::update (PriorCondPoissonInd& hyperPar)
+void ParCondPoissonInd::update (const PriorCondPoissonInd& hyperPar)
 {
 	ParCondPoissonFix::update(hyperPar);
 	weight = rdirichlet(hyperPar.weightPost);

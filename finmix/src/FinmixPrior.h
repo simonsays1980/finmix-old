@@ -20,8 +20,8 @@
  * along with 'finmix'. If not, see <http://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-#ifndef FINMIXPRIOR_H
-#define FINMIXPRIOR_H
+#ifndef __FINMIX_FINMIXPRIOR_H__
+#define __FINMIX_FINMIXPRIOR_H__
 
 #include <RcppArmadillo.h>
 #include <string>
@@ -36,6 +36,10 @@ class FinmixPrior {
 		bool hier;
 	
 		/* ctor */ 
-		FinmixPrior(const Rcpp::S4& classS4);
+		FinmixPrior (Rcpp::S4& classS4) :
+            par(Rcpp::as<Rcpp::List>((SEXP) classS4.slot("par"))),    
+            weight(Rcpp::as<arma::rowvec>((SEXP) classS4.slot("weight"))),
+            type(Rcpp::as<std::string>((SEXP) classS4.slot("type"))),
+            hier(Rcpp::as<bool>((SEXP) classS4.slot("hier"))) {}  
 };
-#endif
+#endif // __FINMIX_FINMIXPRIOR_H__

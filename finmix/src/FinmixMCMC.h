@@ -36,8 +36,15 @@ class FinmixMCMC {
 		bool ranPerm;
 	
 		/* ctor */ 
-		FinmixMCMC(const Rcpp::S4& classS4);	
+		FinmixMCMC (Rcpp::S4& classS4) :
+            burnIn(Rcpp::as<unsigned int>((SEXP) classS4.slot("burnin"))),
+            M(Rcpp::as<unsigned int>((SEXP) classS4.slot("M"))),
+            startPar(Rcpp::as<bool>((SEXP) classS4.slot("startpar"))),
+            storeS(Rcpp::as<unsigned int>((SEXP) classS4.slot("storeS"))),
+            storePost(Rcpp::as<bool>((SEXP) classS4.slot("storepost"))),
+            ranPerm(Rcpp::as<bool>((SEXP) classS4.slot("ranperm"))) {}
+	
 		/* dtor */
-		~FinmixMCMC();
+		~FinmixMCMC() {}
 };
 #endif

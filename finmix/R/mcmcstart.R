@@ -15,16 +15,16 @@
 # You should have received a copy of the GNU General Public License
 # along with finmix. If not, see <http://www.gnu.org/licenses/>.
 
-"mcmcstart" <- function(fdata, model, varargin) 
+"mcmcstart" <- function( fdata, model, varargin ) 
 {
     ## Check arguments 
-    .check.fdata.model.Mcmcstart(fdata, model)
+    .check.fdata.model.Mcmcstart( fdata, model )
 	## Check if mcmc object was given in arguments
-	if(nargs() == 2) {
+	if ( nargs() == 2 ) {
 		mcmc <- mcmc()
 	}		
 	else {
-        .check.mcmc.Mcmcstart(varargin)
+        .check.mcmc.Mcmcstart( varargin )
 		mcmc <- varargin
 	}
     K       <- model@K
@@ -42,22 +42,30 @@
     ##                      the model.
     ## If the model has fixed indicators (@indicfix = TRUE), no indicators
     ## are generated.
-    if (!model@indicfix) {
-        if (mcmc@startpar) {
-            if (K > 1) {
-                fdata <- .indicators.Mcmcstart(fdata, model)
+    if ( !model@indicfix ) {
+        if ( mcmc@startpar ) {
+            if ( K > 1 ) {
+                fdata <- .indicators.Mcmcstart( fdata, model )
+                if ( model@dist %in% c( "student", "studmult" ) ) {
+                    # As an independent prior samples conditional on the means
+                    # starting means are also needed. This can be simplified 
+                    # in the future by defining only starting values for the mean 
+                    # and not the variances.
+                    model   <- .parameters.Mcmcstart( fdata, model, mcmc )
+                    model@par$sigma <- NULL
+                }                
             }
         } else {
-            model <- .parameters.Mcmcstart(fdata, model, mcmc)
+            model <- .parameters.Mcmcstart( fdata, model, mcmc )
         }
     } else {
-        warning(paste("Slot 'indicfix' of 'model' object is ",
-                      "set to TRUE. 'mcmcstart()' does not ",
-                      "generate indicators nor starting parameters ",
-                      "for models with fixed indicators.", sep = ""))
+        warning( paste( "Slot 'indicfix' of 'model' object is ",
+                        "set to TRUE. 'mcmcstart()' does not ",
+                        "generate indicators nor starting parameters ",
+                        "for models with fixed indicators.", sep = "" ) )
     }
-	obj.list <- list(fdata = fdata, model = model, mcmc = mcmc)
-	return(obj.list)
+	obj.list <- list( fdata = fdata, model = model, mcmc = mcmc )
+	return( obj.list )
 }
 
 ### Private functions.
@@ -69,21 +77,24 @@
 ### non-empty data slot @y. 
 ### If the distributions in 'model' do not correspond to the dimensions
 ### @r in 'fdata' an error is thrown.
-".check.fdata.model.Mcmcstart" <- function(fdata.obj, model.obj) 
+".check.fdata.model.Mcmcstart" <- function( fdata.obj, model.obj ) 
 {
-    .valid.Fdata(fdata.obj)
-    .valid.Model(model.obj)
-    hasY(fdata.obj, verbose = TRUE)
-    if (fdata.obj@r > 1 && model.obj@dist %in% .get.univ.Model()) {
-        stop(paste("Wrong specification of slot 'r' in 'fdata' object. ",
-                   "Univariate distribution in slot 'dist' of 'model' ",
-                   "object but dimension in slot 'r' of 'fdata' object ",
-                   "greater 1.", sep = ""))
-    } else if (fdata.obj@r < 2 && model.obj@dist %in% .get.multiv.Model()) {
-        stop(paste("Wrong specification of slot 'r' ind 'fdata' object ",
-                   "Multivariate distribution in slot 'dist' if 'model' ",
-                   "object but dimension in slot 'r' of 'fdata' object ",
-                   "less than two.", sep = ""))
+    .valid.Fdata( fdata.obj )    
+    .valid.dist.Model( model.obj )
+    .valid.K.Model( model.obj )
+    .valid.r.Model( model.obj )
+    .valid.T.Model( model.obj )
+    hasY( fdata.obj, verbose = TRUE )
+    if ( fdata.obj@r > 1 && model.obj@dist %in% .get.univ.Model() ) {
+        stop( paste( "Wrong specification of slot 'r' in 'fdata' object. ",
+                     "Univariate distribution in slot 'dist' of 'model' ",
+                     "object but dimension in slot 'r' of 'fdata' object ",
+                     "greater 1.", sep = "" ) )
+    } else if ( fdata.obj@r < 2 && model.obj@dist %in% .get.multiv.Model() ) {
+        stop( paste( "Wrong specification of slot 'r' ind 'fdata' object ",
+                     "Multivariate distribution in slot 'dist' if 'model' ",
+                     "object but dimension in slot 'r' of 'fdata' object ",
+                     "less than two.", sep = "" ) )
     }
 }
 
@@ -100,31 +111,31 @@
 ### Logic parameters: Generates starting parameters for @dist in 
 ### 'model.obj'. Returns a 'model' object with starting parameters 
 ### in @par. 
-".parameters.Mcmcstart" <- function(fdata.obj, model.obj, mcmc.obj)
+".parameters.Mcmcstart" <- function( fdata.obj, model.obj, mcmc.obj )
 {
     K       <- model.obj@K
     dist    <- model.obj@dist
     ## Check if model object for student-t distributions has 
     ## a parameter 'df'.
-    if (dist %in% c("student", "studmult")) {
-        .mcmcstart.Student.Df(model.obj)
+    if ( dist %in% c( "student", "studmult" ) ) {
+        model.obj   <- .mcmcstart.Student.Df(model.obj)
     }
     ## Check if weights have been already initialized
-    if (K > 1) {
-        if (model.obj@indicmod == "multinomial") { 
-            model.obj <- .parameters.multinomial.Mcmcstart(model.obj)
+    if ( K > 1 ) {
+        if ( model.obj@indicmod == "multinomial" ) { 
+             model.obj <- .parameters.multinomial.Mcmcstart( model.obj )
         } ## else: Markov model, implemented later.
     }
-    if (dist %in% c("poisson", "cond.poisson")) {
-        .parameters.poisson.Mcmcstart(fdata.obj, model.obj)
-    } else if (dist == "exponential") {
-        .mcmcstart.Exponential.Model(fdata.obj, model.obj, mcmc.obj)
-    } else if (dist == "binomial") {
+    if ( dist %in% c( "poisson", "cond.poisson" ) ) {
+        .parameters.poisson.Mcmcstart( fdata.obj, model.obj )
+    } else if ( dist == "exponential" ) {
+        .parameters.exponential.Mcmcstart( fdata.obj, model.obj, mcmc.obj )
+    } else if ( dist == "binomial" ) {
         .parameters.binomial.Mcmcstart(fdata.obj, model.obj)
-    } else if (dist == "normal" || dist == "student") {
+    } else if ( dist %in% c( "normal", "student" ) ) {
         .mcmcstart.Norstud.Model(fdata.obj, model.obj, mcmc.obj)
-    } else if (dist %in% c("normult", "studmult")) {
-        .mcmcstart.Norstudmult.Model(fdata.obj, model.obj, mcmc.obj)
+    } else if ( dist %in% c( "normult", "studmult" ) ) {
+        .mcmcstart.Norstudmult.Model( fdata.obj, model.obj, mcmc.obj )
     }
 }
 
@@ -194,22 +205,20 @@
     return(model.obj)
 }
 
-".mcmcstart.Exponential.Model" <- function(data.obj, model.obj,
-                                           mcmc.obj)
+".parameters.exponential.Mcmcstart" <- function( fdata.obj, model.obj,
+                                                 mcmc.obj )
 {
-    data.obj    <- .valid.Data.Obj(data.obj)
-    datam       <- .mcmcstart.Data(data.obj)
-    K           <- model.obj@K
-    has.par     <- (length(model.obj@par) > 0)
-    if (mcmc.obj@startpar && !has.par) {
+    if ( !hasPar( model.obj ) ) { 
+        datam   <- getColY( fdata.obj )
+        K       <- model.obj@K
         if (K == 1) {
-            pm <- 1/mean(datam, na.rm = TRUE)
+            pm <- 1/mean( datam, na.rm = TRUE )
         } else { ## K > 1
-            pm <- exp(runif(K))/mean(datam, na.rm = TRUE)
+            pm <- exp( runif( K ) )/mean( datam, na.rm = TRUE )
         }
-        model.obj@par <- list(lambda = pm)
+        model.obj@par <- list( lambda = pm )    
     }
-    return(model.obj)
+    return( model.obj )
 }
 
 ".parameters.binomial.Mcmcstart" <- function(fdata.obj, model.obj)                                
@@ -229,77 +238,68 @@
     return(model.obj)
 }
 
-".mcmcstart.Norstud.Model" <- function(data.obj, model.obj,
-                                       mcmc.obj)
+".mcmcstart.Norstud.Model" <- function( fdata.obj, model.obj,
+                                        mcmc.obj )
 {
-    data.obj    <- .valid.Data.Obj(data.obj)
-    datam       <- .mcmcstart.Data(data.obj)
+    datam       <- getColY( fdata.obj )
     K           <- model.obj@K
-    has.par     <- (length(model.obj@par) > 0)
-    if(mcmc@startpar) {
-        start.mu    <- FALSE
-        start.sigma <- FALSE
-	    if(!has.par) {
-				start.mu    <- TRUE
-				start.sigma <- TRUE
-        } else { ## has already parameters 
-            has.mu      <- "mu" %in% names(model.obj@par)
-            has.sigma   <- "sigma" %in% names(model.obj@par)
-            if(!has.mu) {
-                start.mu    <- TRUE
-            }
-            if(!has.sigma) {
-                start.sigma <- TRUE
-            }
-        }		
-        if(start.mu) {
-            if(K == 1) {
-                pm <- mean(datam, na.rm = TRUE) 
-            } else { ## K > 1
-                pm <- mean(datam, na.rm = TRUE) + 
-                        sd(datam, na.rm = TRUE) * runif(K)
-                pm <- matrix(pm, nrow = 1, ncol = K)
-            }
-            if(start.sigma) {
-                model.obj@par <- list(mu = pm)
-            } else {
-                model.obj@par <- list(mu = pm, model.obj@par)
-            }
+    has.par     <- ( length( model.obj@par ) > 0 )
+    start.mu    <- FALSE
+    start.sigma <- FALSE
+    if( !has.par ) {
+        start.mu    <- TRUE
+        start.sigma <- TRUE
+    } else { ## has already parameters 
+        start.mu      <- !"mu" %in% names( model.obj@par )
+        start.sigma   <- !"sigma" %in% names( model.obj@par ) 
+    }		
+    if( start.mu ) {
+        if( K == 1 ) {
+            pm <- mean( datam, na.rm = TRUE )  
+        } else { ## K > 1
+            pm <- mean( datam, na.rm = TRUE ) + 
+            sd( datam, na.rm = TRUE ) * runif( K )  
+            pm <- matrix( pm, nrow = 1, ncol = K )
         }
-        if(start.sigma) {			
-            pm                  <- sd(datam, na.rm = TRUE)
-            pm                  <- matrix(pm, nrow = 1, ncol = K)
-            model.obj@par       <- list(model.obj@par, sigma = pm)
+        if( start.sigma ) {
+            model.obj@par       <- list( mu = pm )
+        } else {
+            model.obj@par$mu    <- pm
         }
     }
-    return(model.obj)
+    if( start.sigma ) {			
+        pm                  <- sd( datam, na.rm = TRUE )
+        pm                  <- matrix( pm, nrow = 1, ncol = K )
+        model.obj@par$sigma <- pm
+    }
+    
+    return( model.obj )
 }
 
-".mcmcstart.Norstudmult.Model" <- function(data.obj, model.obj,
-                                       mcmc.obj)
+".mcmcstart.Norstudmult.Model" <- function( fdata.obj, model.obj,
+                                            mcmc.obj )
 {
-    data.obj    <- .valid.Data.Obj(data.obj)
     K           <- model.obj@K
     r           <- model.obj@r
-    has.par     <- (length(model.obj@par) > 0)
-    datam       <- .mcmcstart.Data(data.obj)
+    has.par     <- ( length( model.obj@par ) > 0 )
+    datam       <- getColY( fdata.obj )
     ## Check if parameters are already provided ##
     start.mu    <- FALSE
     start.sigma <- FALSE
-    if (!has.par) {
+    if ( !has.par ) {
         start.mu    <- TRUE
         start.sigma <- TRUE
     } else {
-        has.mu      <- "mu" %in% names(model.obj@par)
-        has.sigma   <- "sigma" %in% names(model.obj@par)
-        if (!has.mu) {
+        has.mu      <- "mu" %in% names( model.obj@par )
+        has.sigma   <- "sigma" %in% names( model.obj@par )
+        if ( !has.mu ) {
             start.mu    <- TRUE
         }
-        if (!has.sigma) {
+        if ( !has.sigma ) {
             start.sigma <- TRUE
         }
     }			
-    cov.m <- cov(datam)	
+    cov.m <- cov( datam )	
     if (start.mu) {
         if (K == 1) {
             pm.mu   <- apply(datam, 2, mean, na.rm = TRUE)
@@ -325,19 +325,20 @@
     return(model.obj)
 }
 
-".mcmcstart.Student.Df" <- function(model.obj)
+".mcmcstart.Student.Df" <- function( model.obj ) 
 {
-    has.par     <- (length(model.obj@par) > 0)
-    if (has.par) {
-        has.df  <- "df" %in% names(model.obj@par)
-        if (!df.in.model) {	
-            model.obj@pari$df <- array(10, dim = c(1, K))
-            validObject(model.obj)	
+    K           <- model.obj@K
+    has.par     <- ( length( model.obj@par ) > 0 )
+    if ( has.par ) {
+        has.df  <- "df" %in% names( model.obj@par )
+        if ( !has.df ) {	
+            model.obj@par$df <- array( 10, dim = c( 1, K ) )
+            validObject( model.obj )	
         }			
     } else {
-        model@par <- list(df = array(10, dim = c(1, K)))
+        model.obj@par <- list( df = array( 10, dim = c( 1, K ) ) )
     }
-    return(model.obj)
+    return( model.obj )
 }
 
 ### Logic indicators: Returns an 'fdata' object with generated 
@@ -345,13 +346,12 @@
 ".indicators.Mcmcstart" <- function(fdata.obj, model.obj)
 {
     dist    <- model.obj@dist
-    if (dist %in% c("poisson", "cond.poisson", "exponential")) {
+    if ( dist %in% c( "poisson", "cond.poisson", "exponential" ) ) {
         .indicators.poisson.Mcmcstart(fdata.obj, model.obj)
-    } else if (dist == "binomial") {
+    } else if ( dist == "binomial" ) {
         .indicators.binomial.Mcmcstart(fdata.obj, model.obj)
-    } else if(dist %in% c("normal", "normult", 
-                          "student", "studmult")) {
-        .mcmcstart.Ind.Norstud(fdata.obj, model.obj)
+    } else if( dist %in% c( "normal", "normult", "student", "studmult" ) ) {
+        .mcmcstart.Ind.Norstud( fdata.obj, model.obj )
     } 
 }
 
@@ -363,67 +363,71 @@
 ".indicators.poisson.Mcmcstart" <- function(fdata.obj, model.obj)
 {
     K           <- model.obj@K
-    if (!hasS(fdata.obj)) {
-        datam   <- getColY(fdata.obj) 
-        S       <- matrix(kmeans(datam^.5, centers = K,
-                                 nstart = K)$cluster)
-        if (fdata.obj@bycolumn) {
+    if ( !hasS( fdata.obj ) ) {
+        datam   <- getColY( fdata.obj ) 
+        S       <- matrix(kmeans( datam^.5, centers = K,
+                                  nstart = K )$cluster )
+        if ( fdata.obj@bycolumn ) {
             fdata.obj@S  <- S 
         } else {
-            fdata.obj@S  <- t(S)
+            fdata.obj@S  <- t( S )
         }
     }
-    return(fdata.obj)
+    return( fdata.obj )
 }
 
-".indicators.binomial.Mcmcstart" <- function(fdata.obj, model.obj) 
+".indicators.binomial.Mcmcstart" <- function( fdata.obj, model.obj ) 
 {
-    if (!hasS(fdata.obj)) {
+    if ( !hasS( fdata.obj ) ) {
         K           <- model.obj@K
-        datam       <- .mcmcstart.Data(data.obj)
-        if((max(datam) - min(datam)) > 2 * K) {
+        datam       <- getColY( fdata.obj )
+        if( ( max( datam ) - min( datam ) ) > 2 * K ) {
             ## use k-means to determine a starting classification
-            if (data.obj@bycolumn) {
-                data.obj@S <- as.matrix(kmeans(datam^.5, 
-                                               centers = K, 
-                                               nstart = K)$cluster)
+            if ( fdata.obj@bycolumn ) {
+                fdata.obj@S <- as.matrix( kmeans( datam^.5, 
+                                                  centers = K, 
+                                                  nstart = K )$cluster )
             } else {
-                data.obj@S <- t(as.matrix(kmeans(datam^.5, 
-                                                 centers = K,
-                                                 nstart = K)$cluster))
+                fdata.obj@S <- t( as.matrix( kmeans( datam^.5, 
+                                                     centers = K,
+                                                     nstart = K )$cluster ) ) 
             }
         } else {
             ## random classification
-            N           <- data.obj@N
-            if (data.obj@bycolumn) {
-                data.obj@S  <- as.matrix(sample(c(1:K), N, 
-                                                replace = TRUE))
+            N           <- fdata.obj@N
+            if ( fdata.obj@bycolumn ) {
+                fdata.obj@S  <- as.matrix( sample( c( 1:K ), N, 
+                                                   replace = TRUE) )
             } else {
-                data.obj@S  <- t(as.matrix(sample(c(1:K), N, 
-                                                  replace = TRUE)))
+                fdata.obj@S  <- t( as.matrix( sample( c( 1:K ), N, 
+                                                      replace = TRUE ) ) )
             }
         }
+    } 
+    if ( !hasT( fdata.obj ) || length( fdata.obj@T ) != fdata.obj@N ) {
+        if ( fdata.obj@bycolumn ) {
+            fdata.obj@T <- matrix( as.integer( 1 ), nrow = fdata.obj@N, ncol = 1 )
+        } else {
+            fdata.obj@T <- matrix( as.integer( 1 ), nrow = 1, ncol = fdata.obj@N )
+        }
     }
-    return(fdata.obj)
+    return( fdata.obj )
 }
 
-".mcmcstart.Ind.Norstud" <- function(data.obj, model.obj) 
+".mcmcstart.Ind.Norstud" <- function( data.obj, model.obj ) 
 {
-    K           <- model.obj@K
-    has.S       <- .mcmcstart.valid.Ind(data.obj)
-    datam       <- .mcmcstart.Data(data.obj)
-    if (has.S) {
-        return(data.obj)
-    } else {
-        if (data.obj@bycolumn) {
-            data.obj@S  <- as.matrix(kmeans(datam^.5, 
-                                            centers = K, 
-                                            nstart = K)$cluster)
+    if ( !hasS( data.obj ) ) {
+        K           <- model.obj@K
+        datam       <- getColY( data.obj )
+        if ( data.obj@bycolumn ) {
+            data.obj@S  <- as.matrix( kmeans( datam^.5, 
+                                              centers = K, 
+                                              nstart = K )$cluster )
         } else {
-            data.obj@S  <- t(as.matrix(kmeans(datam^.5, 
-                                            centers = K,
-                                            nstart = K)$cluster))
+            data.obj@S  <- t( as.matrix( kmeans( datam^.5, 
+                                                 centers = K,
+                                                 nstart = K )$cluster ) )
         }
-        return(data.obj)
     }
+    return( data.obj )
 }

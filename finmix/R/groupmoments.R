@@ -140,6 +140,10 @@ setMethod("getFdata", "groupmoments",
     for (k in seq(1, K)) {
         names[k] <- paste("k=", k, sep = "")
     }
+    dnames  <- rep( "", r )
+    if ( !is.null( colnames( datam ) ) ) {
+        dnames  <- colnames( datam )
+    } 
     object@NK <- as.array(apply(comp, 2, sum))
     dimnames(object@NK) <- list(names)
     gmeans <- matrix(NA, nrow = r, ncol = K)
@@ -147,17 +151,31 @@ setMethod("getFdata", "groupmoments",
         gmeans[i, ] <- (t(datam[,i]) %*% comp)/t(object@NK)
     }
     colnames(gmeans) <- names
-    rownames(gmeans) <- colnames(datam)
+    rownames(gmeans) <- dnames
     object@mean <- gmeans
-    wkm <- array(NA, dim = c(r, r, K))
-    varm <- array(NA, dim = c(r, r, K))
-    for (k in seq(1, K)) {
-        group.demeaned <- (datam - rep(gmeans[,k], each = nrow(datam))) * comp[, k]
-        wkm[,, k] <- t(group.demeaned) %*% group.demeaned
-        varm[,, k] <- wkm[,, k]/object@NK[k]
+    if ( r > 1 ) {
+        wkm <- array(NA, dim = c(r, r, K))
+        varm <- array(NA, dim = c(r, r, K))
+        for (k in seq(1, K)) {
+            group.demeaned <- (datam - rep(gmeans[,k], each = nrow(datam))) * comp[, k]
+            wkm[,, k] <- t(group.demeaned) %*% group.demeaned
+            varm[,, k] <- wkm[,, k]/object@NK[k]
+        }
+        dimnames(wkm) <- list(colnames(datam), dnames, names)
+        dimnames(varm) <- list(colnames(datam), dnames, names)
+    } else {
+        wkm     <- array( NA, dim = c( 1, K ) )
+        varm    <- array( NA, dim = c( 1, K ) )
+        for ( k in seq( 1, K ) ) {
+            group.demeaned  <- ( datam - rep( gmeans[, k], each = nrow( datam ) ) ) * comp[, k]
+            wkm[k]          <- t( group.demeaned ) %*% group.demeaned
+            varm[k]         <- wkm[k] / object@NK[k]
+        }
+        colnames( wkm )     <- names
+        rownames( wkm )     <- dnames
+        colnames( varm )    <- names
+        rownames( varm )    <- dnames
     }
-    dimnames(wkm) <- list(colnames(datam), colnames(datam), names)
-    dimnames(varm) <- list(colnames(datam), colnames(datam), names)
     object@WK <- wkm
     object@var <- varm
     return(object)

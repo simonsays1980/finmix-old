@@ -127,6 +127,16 @@ arma::rowvec dpoisson(const double &value, const arma::rowvec &par)
 // Gamma distribution
 // --------------------------------------------------------------
 
+inline
+double rgamma (const double& a, const double& b)
+{
+    Rcpp::RNGScope scope;
+    double output   = R::rgamma(a, 1.0);
+    output          = std::max(output, 1e-10);
+    output          = output / b;
+    return output;
+}
+
 /** 
  * --------------------------------------------------------------
  * @brief   Draws vector random sample for Gamma distribution.
@@ -149,7 +159,7 @@ arma::rowvec rgammaprod (const arma::rowvec& par_a,
 	GetRNGstate();
 	
 	for(unsigned int k = 0; k < K; ++k) {
-		par_out(k) = R::rgamma(par_a(k), 1);
+		par_out(k) = R::rgamma(par_a(k), 1.0);
 		par_out(k) = std::max(par_out(k), 1e-10);
 		par_out(k) = par_out(k)/par_b(k); 	
 	}
@@ -210,6 +220,30 @@ double rggamma (const double& shape, const double& rate,
 	par_out += loc;
 
 	return par_out;
+}
+
+/** 
+ * --------------------------------------------------------------
+ * @brief   Computes a proprotion of the conditional Gamma prior
+ *          in the conditional Poisson model. 
+ * @param   x   value
+ * @param   a   shape parameter
+ * @param   b   rate parameter
+ * @param   m   location parameter 
+ * @param   N   number of observations in first component
+ * @param   Q   mean over observations in first component
+ * @return  value
+ * @see     ParCondPoissonFix, ParCondPoissonInd
+ * @author Lars Simon Zehnder
+ * --------------------------------------------------------------
+ **/
+inline
+double cgamm (const double& x, const double& a, const double& b,
+        const double& m, const double& N, const double& Q) 
+{
+    double output = std::pow(x, Q*N) * std::pow(x - m, a - 1)
+        * std::exp(-b * (x - m) - N * x);
+    return output;
 }
 
 // =======================================================
@@ -314,4 +348,145 @@ arma::rowvec dbinomial(const double& value, const double& T,
     return rvec;
 }
 
+// =================================================================
+// Exponential distribution
+// -----------------------------------------------------------------
+
+/**
+ * -----------------------------------------------------------------
+ * dexponential
+ * @brief   Computes density of the Exponential distribution for an
+ *          Armadillo parameter vector.
+ * @param   value   the density is calculated for
+ * @param   par     parameter vector; 1 x K
+ * @return  vector with density values for the corresponding 
+ *          parameters in 'par'
+ * @detail  Uses inside the 'dexp()' function from Rcpp's 'R'
+ *          namespace.
+ * @see R::dexp
+ * @author  Lars Simon Zehnder
+ * ------------------------------------------------------------------
+ **/
+inline 
+arma::rowvec dexponential(const double& value, const arma::rowvec& par)
+{
+    const unsigned int K = par.n_elem;
+    arma::rowvec rvec(K);
+    for (unsigned int k = 0; k < K; ++k) {
+        rvec(k) = R::dexp(value, par(k), 0);
+    }
+    return rvec;
+}
+
+inline
+arma::rowvec rnormal (const arma::rowvec& mu, 
+        const arma::rowvec& sigma)
+{
+    const unsigned int K = mu.n_elem;
+    arma::rowvec output(K);
+    for (unsigned int k = 0; k < K; ++k) {
+        output(k) = mu(k) + std::sqrt(sigma(k)) * R::rnorm(0.0, 1.0);
+    }
+    return output;
+}
+
+inline 
+arma::mat rnormult (const arma::mat& mu,
+        const arma::cube& sigma)
+{
+    const unsigned int r = mu.n_rows;
+    const unsigned int K = mu.n_cols;
+    arma::mat output(r, K);
+    for (unsigned int k = 0; k < K; ++k) {
+        for (unsigned int i = 0; i < r; ++i) {
+            output(i, k) = R::rnorm(0.0, 1.0);
+        }
+        output.col(k) = arma::chol(sigma.slice(k)) * output.col(k);
+        output.col(k) += mu.col(k);
+    }
+    return output;
+}
+
+inline
+arma::mat rinvwishart (const double& df,
+        const arma::mat scale) 
+{
+    const unsigned int r = scale.n_rows;
+    const unsigned int Nu = 2 * df + 1;
+    arma::mat unityS(r, r);
+    arma::mat schurS(r, r);
+    arma::auxlib::schur_dec(unityS, schurS, scale);
+    arma::colvec diagschurS = arma::diagvec(arma::max(schurS, arma::zeros(r, r)));
+    arma::mat thSchur = arma::diagmat(arma::pow(diagschurS, 0.5));    
+    arma::mat unity = unityS * thSchur;
+    arma::mat Z(Nu, r);
+    /* Z is filled by rows */
+    Rcpp::RNGScope scope;
+    for (unsigned int nu = 0; nu < Nu; ++nu) {
+        for (unsigned int rr = 0; rr < r; ++rr) {
+            Z(nu, rr) = R::rnorm(0.0, 1.0);
+        }
+    }
+    unityS = df * arma::cov(Z);
+    return unity * arma::inv(unityS) * arma::trans(unity);
+}
+
+inline
+double logdnormult (const arma::mat& Y, 
+        const arma::mat& mu, const arma::cube& sigma,
+        const arma::cube& sigmainv)
+{
+    const unsigned int r = Y.n_rows;
+    const unsigned int K = Y.n_cols;
+    double output = 0.0;
+    for (unsigned int k = 0; k < K; ++k) {
+        arma::vec err = Y.col(k) - mu.col(k);
+        output += 0.5 * arma::as_scalar(arma::trans(err) * sigmainv.slice(k) * err);
+        output -= 0.5 * std::log(arma::det(sigma.slice(k)));
+        output -= 0.5 * r * std::log(2 * M_PI);
+    }
+    return output;
+}
+
+inline
+double logdwishart (const arma::cube& Y, 
+        const arma::rowvec& a, const arma::cube& S,
+        const arma::rowvec& logdetS) 
+{
+    const unsigned int r = Y.n_rows;
+    const unsigned int K = Y.n_slices;
+    double output   = 0.0;
+    double trQS     = 0.0;
+    for (unsigned int k = 0; k < K; ++k) {
+        trQS    = arma::trace(Y.slice(k) * S.slice(k));
+        output  += a(k) * logdetS(k) + (a(k) - (r + 1) / 2.0)
+            * std::log(arma::det(Y.slice(k))) - trQS 
+            - r * (r + 1) / 4.0 * std::log(M_PI);
+        for (unsigned int rr = 0; rr < r; ++rr) {
+            output -= R::lgammafn( a(k) + 0.5 - 0.5 * rr);
+        }
+    }
+    return output;
+}
+
+inline
+double logdwishart (const arma::cube& Y, 
+        const arma::rowvec& a, const arma::mat& S,
+        const double logdetS)
+{
+    const unsigned int r = Y.n_rows;
+    const unsigned int K = Y.n_slices;
+    double output   = 0.0;
+    double trQS     = 0.0;
+    for (unsigned int k = 0; k < K; ++k) {
+        trQS    = arma::trace(Y.slice(k) * S);
+        output  += a(k) * logdetS + (a(k) - (r+1) / 2.0)
+            * std::log(arma::det(Y.slice(k))) - trQS
+            - r * (r + 1) / 4.0 * std::log(M_PI);
+        for (unsigned int rr = 0; rr < r; ++rr) {
+            output  -= R::lgammafn( a(k) + 0.5 - 0.5 * rr);
+        }
+    }
+    return output;
+}
 #endif // __FINMIX_DISTRIBUTIONS_H__

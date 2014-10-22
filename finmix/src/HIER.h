@@ -98,7 +98,7 @@ class HIER : public Super {
 			public:
 				HierOutType hyper;
 
-				Output (const Rcpp::S4&);
+				Output (Rcpp::S4&);
 				virtual ~Output () {}
 				virtual void store (const 
 						unsigned int&, 
@@ -109,7 +109,7 @@ class HIER : public Super {
 		
 		HIER (const FinmixData&, const FinmixModel&,
 			const FinmixPrior&, const FinmixMCMC&,
-			const Rcpp::S4&);
+			Rcpp::S4&);
 		virtual ~HIER () {}
 		virtual void update ();
 		virtual void store (const unsigned int&);
@@ -175,7 +175,7 @@ HIER <Super, HierOutType>::Node::Node (const FinmixData& data,
  * ----------------------------------------------------------
  **/
 template <typename Super, typename HierOutType> 
-HIER <Super, HierOutType>::Output::Output (const Rcpp::S4& classS4) :
+HIER <Super, HierOutType>::Output::Output (Rcpp::S4& classS4) :
 	Super::Output(classS4),
 	hyper(Rcpp::as<Rcpp::List>((SEXP) classS4.slot("hyper"))) {}
 
@@ -238,7 +238,7 @@ void HIER <Super, HierOutType>::Output::store (const unsigned int& m,
 template <typename Super, typename HierOutType>
 HIER <Super, HierOutType>::HIER (const FinmixData& data, 
 	const FinmixModel& model, const FinmixPrior& prior,
-	const FinmixMCMC& mcmc, const Rcpp::S4& classS4) :
+	const FinmixMCMC& mcmc, Rcpp::S4& classS4) :
 		Super(data, model, prior, mcmc, classS4),
 		node(data, model, prior, mcmc),
 		output(classS4) {}

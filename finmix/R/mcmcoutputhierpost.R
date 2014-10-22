@@ -15,15 +15,15 @@
 # You should have received a copy of the GNU General Public License
 # along with finmix. If not, see <http://www.gnu.org/licenses/>.
 
-.mcmcoutputhierpost <- setClass("mcmcoutputhierpost", 
-                                representation(post = "list"),
-                                contains = c("mcmcoutputhier"),
-                                validity = function(object) 
-                                {
-                                    ## else: OK
-                                    TRUE
-                                }, 
-                                prototype(post  = list())
+.mcmcoutputhierpost <- setClass( "mcmcoutputhierpost", 
+                                 representation( post = "list" ),
+                                 contains = c( "mcmcoutputhier" ),
+                                 validity = function( object ) 
+                                 {
+                                     ## else: OK
+                                     TRUE
+                                 }, 
+                                 prototype( post  = list() )
 )
 
 ## Set 'mcmcoutput' to the virtual class inheriting ##
@@ -76,103 +76,111 @@ setMethod("show", "mcmcoutputhierpost",
           }
 )
 
-setMethod("plotTraces", signature(x     = "mcmcoutputhierpost", 
-                                  dev   = "ANY",
-                                  lik   = "ANY"), 
-          function(x, dev = TRUE, lik = 1, ...) 
-          {
-              ## Call method 'plot()' from 'mcmcoutputhier'
-              callNextMethod(x, dev, lik, ...)
-          }
+setMethod( "plotTraces", signature( x     = "mcmcoutputhierpost", 
+                                    dev   = "ANY",
+                                    lik   = "ANY",
+                                    col   = "ANY" ), 
+           function( x, dev = TRUE, lik = 1, col = FALSE, ... ) 
+           {
+               ## Call method 'plot()' from 'mcmcoutputhier'
+               callNextMethod( x, dev, lik, col, ... )
+           }
 )
 
-setMethod("plotHist", signature(x   = "mcmcoutputhierpost", 
-                                dev = "ANY"), 
-          function(x, dev = TRUE, ...) 
-          {
-              ## Call method 'plotHist()' from 'mcmcoutputhier'
-              callNextMethod(x, dev, ...)
-          }
+setMethod( "plotHist", signature( x   = "mcmcoutputhierpost", 
+                                  dev = "ANY" ), 
+           function( x, dev = TRUE, ... ) 
+           {
+               ## Call method 'plotHist()' from 'mcmcoutputhier'
+               callNextMethod( x, dev, ... )
+           }
 )
 
-setMethod("plotDens", signature(x   = "mcmcoutputhierpost", 
-                                dev = "ANY"), 
-          function(x, dev = TRUE, ...) 
-          {
-              ## Call 'plotHist()' from 'mcmcoutputhier'
-              callNextMethod(x, dev, ...)
-          }
+setMethod( "plotDens", signature( x   = "mcmcoutputhierpost", 
+                                  dev = "ANY" ), 
+           function( x, dev = TRUE, ... ) 
+           {
+               ## Call 'plotHist()' from 'mcmcoutputhier'
+               callNextMethod( x, dev, ... )
+           }
 )
 
-setMethod("plotPointProc", signature(x      = "mcmcoutputhierpost",
-                                     dev    = "ANY"),
-          function(x, dev = TRUE, ...)
-          {
-              ## Call 'plotPointProc()' from 'mcmcoutputhier'
-              callNextMethod(x, dev, ...)
-          }
+setMethod( "plotPointProc", signature( x      = "mcmcoutputhierpost",
+                                       dev    = "ANY" ),
+           function( x, dev = TRUE, ... )
+           {
+               ## Call 'plotPointProc()' from 'mcmcoutputhier'
+               callNextMethod( x, dev, ... )
+           }
 )
 
-setMethod("plotSampRep", signature(x    = "mcmcoutputhierpost",
-                                   dev  = "ANY"),
-          function(x, dev = TRUE, ...) 
-          {
-              ## Call 'plotSampRep()' from 'mcmcoutputhier'
-              callNextMethod(x, dev, ...)
-          }
+setMethod( "plotSampRep", signature( x    = "mcmcoutputhierpost",
+                                     dev  = "ANY" ),
+           function( x, dev = TRUE, ... ) 
+           {
+               ## Call 'plotSampRep()' from 'mcmcoutputhier'
+               callNextMethod( x, dev, ... )
+           }
 )
 
-setMethod("plotPostDens", signature(x   = "mcmcoutputhierpost",
-                                    dev = "ANY"),
-          function(x, dev = TRUE, ...)
-          {
-              ## Call 'plotPostDens()' from 'mcmcoutputhier'
-              callNextMethod(x, dev, ...)
-          }
+setMethod( "plotPostDens", signature( x   = "mcmcoutputhierpost",
+                                      dev = "ANY" ),
+           function( x, dev = TRUE, ... )
+           {
+               ## Call 'plotPostDens()' from 'mcmcoutputhier'
+               callNextMethod( x, dev, ... )
+           }
 )
 
-setMethod("subseq", signature(object = "mcmcoutputhierpost", 
-                              index  = "array"), 
-          function(object, index) 
-          {
-              ## Call 'subseq()' method from 'mcmcoutputhier'
-              as(object, "mcmcoutputhier") <- callNextMethod(object, index)
-              # Change owned slots #
-              dist      <- object@model@dist
-              if (dist == "poisson") {
-                  .subseq.Poisson.Post(object, index)
-              } else if (dist == "binomial") {
-                  .subseq.binomial.Mcmcoutputfixpost(object, index)
-              }
-
-          }
+setMethod( "subseq", signature( object = "mcmcoutputhierpost", 
+                                index  = "array"), 
+           function( object, index ) 
+           {
+               ## Call 'subseq()' method from 'mcmcoutputhier'
+               as( object, "mcmcoutputhier" ) <- callNextMethod( object, index )
+               # Change owned slots #
+               dist      <- object@model@dist
+               if ( dist == "poisson" ) {
+                   .subseq.Poisson.Post( object, index )
+               } else if ( dist == "binomial" ) {
+                   .subseq.Binomial.Mcmcoutputfixpost( object, index )
+               } else if ( dist %in% c( "normal", "student" ) ) {
+                   .subseq.Norstud.Mcmcoutputfixpost( object, index )
+               } else if ( dist %in% c( "normult", "studmult" ) ) {
+                   .subseq.Normultstud.Mcmcoutputfixpost( object, index ) 
+               } 
+           }
 )
 
-setMethod("swapElements", signature(object = "mcmcoutputhierpost", 
-                                    index = "array"),
-          function(object, index) 
+setMethod("swapElements", signature( object = "mcmcoutputhierpost", 
+                                     index = "array" ),
+          function( object, index ) 
           {
               ## Check arguments, TODO: .validObject ##
-              if (object@model@K == 1) {
-                  return(object)
+              if ( object@model@K == 1 ) {
+                  return( object )
               } else {
                   dist <- object@model@dist
                   ## Call method 'swapElements()' from 'mcmcoutputhier' 
-                  object <- callNextMethod(object, index)
-                  if (dist == "poisson") {
-                      .swapElements.Poisson.Post(object, index)
-                  } else if (dist == "binomial") {
-                      .swapelements.binomial.Mcmcoutputfixpost(object, index)
+                  object <- callNextMethod( object, index )
+                  if ( dist == "poisson" ) {
+                      .swapElements.Poisson.Post( object, index )
+                  } else if ( dist == "binomial" ) {
+                      .swapElements.binomial.Mcmcoutputfixpost( object, index )
+                  } else if ( dist %in% c(  "normal", "student" ) ) {
+                      .swapElements.Norstud.Mcmcoutputfixpost( object, index )
+                  } else if ( dist %in% c( "normult", "studmult" ) ) {
+                      .swapElements.Normultstud.Mcmcoutputfixpost( object, index )
                   }
               }
           }
 )
 
-setMethod("getPost", "mcmcoutputhierpost",  
-          function(object) 
-          {
-              return(object@post)
-          }
+setMethod( "getPost", "mcmcoutputhierpost",  
+           function( object ) 
+           {
+               return( object@post )
+           }
 )
 
 ## No setters as users are not intended to manipuate ##

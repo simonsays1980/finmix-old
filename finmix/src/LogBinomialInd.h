@@ -39,6 +39,59 @@ class LogBinomialInd : public LogBinomialFix {
                 arma::ivec&, const arma::mat&, const arma::vec&,
                 const ParBinomialInd&, const PriorBinomialInd&);
 };
+
+// =============================================================
+// Constructor
+// -------------------------------------------------------------
+LogBinomialInd::LogBinomialInd () : LogBinomialFix(),
+    cdpost(0.0), entropy(0.0), maxcdpost(0.0) {}
+
+// =============================================================
+// Update
+// -------------------------------------------------------------
+
+/** 
+ * -------------------------------------------------------------
+ * update
+ * @brief   Updates the log-likelihoods of the Binomial model
+ *          and samples the indicators S.
+ * @par K           number of components
+ * @par y           data matrix, N x 1
+ * @par S           indicator matrix from last step, N x 1
+ * @par T           repetitions, N x 1
+ * @par par         object holding the parameters
+ * @par hyperPar    object holding the hyper parameters
+ * @detail  The classification() function samples the indi-
+ *          cators and computes likelihoods and entropy. As the
+ *          model with fixed indicators does use a different 
+ *          function 'classification_fix()' it cannot be made 
+ *          use of inheritance, i.e. the LogBinomialFix::update()
+ *          function is of no use here.
+ * @see DataClass, likelihood_binomial, priormixlik_binomial,
+ *      LogBinomialFix::update()
+ * @author Lars Simon Zehnder
+ * -------------------------------------------------------------
+ **/
+void LogBinomialInd::update (const unsigned int& K,
+        const arma::mat& y, arma::ivec& S, const arma::mat& expos, 
+        const arma::vec& T, const ParBinomialInd& par, 
+        const PriorBinomialInd& hyperPar)
+{  
+    liklist lik = likelihood_binomial(y, par.p, T);
+    DataClass dataC = classification(S, lik, par.weight);
+    S = dataC.newS;
+    mixlik = dataC.mixLik;
+    /* Compute log-likelihood of the mixture prior */
+    mixprior = priormixlik_binomial(par.p, hyperPar.aStart,
+            hyperPar.bStart);
+    if (K > 1) {
+        /* Compute log-likelihood of Dirichlet prior */
+        mixprior += priormixlik_dirichlet(par.weight, 
+                hyperPar.weightStart);
+        cdpost  = mixlik + mixprior + dataC.postS;
+        entropy = dataC.entropy;
+    }
+}
 #endif /* __FINMIX_LOGBINOMIALIND_H__ */
 
 

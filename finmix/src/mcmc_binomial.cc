@@ -29,9 +29,11 @@
 #include "FIX.h"
 #include "IND.h"
 #include "POST.h"
-#include "LogBinomialInd.h"
+#include "PriorBinomialFix.h"
+#include "ParBinomialFix.h"
 #include "PriorBinomialInd.h"
 #include "ParBinomialInd.h"
+#include "LogBinomialInd.h"
 #include "ParOutBinomial.h"
 #include "PostOutBinomialInd.h"
 

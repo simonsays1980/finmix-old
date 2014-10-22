@@ -20,10 +20,9 @@
  * along with finmix. If not, see <http://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-#ifndef POSTOUTPOISSONIND_H
-#define POSTOUTPOISSONIND_H
+#ifndef __FINMIX_POSTOUTPOISSONIND_H__
+#define __FINMIX_POSTOUTPOISSONIND_H__
 
-#include <RcppArmadillo.h>
 #include "PostOutPoissonFix.h"
 #include "PriorPoissonInd.h"
 
@@ -36,4 +35,20 @@ class PostOutPoissonInd : public PostOutPoissonFix {
 		virtual void store (const unsigned int&,
 				const PriorPoissonInd&); 
 };
-#endif
+
+PostOutPoissonInd::PostOutPoissonInd (const Rcpp::List& list) :
+	PostOutPoissonFix(list) 
+{	
+	Rcpp::NumericMatrix tmpWeight((SEXP) list["weight"]);
+	const unsigned int M = tmpWeight.nrow();
+	const unsigned int K = tmpWeight.ncol();
+	weight = new arma::mat(tmpWeight.begin(), M, K, false, true);
+}
+
+void PostOutPoissonInd::store (const unsigned int& m,
+	const PriorPoissonInd& hyperPar) 
+{
+	PostOutPoissonFix::store(m, hyperPar);
+	(*weight).row(m) = hyperPar.weightPost;
+}
+#endif // __FINMIX_POSTOUTPOISSONIND_H_

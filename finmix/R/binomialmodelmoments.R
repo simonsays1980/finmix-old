@@ -77,7 +77,7 @@ setMethod("getExtrabinvar", "binomialmodelmoments",
 ".generateMomentsBinomial" <- function(object)
 {
     p               <- object@model@par$p
-    n               <- object@model@par$n
+    n               <- object@model@T[1]
     weight          <- object@model@weight
     object@mean     <- sum(weight * n * p)
     object@var      <- array(sum(weight * (n * p - object@mean)^2) 

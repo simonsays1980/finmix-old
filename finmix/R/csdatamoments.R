@@ -73,7 +73,7 @@ setMethod("show", "csdatamoments",
               }
               cat("     gmoments    : Object of class", 
                   class(object@gmoments), "\n")
-              cat("     fdata        : Object of class", 
+              cat("     fdata       : Object of class", 
                   class(object@fdata), "\n")
           }
 )
@@ -176,7 +176,7 @@ setMethod("getFdata", "csdatamoments",
     ## Calculate coefficient of determination ##
     ## 'Rtr' is an 1 x 1 numeric ##
     ## 'Rdet' is an 1 x 1 numeric ##
-    if (object@data@r > 1) {
+    if (object@fdata@r > 1) {
         r <- NA
         object@R <- as.numeric(r)
         object@Rtr <- 1 - sum(diag(object@W), na.rm = TRUE) / 

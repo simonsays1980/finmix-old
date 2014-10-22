@@ -40,6 +40,40 @@ class LogBinomialFix {
                 const arma::ivec&, const arma::mat&, const arma::vec&, 
                 const ParBinomialFix&, const PriorBinomialFix&);
 };
+
+// =============================================================
+// Constructor
+// -------------------------------------------------------------
+LogBinomialFix::LogBinomialFix () : mixlik(0.0), mixprior(0.0) {}
+
+// =============================================================
+// Update
+// -------------------------------------------------------------
+
+/** 
+ * -------------------------------------------------------------
+ * update
+ * @brief   Updates the log-likelihoods of the Binomial model
+ * @par K           number of components
+ * @par y           data matrix, N x 1
+ * @par S           indicator matrix, N x 1
+ * @par par         object holding the parameters
+ * @par hyperPar    object holding the hyper parameters
+ * @see DataClass, likelihood_binomial, priormxilik_binomial
+ * @author Lars Simon Zehnder
+ * -------------------------------------------------------------
+ **/
+void LogBinomialFix::update (const unsigned int& K, const arma::mat& y,
+        const arma::ivec& S, const arma::mat& expos, const arma::vec& T, 
+        const ParBinomialFix& par, const PriorBinomialFix& hyperPar)
+{
+    liklist lik     = likelihood_binomial(y, par.p, T);
+    DataClass dataC = classification_fix(K, S, lik);
+    mixlik          = arma::sum(dataC.logLikCd);
+    /* Compute likelihood of mixture prior */
+    mixprior        = priormixlik_binomial(par.p, hyperPar.aStart, 
+            hyperPar.bStart);
+}
 #endif /* __FINMIX_LOGBINOMIALFIX_H__ */
 
 

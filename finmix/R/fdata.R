@@ -645,19 +645,21 @@ setReplaceMethod("setT", "fdata",
 ### Check S: Indicators must be of type 'integer'. If this is the case
 ### the indicators are turned into a matrix object with storage mode 
 ### 'integer'.
-".check.S.Fdata" <- function(S) 
+".check.S.Fdata" <- function( S ) 
 {
-    if (!all(is.na(S))) {       
-        if (!is.numeric(S)) {
-            stop(paste("Wrong type of slot 'S' in 'fdata' object. ",
-                       "Indicators must be of type 'integer'.",
-                       sep = ""))
+    if ( !all( is.na( S ) ) ) {       
+        if ( !is.numeric( S ) ) {
+            stop( paste( "Wrong type of slot 'S' in 'fdata' object. ",
+                         "Indicators must be of type 'integer'.",
+                         sep = "" ) )
         } else {
-            S <- as.matrix(S)
-            storage.mode(S) <- "integer"
-            return(S)
+            S <- as.matrix( S )
+            storage.mode( S ) <- "integer"
+            return( S )
         }
-    } 
+    } else {
+        return ( S )
+    }
 }
 
 ### Check T: Repetitions must be of type 'integer'. If this is the case
@@ -723,10 +725,10 @@ setReplaceMethod("setT", "fdata",
 ### are used in the plot.
 ".plot.discrete.Fdata" <- function(obj)
 {
-    if (has.Y(obj, verbose = TRUE)) {
+    if ( hasY(obj, verbose = TRUE ) ) {
         datam   <- getColY(obj)
     }
-    if (has.Exp(obj)) {
+    if (hasExp(obj)) {
         exp     <- getColExp(obj)
         datam   <- datam * exp
     } 
@@ -757,22 +759,28 @@ setReplaceMethod("setT", "fdata",
 ".plot.continuous.Fdata" <- function(obj, dev)
 {
     datam   <- getColY(obj)
+    r       <- obj@r
     if (obj@r == 1) {
-        .symmetric.Hist(datam, colnames(datam))
-    } else if (x@r == 2) { ## 2-dimensional       
-        .symmetric.Hist(datam, colnames(datam))
-        if (.check.grDevice() && dev) {
-            dev.new(title = "Contour plot")
+        .symmetric.Hist(datam, as.list( colnames( datam ) ) )
+    } else if ( obj@r == 2 ) { ## 2-dimensional 
+        if ( !is.null( colnames( datam ) ) ) {
+            col.names   <- colnames( datam )
+        } else {
+            col.names   <- c( "r = 1", "r = 2" )
         }
-        par(mfrow = c(1, 2), mar = c(2, 2, 2, 3),
+        .symmetric.Hist(datam, as.list( col.names ) )
+        if ( .check.grDevice() && dev ) {
+            dev.new( title = "Contour plot", width = 10, height = 6 )
+        }
+        par(mfrow = c(1, 2), mar = c( 2, 2, 2, 3 ),
             oma = c(4, 5, 1, 5))
         plot(datam[, 1], datam[, 2], col = "gray47",
              cex = 0.7, cex.axis = 0.7,
              pch = 20, xlab = "", ylab = "", 
              main = "")
-        mtext(side = 1, colnames(datam)[1],
+        mtext(side = 1, col.names[1],
               cex = 0.7, line = 3)
-        mtext(side = 2, colnames(datam)[2],
+        mtext(side = 2, col.names[2],
               cex = 0.7, line = 3)
         d <- bkde2D(datam, 
                     bandwidth = c(sd(datam[, 1]), 
@@ -780,31 +788,34 @@ setReplaceMethod("setT", "fdata",
         contour(d$x1, d$x2, d$fhat, col = "gray47",
                 cex = 0.7, cex.axis = 0.7, 
                 xlab = "", ylab = "")
-        mtext(side = 1, colnames(datam)[1],
+        mtext(side = 1, col.names[1],
               cex = 0.7, line = 3)
-        mtext(side = 2, colnames(datam)[2],
+        mtext(side = 2, col.names[2],
               cex = 0.7, line = 3)
-        if (.check.grDevice() && dev) {
-            dev.new("Perspective plot")
-        }
-        if (!is.null(colnames(datam))) {
-            col.names <- colnames(datam)
-        } else {
-            col.names <- c("", "")
+        if ( .check.grDevice() && dev ) {
+            dev.new( title = "Perspective plot" )
         }
         persp(d$x1, d$x2, d$fhat, main = "",
-              xlab = col.names[1], ylab = col.names[2], 
-              zlab = "", col = "gray65", 
+              xlab = col.names[1], ylab = col.names[2],               
+              zlab = "P(Y)", col = "gray65", 
               border = "gray47", theta = 55, phi = 30,
               expand = 0.5, lphi = 190, ltheta = 90,
               r = 40, d = 0.1, cex = 0.7, cex.axis = 0.7, 
               cex.lab = 0.7, ticktype = "detailed")                   
     } else { ## multivariate distribution
-        .symmetric.Hist(datam, colnames(datam))
+        if ( !is.null( colnames( datam ) ) ) {
+            col.names   <- colnames( datam )
+        } else {
+            col.names   <- vector( "character", obj@r )
+            for ( rr in 1:r ) {                
+                col.names[rr]   <- paste( "r = ", rr, sep = "" )
+            }
+        }
+        .symmetric.Hist(datam, as.list( col.names ) )
         if (.check.grDevice() && dev) {
             dev.new(title = "Pairs")
         }
-        pairs(datam, col = "gray47", pch = 20, 
+        pairs(datam, labels = col.names, col = "gray47", pch = 20, 
               cex = 0.7, cex.axis = 0.7, cex.labels = 1.3)                      
     }
 }

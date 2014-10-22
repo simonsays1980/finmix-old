@@ -37,8 +37,14 @@ class FinmixModel {
 		unsigned int r;
 	
 		/* ctor */ 
-		FinmixModel(const Rcpp::S4& classS4);	
+		FinmixModel (Rcpp::S4& classS4) :
+            par(classS4.slot("par")),
+            weight(Rcpp::as<arma::mat>((SEXP) classS4.slot("weight"))),
+            indicFix(Rcpp::as<bool>((SEXP) classS4.slot("indicfix"))),
+            K(Rcpp::as<unsigned int>((SEXP) classS4.slot("K"))),
+            r(Rcpp::as<unsigned int>((SEXP) classS4.slot("r"))) {}
+	
 		/* dtor */
-		~FinmixModel();
+		~FinmixModel() {}
 };
 #endif

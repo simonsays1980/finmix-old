@@ -8,7 +8,7 @@
  *
  * finmix is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published
- * by the Free Software Foundatio, either version 3 of the License, or
+ * by the Free Software Foundation, either version 3 of the License, or
  * any later version.
  *
  * finmix is distributed in the hope that it will be useful,
@@ -17,23 +17,31 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with 'finmix'. If not, see <http://www.gnu.org/licenses/>.
+ * along with finmix. If not, see <http://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-#ifndef PARCONDPOISSONFIX_H
-#define PARCONDPOISSONFIX_H
+#ifndef __FINMIX_PARCONDPOISSONFIX_H_
+#define __FINMIX_PARCONDPOISSONFIX_H_
 
 #include <RcppArmadillo.h>
-#include "ParPoissonFix.h"
 #include "FinmixModel.h"
 #include "PriorCondPoissonFix.h"
 #include "distributions.h"
 
-class ParCondPoissonFix : virtual public ParPoissonFix {
+class ParCondPoissonFix {
 	public: 
+		arma::rowvec lambda;
+        double acc;
+		
 		ParCondPoissonFix (const bool&, 
 				const FinmixModel&);
 		virtual ~ParCondPoissonFix () {}
-		void update (PriorCondPoissonFix&);
+        double metropolis (const arma::rowvec&, 
+                const PriorCondPoissonFix&);
+        double proposal_prob (const arma::rowvec&, 
+                const PriorCondPoissonFix&);
+		void update (const PriorCondPoissonFix&);
+        virtual void permute (const arma::urowvec&,
+                const arma::urowvec&);
 };
-#endif
+#endif // __FINMIX_PARCONDPOISSON_H_

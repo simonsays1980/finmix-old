@@ -5,6 +5,10 @@ swap_cc <- function(values, index) {
     .Call('finmix_swap_cc', PACKAGE = 'finmix', values, index)
 }
 
+swap_3d_cc <- function(values, index) {
+    .Call('finmix_swap_3d_cc', PACKAGE = 'finmix', values, index)
+}
+
 swapInteger_cc <- function(values, index) {
     .Call('finmix_swapInteger_cc', PACKAGE = 'finmix', values, index)
 }
@@ -33,23 +37,11 @@ ddirichlet_cc <- function(values, par) {
     .Call('finmix_ddirichlet_cc', PACKAGE = 'finmix', values, par)
 }
 
-hungarian_cc <- function(cost) {
-    .Call('finmix_hungarian_cc', PACKAGE = 'finmix', cost)
+moments_cc <- function(classS4) {
+    .Call('finmix_moments_cc', PACKAGE = 'finmix', classS4)
 }
 
-stephens1997a_poisson_cc <- function(values1, values2, pars, perm) {
-    .Call('finmix_stephens1997a_poisson_cc', PACKAGE = 'finmix', values1, values2, pars, perm)
-}
-
-stephens1997a_binomial_cc <- function(values1, values2, pars, perm) {
-    .Call('finmix_stephens1997a_binomial_cc', PACKAGE = 'finmix', values1, values2, pars, perm)
-}
-
-stephens1997b_poisson_cc <- function(values, comp_par, weight_par) {
-    .Call('finmix_stephens1997b_poisson_cc', PACKAGE = 'finmix', values, comp_par, weight_par)
-}
-
-stephens1997b_binomial_cc <- function(values, reps, comp_par, weight_par) {
-    .Call('finmix_stephens1997b_binomial_cc', PACKAGE = 'finmix', values, reps, comp_par, weight_par)
+permmoments_cc <- function(classS4) {
+    .Call('finmix_permmoments_cc', PACKAGE = 'finmix', classS4)
 }
 

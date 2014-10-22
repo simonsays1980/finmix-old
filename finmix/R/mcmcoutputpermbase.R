@@ -15,14 +15,14 @@
 # You should have received a copy of the GNU General Public License
 # along with finmix. If not, see <http://www.gnu.org/licenses/>.
 
-.mcmcoutputpermbase <- setClass("mcmcoutputpermbase",
-                                contains = c("mcmcpermind", 
-                                             "mcmcoutputbase"),
-                                validity = function(object) 
-                                {
-                                    ## else: OK
-                                    TRUE
-                                }
+.mcmcoutputpermbase <- setClass( "mcmcoutputpermbase",
+                                 contains = c( "mcmcpermind", 
+                                               "mcmcoutputbase" ),
+                                 validity = function( object ) 
+                                 {
+                                     ## else: OK
+                                     TRUE
+                                 }
 )
 
 setMethod("initialize", "mcmcoutputpermbase",
@@ -104,89 +104,149 @@ setMethod("show", "mcmcoutputpermbase",
           }
 )
 
-setMethod("plotTraces", signature(x     = "mcmcoutputpermbase", 
-                                  dev   = "ANY",
-                                  lik   = "ANY"), 
-          function(x, dev = TRUE, lik = 1, ...) 
+setMethod( "plotTraces", signature( x     = "mcmcoutputpermbase", 
+                                    dev   = "ANY",
+                                    lik   = "ANY",
+                                    col   = "ANY" ), 
+          function( x, dev = TRUE, lik = 1, col = FALSE, ... ) 
           {
               dist <- x@model@dist
-              if (lik %in% c(0, 1)) {
-                  if (dist == "poisson") {
-                      .permtraces.Poisson.Base(x, dev)
-                  } else if (dist == "binomial") {
-                      .permtraces.Binomial.Base(x, dev)
-                  } 
+              if ( lik %in% c( 0, 1 ) ) {
+                  if ( dist == "poisson" ) {
+                      .permtraces.Poisson.Base( x, dev )
+                  } else if ( dist == "binomial" ) {
+                      .permtraces.Binomial.Base( x, dev )
+                  } else if ( dist == "exponential" ) {
+                      .permtraces.Exponential.Base( x, dev )
+                  } else if ( dist == "normal" ) {
+                      .permtraces.Normal( x, dev )
+                      .permtraces.Weights.Base( x, dev, col )
+                  } else if ( dist == "student" ) {
+                      .permtraces.Student( x, dev )
+                      .permtraces.Weights.Base( x, dev, col )
+                  } else if ( dist == "normult" ) {
+                      .permtraces.Normult( x, dev, col )
+                      .permtraces.Weights.Base( x, dev, col )
+                  } else if ( dist == "studmult" ) {
+                      .permtraces.Studmult(x, dev, col ) 
+                      .permtraces.Weights.Base( x, dev, col )
+                  }
               }
-              if (lik %in% c(1, 2)) {
+              if ( lik %in% c( 1, 2 ) ) {
                   ## log ##
-                  .permtraces.Log.Base(x, dev)	
+                  .permtraces.Log.Base( x, dev )	
               }
           }
 )
 
-setMethod("plotHist", signature(x   = "mcmcoutputpermbase", 
-                                dev = "ANY"), 
-          function(x, dev = TRUE, ...) 
-          {
-              dist <- x@model@dist
-              if(dist == "poisson") {
-                  .permhist.Poisson.Base(x, dev)
-              }	else if (dist == "binomial") {
-                  .permhist.Binomial.Base(x, dev)
-              }
-          }
+setMethod( "plotHist", signature( x   = "mcmcoutputpermbase", 
+                                  dev = "ANY" ), 
+           function( x, dev = TRUE, ... ) 
+           {
+               dist <- x@model@dist
+               if( dist == "poisson" ) {
+                   .permhist.Poisson.Base( x, dev )
+               } else if ( dist == "binomial" ) {
+                   .permhist.Binomial.Base( x, dev )
+               } else if ( dist == "exponential" ) {
+                   .permhist.Exponential.Base( x, dev )
+               } else if ( dist == "normal" ) {
+                   .permhist.Normal.Base( x, dev)
+               } else if ( dist == "student" ) {
+                   .permhist.Student.Base( x, dev ) 
+               } else if ( dist == "normult" ) {
+                   .permhist.Normult.Base( x, dev )
+               } else if ( dist == "studmult" ) {
+                   .permhist.Studmult.Base( x, dev )
+               }
+           }
 )
 
-setMethod("plotDens", signature(x   = "mcmcoutputpermbase", 
-                                dev = "ANY"), 
-          function(x, dev = TRUE, ...) 
-          {
-              dist <- x@model@dist
-              if (dist == "poisson") {
-                  .permdens.Poisson.Base(x, dev)
-              }	else if (dist == "binomial") {
-                  .permdens.Binomial.Base(x, dev)
-              }
-          }
+setMethod( "plotDens", signature( x   = "mcmcoutputpermbase", 
+                                  dev = "ANY" ), 
+           function( x, dev = TRUE, ... ) 
+           {
+               dist <- x@model@dist
+               if ( dist == "poisson" ) {
+                   .permdens.Poisson.Base( x, dev )
+               } else if ( dist == "binomial" ) {
+                   .permdens.Binomial.Base( x, dev )
+               } else if ( dist == "exponential" ) {
+                   .permdens.Exponential.Base( x, dev )
+               } else if ( dist == "normal" ) {
+                   .permdens.Normal.Base( x, dev)
+               } else if ( dist == "student" ) {
+                   .permdens.Student.Base( x, dev ) 
+               } else if ( dist == "normult" ) {
+                   .permdems.Normult.Base( x, dev )
+               } else if ( dist == "studmult" ) {
+                   .permdems.Studmult.Base( x, dev )
+               }
+
+           }
 )
 
-setMethod("plotPointProc", signature(x      = "mcmcoutputpermbase",
-                                     dev    = "ANY"),
-          function(x, dev = TRUE, ...)
-          {
-              dist <- x@model@dist
-              if (dist == "poisson") {
-                  .permpointproc.Poisson(x, dev)
-              } else if (dist == "binomial") {
-                  .permpointproc.Binomial(x, dev)
-              }
-          }
+setMethod( "plotPointProc", signature( x      = "mcmcoutputpermbase",
+                                       dev    = "ANY" ),
+            function( x, dev = TRUE, ... )
+            {
+                dist <- x@model@dist
+                if ( dist %in% c( "poisson", "exponential" ) ) {
+                    .permpointproc.Poisson( x, dev )
+                } else if ( dist == "binomial" ) {
+                    .permpointproc.Binomial( x, dev )
+                } else if ( dist == "exponential" ) {
+                    .permpointproc.Exponential( x, dev )
+                } else if ( dist %in% c( "normal", "student" ) ) {
+                    .permpointproc.Normal( x, dev )
+                } else if ( dist %in% c( "normult", "studmult" ) ) {
+                    .permpointproc.Normult( x, dev )
+                }
+            }
 )
 
-setMethod("plotSampRep", signature(x    = "mcmcoutputpermbase",
-                                   dev  = "ANY"),
-          function(x, dev, ...) 
-          {
-              dist <- x@model@dist
-              if (dist == "poisson") {
-                  .permsamprep.Poisson(x, dev)
-              } else if (dist == "binomial") {
-                  .permsamprep.Binomial(x, dev)
-              }
-          }
+setMethod( "plotSampRep", signature( x    = "mcmcoutputpermbase",
+                                     dev  = "ANY" ),
+           function( x, dev, ... ) 
+           {
+               dist <- x@model@dist
+               if ( dist == "poisson" ) {
+                   .permsamprep.Poisson( x, dev )
+               } else if ( dist == "binomial" ) {
+                   .permsamprep.Binomial( x, dev )                                      
+               } else if ( dist == "exponential" ) {
+                   .permsamprep.Exponential( x, dev )
+               } else if ( dist == "normal" ) {
+                   .permsamprep.Normal( x, dev )
+               } else if ( dist == "student" ) {
+                   .permsamprep( x, dev )
+               } else if ( dist == "normult" ) {
+                   .permsamprep.Normal( x, dev)
+               } else if ( dist == "studmult" ) {
+                   .permsamprep.Studmult( x, dev )
+               }
+           }
 )
 
-setMethod("plotPostDens", signature(x   = "mcmcoutputpermbase",
-                                    dev = "ANY"),
-          function(x, dev = TRUE, ...) 
-          {
-              dist <- x@model@dist
-              if (dist == "poisson") {
-                  .permpostdens.Poisson(x, dev)
-              } else if (dist == "binomial") {
-                  .permpostdens.Binomial(x, dev)
-              }
-          }
+setMethod( "plotPostDens", signature( x   = "mcmcoutputpermbase",
+                                      dev = "ANY" ),
+           function( x, dev = TRUE, ... ) 
+           {
+               dist <- x@model@dist
+               if ( dist %in% c( "poisson", "exponential" ) ) {
+                   .permpostdens.Poisson( x, dev )
+               } else if ( dist == "binomial" ) {
+                   .permpostdens.Binomial( x, dev )
+               } else if ( dist == "normal" ) {
+                   .permpostdens.Normal( x, dev )
+               } else if ( dist == "student" ) {
+                   .permpostdens.Student( x, dev )
+               } else if ( dist == "normult" ){
+                   .permpostdens.Normult( x, dev )
+               } else if ( dist == "studmult" ) {
+                   .permpostdens.Studmult( x, dev )
+               }
+           }
 )
 
 ### Private functions. 
@@ -254,114 +314,350 @@ setMethod("plotPostDens", signature(x   = "mcmcoutputpermbase",
     mtext(side = 1, "Iterations", cex = 0.7, line = 3)
 }
 
-### Traces log-likelihoods: Plots traces for the log-likelihoods.
-".permtraces.Log.Base" <- function(x, dev)
+".permtraces.Exponential.Base" <- function( x, dev )
 {
-    if (.check.grDevice() && dev) {
-        dev.new(title = "Log Likelihood Traceplots (permuted)")
+    K <- x@model@K
+    trace.n <- K * 2 - 1
+    if ( .check.grDevice() && dev ) {
+        dev.new( title = "Traceplots" )
     }
-    par(mfrow = c(3, 1), mar = c(1, 0, 0, 0),
-        oma = c(4, 5, 4, 4))
+    par( mfrow = c( trace.n, 1 ), mar = c( 1, 0, 0, 0 ),
+         oma = c( 4, 5, 4, 4 ) )
+    lambda <- x@parperm$lambda
+    for ( k in 1:K ) {
+        plot( lambda[, k], type = "l", axes = F, 
+              col = "gray20", xlab = "", ylab = "" )                      
+        axis( 2, las = 2, cex.axis = .7 )
+        mtext( side = 2, las = 2, bquote( lambda[k = .( k )] ),
+               cex = .6, line = 3 )
+    }
+    weight <- x@weight
+    for ( k in 1:( K - 1 ) ) {
+        plot( weight[, k], type = "l", axes = F, 
+              col = "gray47", xlab = "", ylab = "" )
+        axis( 2, las = 2, cex.axis = .7 )
+        mtext( side = 2, las = 2, bquote(eta[k = .(k)]),
+               cex = .6, line = 3 )
+    }
+    axis( 1 )
+    mtext( side = 1, "Iterations", cex = .7, line = 3 )                  
+}
+
+".permtraces.Weights.Base"   <- function( x, dev, col ) 
+{
+    weight  <- x@weightperm
+    K       <- x@model@K
+    if ( .check.grDevice() && dev ) {
+        dev.new( title = "Traceplots Weights" )
+    }
+    if ( col ) {
+        cscale  <- rainbow( K, start = 0.5, end = 0 )
+    } else {
+        cscale  <- gray.colors( K, start = 0.5, end = 0.15 )
+    } 
+
+    plot( weight[, 1], type = "l", axes = F,
+          col = cscale[1], xlab = "", ylab = "", ylim = c( 0, 1.2 ) )
+    for( k in 2:K ) {
+        lines( weight[, k], col = cscale[k] )
+    }
+    axis( 2, las = 2, cex.axis = .7 )
+    mtext( side = 2, las = 2, bquote( eta ),
+           cex = .6, line = 3 )
+    name    <- vector( "character", K )
+    for( k in 1:K ) {
+        name[k]     <- paste( "k = ", k, sep = "" )
+    }
+    legend( "top", legend = name, col = cscale, lty = 1,
+             horiz = TRUE, cex = .7 )
+    axis( 1 )
+    mtext( side = 1, "Iterations", cex = .7, line = 3 )
+}
+
+### Traces log-likelihoods: Plots traces for the log-likelihoods.
+".permtraces.Log.Base" <- function( x, dev )
+{
+    if ( .check.grDevice() && dev ) {
+        dev.new( title = "Log Likelihood Traceplots (permuted)" )
+    }
+    if ( col ) {
+        cscale  <- rainbow( 3, start = 0, end = .5 )
+    } else {
+        cscale  <- gray.colors( 3, start = 0, end = .15 )
+    }
+    par( mfrow = c( 3, 1 ), mar = c( 1, 0, 0, 0 ),
+        oma = c( 4, 5, 4, 4 ) )    
     mixlik <- x@logperm$mixlik
-    plot(mixlik, type = "l", axes = F,
-         col = "gray20", xlab = "", ylab = "")
-    axis(2, las = 2, cex.axis = 0.7)
-    mtext(side = 2, las = 3, "mixlik", cex = 0.6,
-          line = 3)
+    plot( mixlik, type = "l", axes = F,
+          col = cscale[3], xlab = "", ylab = "" )
+    axis( 2, las = 2, cex.axis = 0.7 )
+    mtext( side = 2, las = 3, "mixlik", cex = 0.6,
+           line = 3 )
     mixprior <- x@logperm$mixprior
-    plot(mixprior, type = "l", axes = F,
-         col = "gray65", xlab = "", ylab = "")
-    axis(2, las = 2, cex.axis = 0.7)
-    mtext(side = 2, las = 3, "mixprior", cex = 0.6,
-          line = 3)
+    plot( mixprior, type = "l", axes = F,
+          col = cscale[2], xlab = "", ylab = "" )
+    axis( 2, las = 2, cex.axis = 0.7 )
+    mtext( side = 2, las = 3, "mixprior", cex = 0.6,
+           line = 3)
     cdpost <- x@logperm$cdpost
-    plot(mixprior, type = "l", axes = F,
-         col = "gray47", xlab = "", ylab = "")
-    axis(2, las = 2, cex.axis = 0.7)
-    mtext(side = 2, las = 3, "cdpost", cex = 0.6,
-          line = 3)
-    axis(1)
-    mtext(side = 1, "Iterations", cex = 0.7, line = 3)
+    plot( mixprior, type = "l", axes = F,
+          col = cscale[3], xlab = "", ylab = "" )
+    axis( 2, las = 2, cex.axis = 0.7 )
+    mtext( side = 2, las = 3, "cdpost", cex = 0.6,
+           line = 3 )
+    axis( 1 )
+    mtext( side = 1, "Iterations", cex = 0.7, line = 3 )
 }
 
 ### Histograms
 ### Histograms Poisson: Plots histograms for all Poisson 
 ### parameters and the weights.
-".permhist.Poisson.Base" <- function(x, dev)
+".permhist.Poisson.Base" <- function( x, dev )
 {
     K <- x@model@K 
-    if (.check.grDevice() && dev) {
-        dev.new(title = "Histograms (permuted)")
+    if ( .check.grDevice() && dev ) {
+        dev.new( title = "Histograms (permuted)" )
     }
     lambda      <- x@parperm$lambda
     weight      <- x@weightperm
-    vars        <- cbind(lambda, weight[, seq(1:(K - 1))])
-    lab.names   <- vector("list", 2 * K - 1)
-    for (k in 1:K) {
-        lab.names[[k]] <- bquote(lambda[.(k)])
+    vars        <- cbind( lambda, weight[, seq( 1:( K - 1 ) )] )
+    lab.names   <- vector( "list", 2 * K - 1 )
+    for ( k in 1:K ) {
+        lab.names[[k]] <- bquote( lambda[.( k )] )
     }
-    for (k in (K + 1):(2 * K - 1)) {
-        lab.names[[k]] <- bquote(eta[.(k - K)])
+    for ( k in ( K + 1 ):( 2 * K - 1 ) ) {
+        lab.names[[k]] <- bquote( eta[.( k - K )] )
     }
-    .symmetric.Hist(vars, lab.names)
+    .symmetric.Hist( vars, lab.names )
 }
 
-".permhist.Binomial.Base" <- function(x, dev)
+".permhist.Binomial.Base" <- function( x, dev )
 {
     K <- x@model@K 
-    if (.check.grDevice() && dev) {
-        dev.new(title = "Histograms (permuted)")
+    if ( .check.grDevice() && dev ) {
+        dev.new( title = "Histograms (permuted)" )
     }
     p           <- x@parperm$p
     weight      <- x@weightperm
-    vars        <- cbind(p, weight[, seq(1:(K - 1))])
-    lab.names   <- vector("list", 2 * K - 1)
-    for (k in 1:K) {
-        lab.names[[k]] <- bquote(p[.(k)])
+    vars        <- cbind( p, weight[, seq( 1:( K - 1 ) )] )
+    lab.names   <- vector( "list", 2 * K - 1 )
+    for ( k in 1:K ) {
+        lab.names[[k]] <- bquote( p[.( k )] )
     }
-    for (k in (K + 1):(2 * K - 1)) {
-        lab.names[[k]] <- bquote(eta[.(k - K)])
+    for ( k in ( K + 1 ):( 2 * K - 1 ) ) {
+        lab.names[[k]] <- bquote( eta[.( k - K )] )
     }
-    .symmetric.Hist(vars, lab.names)
+    .symmetric.Hist( vars, lab.names )
+}
+
+".permhist.Exponential.Base" <- function( x, dev )
+{
+    K <- x@model@K 
+    if ( .check.grDevice() && dev ) {
+        dev.new( title = "Histograms (permuted)" )
+    }
+    lambda <- x@parperm$lambda
+    weight <- x@weightperm		
+    vars <- cbind( lambda, weight[, seq( 1, K - 1 )] )
+    lab.names <- vector( "list", 2 * K - 1 )
+    for ( k in seq( 1, K ) ) {
+        lab.names[[k]] <- bquote( lambda[.( k )] )
+    }
+    for ( k in seq( K + 1, 2 * K - 1 ) ) {
+        lab.names[[k]] <- bquote( eta[.( k - K )] )
+    }  
+    .symmetric.Hist( vars, lab.names )
+}
+
+".permhist.Normal.Base" <- function( x, dev )
+{
+    .permhist.Normal( x, dev )
+    if ( K > 1 ) {
+        weight              <- x@weightperm
+        weights.lab.names   <- vector( "list", K ) 
+        for ( k in 1:K ) {
+            weights.lab.names[[k]]  <- bquote( eta[.( k )] )
+        }
+        if ( K > 1 ) {
+            if ( .check.grDevice() && dev ) {
+                dev.new( title = "Histograms Weights (permuted)" )
+            }
+            .symmetric.Hist( weight, weights.lab.names )
+        }
+    }
+}
+
+".permhist.Student.Base" <- function( x, dev )
+{
+    .permhist.Student( x, dev )
+    if ( K > 1 ) {
+        weight              <- x@weightperm
+        weight.lab.names    <- vector( "list", K )
+        for ( k in 1:K ) {
+            weight.lab.names[[k]]   <- bquote( eta[.( k )] )
+        }
+        if ( .check.grDevice() && dev ) {
+            dev.new( title = "Histograms Weights (permuted)" )
+        }
+        .symmetric.Hist( weight, weight.lab.names )
+    }
+}
+
+".permhist.Normult.Base"  <- function( x, dev ) 
+{
+    .permhist.Normult( x, dev )    
+    if ( K > 1 ) {
+        weight              <- x@weightperm
+        weight.lab.names    <- vector( "list", K )        
+        for ( k in 1:K ) {
+            weight.lab.names[[k]]   <- bquote( eta[.( k ) ] )
+        }
+        if ( .check.grDevice() && dev ) {
+            dev.new( title = "Histograms Weights (permuted)" )
+        }
+        .symmetric.Hist( weight, weight.lab.names )
+    }
+}
+
+".permhist.Studmult.Base"  <- function( x, dev ) 
+{
+    .permhist.Studmult( x, dev )
+    if ( K > 1 ) {
+        weight              <- x@weightperm
+        weight.lab.names    <- vector( "list", K )
+        for ( k in 1:K ) {
+            weight.lab.names[[k]]   <- bquote( eta[.( k )] )
+        }
+        if ( .check.grDevice() && dev ) {
+            dev.new( title = "Histograms Weights (permuted)" )
+        }
+       .symmetric.Hist( weight, weight.lab.names )
+    }
 }
 
 ### Densities
 ### Densities Poisson: Plots Kernel densities for all Poisson
 ### parameters and weights.
-".permdens.Poisson.Base" <- function(x, dev)
+".permdens.Poisson.Base" <- function( x, dev )
 {
     K <- x@model@K 
-    if (.check.grDevice() && dev) {
-        dev.new(title = "Histograms (permuted)")
+    if ( .check.grDevice() && dev ) {
+        dev.new( title = "Histograms (permuted)" )
     }
     lambda      <- x@parperm$lambda
     weight      <- x@weightperm
-    vars        <- cbind(lambda, weight[, seq(1:(K - 1))])
-    lab.names   <- vector("list", 2 * K - 1)
-    for (k in 1:K) {
-        lab.names[[k]] <- bquote(lambda[.(k)])
+    vars        <- cbind( lambda, weight[, seq( 1:( K - 1 ) )] )
+    lab.names   <- vector( "list", 2 * K - 1 )
+    for ( k in 1:K ) {
+        lab.names[[k]] <- bquote( lambda[.( k )] )
     }
-    for (k in (K + 1):(2 * K - 1)) {
-        lab.names[[k]] <- bquote(eta[.(k - K)])
+    for ( k in ( K + 1 ):( 2 * K - 1 ) ) {
+        lab.names[[k]] <- bquote( eta[.( k - K )] )
     }
-    .symmetric.Dens(vars, lab.names)
+    .symmetric.Dens( vars, lab.names )
 }
 
-".permdens.Binomial.Base" <- function(x, dev)
+".permdens.Binomial.Base" <- function( x, dev )
 {
     K <- x@model@K 
-    if (.check.grDevice() && dev) {
-        dev.new(title = "Histograms (permuted)")
+    if ( .check.grDevice() && dev ) {
+        dev.new( title = "Histograms (permuted)" )
     }
     p           <- x@parperm$p
     weight      <- x@weightperm
-    vars        <- cbind(p, weight[, seq(1:(K - 1))])
-    lab.names   <- vector("list", 2 * K - 1)
-    for (k in 1:K) {
-        lab.names[[k]] <- bquote(p[.(k)])
+    vars        <- cbind( p, weight[, seq( 1:( K - 1 ) )] )
+    lab.names   <- vector( "list", 2 * K - 1 )
+    for ( k in 1:K ) {
+        lab.names[[k]] <- bquote( p[.( k )] )
     }
-    for (k in (K + 1):(2 * K - 1)) {
-        lab.names[[k]] <- bquote(eta[.(k - K)])
+    for ( k in ( K + 1 ):( 2 * K - 1 ) ) {
+        lab.names[[k]] <- bquote( eta[.( k - K )] )
     }
-    .symmetric.Dens(vars, lab.names)
+    .symmetric.Dens( vars, lab.names )
 }
+
+".permdens.Exponential.Base" <- function( x, dev )
+{
+    K   <- x@model@K
+    if ( .check.grDevice() && dev ) {
+         dev.new( title = "Densities (permuted)" )
+    }
+    lambda      <- x@parperm$lambda
+    weight      <- x@weightperm
+    vars        <- cbind( lambda, weight[, seq( 1, K - 1 )] )
+    lab.names   <- vector( "list", 2 * K - 1 )
+    for ( k in seq( 1, K ) ) {
+        lab.names[[k]]  <- bquote( lambda[.( k )] )
+    }
+    for ( k in seq( K + 1, 2 * K - 1 ) ) {
+        lab.names[[k]]  <- bquote( eta[.( k - K )] )
+    }
+    .symmetric.Dens( vars, lab.names )
+}
+
+".permdens.Normal.Base" <- function( x, dev )
+{
+    .permdens.Normal( x, dev )
+    if ( K > 1 ) {
+        weight              <- x@weightperm
+        weights.lab.names   <- vector( "list", K ) 
+        for ( k in 1:K ) {
+            weights.lab.names[[k]]  <- bquote( eta[.( k )] )
+        }
+        if ( K > 1 ) {
+            if ( .check.grDevice() && dev ) {
+                dev.new( title = "Densities Weights (permuted)" )
+            }
+            .symmetric.Dens( weight, weights.lab.names )
+        }
+    }
+}
+
+".permdens.Student.Base" <- function( x, dev )
+{
+    .permdens.Student( x, dev )
+    if ( K > 1 ) {
+        weight              <- x@weightperm
+        weight.lab.names    <- vector( "list", K )
+        for ( k in 1:K ) {
+            weight.lab.names[[k]]   <- bquote( eta[.( k )] )
+        }
+        if ( .check.grDevice() && dev ) {
+            dev.new( title = "Densities Weights (permuted)" )
+        }
+        .symmetric.Dens( weight, weight.lab.names )
+    }
+}
+
+".permdens.Normult.Base"  <- function( x, dev ) 
+{
+    .permdens.Normult( x, dev )    
+    if ( K > 1 ) {
+        weight              <- x@weightperm
+        weight.lab.names    <- vector( "list", K )        
+        for ( k in 1:K ) {
+            weight.lab.names[[k]]   <- bquote( eta[.( k ) ] )
+        }
+        if ( .check.grDevice() && dev ) {
+            dev.new( title = "Densities Weights (permuted)" )
+        }
+        .symmetric.Dens( weight, weight.lab.names )
+    }
+}
+
+".permdens.Studmult.Base"  <- function( x, dev ) 
+{
+    .permdens.Studmult( x, dev )
+    if ( K > 1 ) {
+        weight              <- x@weightperm
+        weight.lab.names    <- vector( "list", K )
+        for ( k in 1:K ) {
+            weight.lab.names[[k]]   <- bquote( eta[.( k )] )
+        }
+        if ( .check.grDevice() && dev ) {
+            dev.new( title = "Densities Weights (permuted)" )
+        }
+        .symmetric.Dens( weight, weight.lab.names )
+    }
+}
+

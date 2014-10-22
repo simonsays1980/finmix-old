@@ -196,13 +196,15 @@ setMethod("getPostS", "dataclass",
     if(has.sigmainv && has.logdet) {
         return(model.obj)
     } else {
+        r               <- model.obj@r
+        K               <- model.obj@K
         qinv            <- array(0, dim = c(r,r,K))
         logdetq         <- array(0, dim = c(1, K))
         for(k in 1:K) {
-            qinv[,,k]   <- solve(model@par$sigma[,,k])
+            qinv[,,k]   <- solve(model.obj@par$sigma[,,k])
             logdetq[k]  <- log(det(qinv[,,k]))
         }
-        model.obj@par$qinv      <- qinv
+        model.obj@par$sigmainv  <- qinv
         model.obj@par$logdetq   <- logdetq
         return(model.obj)
     }

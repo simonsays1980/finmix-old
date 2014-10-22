@@ -20,13 +20,12 @@
  * along with 'finmix'. If not, see <http://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-#ifndef LOGCONDPOISSONIND_H
-#define LOGCONDPOISSONIND_H
+#ifndef __FINMIX_LOGCONDPOISSONIND_H_
+#define __FINMIX_LOGCONDPOISSONIND_H_
 
 #include <RcppArmadillo.h>
 #include "LogCondPoissonFix.h"
 #include "ParCondPoissonInd.h"
-#include "PriorCondPoissonInd.h"
 
 class LogCondPoissonInd : public LogCondPoissonFix {
 	public:
@@ -36,10 +35,57 @@ class LogCondPoissonInd : public LogCondPoissonFix {
 
 		LogCondPoissonInd ();
 		virtual ~LogCondPoissonInd () {}
-		void update (const unsigned int&, 
-			const arma::mat&, arma::ivec&, 
-			const arma::mat&, 
-			const ParCondPoissonInd&,
-			const PriorCondPoissonInd&);
+		void update (const unsigned int&, const arma::mat&,
+			arma::ivec&, const arma::mat&, const arma::vec&,
+            const ParCondPoissonInd&, const PriorCondPoissonInd&);
 };
+
+// =============================================================
+// Constructor
+// -------------------------------------------------------------
+LogCondPoissonInd::LogCondPoissonInd () : LogCondPoissonFix(),
+	cdpost(0.0), entropy(0.0), maxcdpost(0.0) {}
+
+/** 
+ * -------------------------------------------------------------
+ * update
+ * @brief   Updates the log-likelihoods of the Poisson model
+ *          and samples the indicators S.
+ * @par K           number of components
+ * @par y           data matrix, N x 1
+ * @par S           indicator matrix from last step, N x 1
+ * @par par         object holding the parameters
+ * @par hyperPar    object holding the hyper parameters
+ * @detail  The classification() function samples the indi-
+ *          cators and computes likelihoods and entropy. As the
+ *          model with fixed indicators does use a different 
+ *          function 'classification_fix()' it cannot be made 
+ *          use of inheritance, i.e. the LogPoissonFix::update()
+ *          function is of no use here.
+ * @see DataClass, likelihood_poisson, priormixlik_poisson,
+ *      LogPoissonFix::update()
+ * @author Lars Simon Zehnder
+ * -------------------------------------------------------------
+ **/
+void LogCondPoissonInd::update (const unsigned int& K, 
+	const arma::mat& y, arma::ivec &S, const arma::mat& expos,
+    const arma::vec& T, const ParCondPoissonInd& par, 
+    const PriorCondPoissonInd& hyperPar)
+{
+	arma::mat lambdaM = arma::kron(expos, par.lambda);
+    liklist lik = likelihood_poisson(y, lambdaM);
+    DataClass dataC = classification(S, lik, par.weight);
+    S = dataC.newS;
+	mixlik = dataC.mixLik;
+    /* Compute likelihood of mixture prior */
+    mixprior = priormixlik_condpoisson(par.lambda, hyperPar);
+    if(K > 1) {
+		/* Compute likelihood of Dirichlet prior */
+		mixprior += priormixlik_dirichlet(par.weight, 
+			hyperPar.weightStart);
+		cdpost = mixlik + mixprior + dataC.postS;
+		entropy = dataC.entropy;
+	}
+	
+}
 #endif

@@ -57,106 +57,146 @@ setMethod("show", "mcmcoutputhier",
           }
 )
 
-setMethod("plotTraces", signature(x     = "mcmcoutputhier", 
-                                  dev   = "ANY",
-                                  lik   = "ANY"), 
-          function(x, dev = TRUE, lik = 1, ...) 
+setMethod( "plotTraces", signature( x     = "mcmcoutputhier", 
+                                    dev   = "ANY",
+                                    lik   = "ANY",
+                                    col   = "ANY" ), 
+          function( x, dev = TRUE, lik = 1, col = FALSE, ... ) 
           {
               dist <- x@model@dist
-              if (lik %in% c(0, 1)) {
-                  if (dist == "poisson") {
-                      .traces.Poisson.Base.Hier(x, dev)
-                  } else if (dist == "binomial") {
-                      .traces.Binomial.Base(x, dev)
+              if ( lik %in% c( 0, 1 ) ) {
+                  if ( dist == "poisson" || dist == "cond.poisson" ) {
+                      .traces.Poisson.Base.Hier( x, dev )
+                  } else if ( dist == "binomial" ) {
+                      .traces.Binomial.Base( x, dev )
+                  } else if ( dist == "exponential" ) {
+                      .traces.Exponential.Base( x, dev )
+                  } else if ( dist == "normal" ) {
+                      .traces.Normal.Hier( x, dev )
+                      .traces.Weights.Base( x, dev, col )
+                  } else if ( dist == "student" ) {
+                      .traces.Student.Hier( x, dev )
+                      .traces.Weights.Base( x, dev, col )
+                  } else if ( dist == "normult" ) {
+                      .traces.Normult.Hier( x, dev, col )
+                      .traces.Weights.Base( x, dev, col )
+                  } else if ( dist == "studmult" ) {
+                      .traces.Studmult.Hier( x, dev, col )
+                      .traces.Weights.Base( x, dev, col )
                   }
               }
-              if (lik %in% c(1, 2)) {
+              if ( lik %in% c( 1, 2 ) ) {
                   ## log ##
-                  .traces.Log.Base(x, dev) 
+                  .traces.Log.Base( x, dev, col ) 
               }
           }
 )
 
-setMethod("plotHist", signature(x   = "mcmcoutputhier", 
-                                dev = "ANY"), 
-          function(x, dev = TRUE, ...) 
-          {
-              dist <- x@model@dist
-              if (dist == "poisson") {
-                  .hist.Poisson.Base.Hier(x, dev)
-              }	else if (dist == "binomial") {
-                  .hist.Binomial.Base(x, dev)  
-              }
-          }
+setMethod( "plotHist", signature( x   = "mcmcoutputhier", 
+                                  dev = "ANY" ), 
+           function( x, dev = TRUE, ... ) 
+           {
+               dist <- x@model@dist
+               if ( dist == "poisson" ) {
+                   .hist.Poisson.Base.Hier( x, dev )
+               } else if ( dist == "binomial" ) {
+                   .hist.Binomial.Base( x, dev )  
+               } else if ( dist == "exponential" ) {
+                   .hist.Exponential.Base( x, dev )
+               } else if ( dist == "normal" ) {                   
+                   .hist.Normal.Base.Hier( x, dev )
+               } else if ( dist == "student" ) {
+                   .hist.Student.Base.Hier( x, dev )
+               } else if ( dist == "normult" ) {
+                   .hist.Normult.Base.Hier( x, dev )
+               } else if ( dist == "studmult" ) {
+                   .hist.Studmult.Base.Hier( x, dev )
+               }
+           }
 )
 
-setMethod("plotDens", signature(x   = "mcmcoutputhier",
-                                dev = "ANY"),
-          function(x, dev = TRUE, ...)
-          {
-              dist <- x@model@dist
-              if (dist == "poisson") {
-                  .dens.Poisson.Base.Hier(x, dev)
-              } else if (dist == "binomial") {
-                  .dens.Binomial.Base(x, dev)
-              }
-          }
+setMethod( "plotDens", signature( x   = "mcmcoutputhier",
+                                  dev = "ANY" ),
+           function( x, dev = TRUE, ... )
+           {
+               dist <- x@model@dist
+               if ( dist == "poisson" ) {
+                   .dens.Poisson.Base.Hier( x, dev )
+               } else if ( dist == "binomial" ) {
+                   .dens.Binomial.Base( x, dev )
+               } else if ( dist == "exponential" ) {
+                   .dens.Exponential.Base( x, dev )
+               } else if ( dist == "normal" ) {                   
+                   .dens.Normal.Base.Hier( x, dev )
+               } else if ( dist == "student" ) {
+                   .dens.Student.Base.Hier( x, dev )
+               } else if ( dist == "normult" ) {
+                   .dens.Normult.Base.Hier( x, dev )
+               } else if ( dist == "studmult" ) {
+                   .dens.Studmult.Base.Hier( x, dev )
+               }
+
+           }
 )
 
-setMethod("plotPointProc", signature(x      = "mcmcoutputhier",
-                                     dev    = "ANY"),
-          function(x, dev = TRUE, ...)
-          {
-              ## Call 'plotPointProc()' from 'mcmcoutputbase'
-              callNextMethod(x, dev, ...)
-          }
+setMethod( "plotPointProc", signature( x      = "mcmcoutputhier",
+                                       dev    = "ANY" ),
+          function( x, dev = TRUE, ... )
+           {
+               ## Call 'plotPointProc()' from 'mcmcoutputbase'
+               callNextMethod( x, dev, ... )
+           }
 )
 
-setMethod("plotSampRep", signature(x    = "mcmcoutputhier",
-                                   dev  = "ANY"),
-          function(x, dev = TRUE, ...) 
-          {
-              ## Call 'plotSampRep()' from 'mcmcoutputbase'
-              callNextMethod(x, dev, ...)
-          }
+setMethod( "plotSampRep", signature( x    = "mcmcoutputhier",
+                                     dev  = "ANY" ),
+           function( x, dev = TRUE, ... ) 
+           {
+               ## Call 'plotSampRep()' from 'mcmcoutputbase'
+               callNextMethod( x, dev, ... )
+           }
 )
 
-setMethod("plotPostDens", signature(x   = "mcmcoutputhier",
-                                    dev = "ANY"),
-          function(x, dev = TRUE, ...)
-          {
-              ## Call 'plotPostDens()' from 'mcmcoutputbase'
-              callNextMethod(x, dev, ...)
-          }
+setMethod( "plotPostDens", signature( x   = "mcmcoutputhier",
+                                      dev = "ANY" ),
+           function( x, dev = TRUE, ... )
+           {
+               ## Call 'plotPostDens()' from 'mcmcoutputbase'
+               callNextMethod( x, dev, ... )
+           }
 )
 
-setMethod("subseq", signature(object    = "mcmcoutputhier", 
-                              index     = "array"), 
-          function(object, index) 
-          {
-              ## Call 'subseq()' method from 'mcmcoutputfixhier'
-              as(object, "mcmcoutputbase") <- callNextMethod(object, index)              
-              dist <- object@model@dist
-              if (dist == "poisson") {
-                  .subseq.Poisson.Hier(object, index)
-              }
-          }
+setMethod( "subseq", signature( object    = "mcmcoutputhier", 
+                                index     = "array" ), 
+           function( object, index ) 
+           {
+               ## Call 'subseq()' method from 'mcmcoutputfixhier'
+               as( object, "mcmcoutputbase" ) <- callNextMethod( object, index )             
+               dist <- object@model@dist
+               if ( dist == "poisson" ) {
+                   .subseq.Poisson.Hier( object, index )
+               } else if ( dist %in% c( "normal", "student" ) ) {
+                   .subseq.Norstud.Hier( object, index )
+               } else if ( dist %in% c( "normult", "studmult" ) ) {
+                   .subseq.Normultstud.Hier( object, index )  
+               }
+           }
 )
 
-setMethod("swapElements", signature(object  = "mcmcoutputhier", 
-                                    index   = "array"),
-          function(object, index) 
-          {
-              ## Check arguments, TODO: .validObject ##
-              ## Call method 'swapElements()' from 'mcmcoutputbase' 
-              callNextMethod(object, index)
-          }
+setMethod( "swapElements", signature( object  = "mcmcoutputhier", 
+                                      index   = "array" ),
+           function( object, index ) 
+           {
+               ## Check arguments, TODO: .validObject ##
+               ## Call method 'swapElements()' from 'mcmcoutputbase' 
+               callNextMethod( object, index )
+           }
 )
 
-setMethod("getHyper", "mcmcoutputhier",
-          function(object) {
-              return(object@hyper)
-          }
+setMethod( "getHyper", "mcmcoutputhier",
+           function( object ) {
+               return( object@hyper )
+           }
 )
 
 
@@ -230,6 +270,102 @@ setMethod("getHyper", "mcmcoutputhier",
     .symmetric.Hist(vars, lab.names)
 }	
 
+".hist.Normal.Base.Hier" <- function( x, dev )
+{
+    .hist.Normal( x, dev )
+    C   <- x@hyper$C
+    if ( .check.grDevice() && dev ) {
+        dev.new( title = "Histogram Hyperparameter" )
+    }    
+    .symmetric.Hist( C, "C" )
+    if ( K > 1 ) {
+        weight              <- x@weight
+        weights.lab.names   <- vector( "list", K ) 
+        for ( k in 1:K ) {
+            weights.lab.names[[k]]  <- bquote( eta[.( k )] )
+        }
+        if ( K > 1 ) {
+            if ( .check.grDevice() && dev ) {
+                dev.new( title = "Histograms Weights" )
+            }
+            .symmetric.Hist( weight, weights.lab.names )
+        }
+    }
+}
+
+".hist.Student.Base.Hier" <- function( x, dev )
+{
+    .hist.Student( x, dev )
+    C   <- x@hyper$C
+    if ( .check.grDevice() && dev ) {
+        dev.new( title = "Histogram Hyperparameter" )
+    }    
+    .symmetric.Hist( C, "C" )
+    if ( K > 1 ) {
+        weight              <- x@weight
+        weight.lab.names    <- vector( "list", K )
+        for ( k in 1:K ) {
+            weight.lab.names[[k]]   <- bquote( eta[.( k )] )
+        }
+        if ( .check.grDevice() && dev ) {
+            dev.new( title = "Histograms Weights" )
+        }
+        .symmetric.Hist( weight, weight.lab.names )
+    }
+}
+
+".hist.Normult.Base.Hier"  <- function( x, dev ) 
+{
+    .hist.Normult( x, dev )   
+    Clogdet <- sapply( seq( 1:x@M ), function( i ) log( det( qinmatr( x@hyper$C[i,] ) ) ) )
+    Ctr     <- sapply( seq( 1:x@M ), function( i ) sum( diag( qinmatr( x@hyperC[i,]) ) ) )
+    if ( .check.grDevice() && dev ) {
+        dev.new( title = "Histograms Hyperparameters" )        
+    }
+    lab.C.names <- vector( "list", 2 )
+    lab.C.names[[1]]    <- "tr(C)"
+    lab.C.names[[2]]    <- "log(det(C))"
+    vars                <- cbind( Ctr, Clogdet )
+    .symmetric.Hist( vars, lab.C.names )
+    if ( K > 1 ) {
+        weight              <- x@weight
+        weight.lab.names    <- vector( "list", K )        
+        for ( k in 1:K ) {
+            weight.lab.names[[k]]   <- bquote( eta[.( k ) ] )
+        }
+        if ( .check.grDevice() && dev ) {
+            dev.new( title = "Histograms Weights" )
+        }
+        .symmetric.Hist( weight, weight.lab.names )
+    }
+}
+
+".hist.Studmult.Base.Hier"  <- function( x, dev ) 
+{
+    .hist.Studmult( x, dev )
+    Clogdet <- sapply( seq( 1:x@M ), function( i ) log( det( qinmatr( x@hyper$C[i,] ) ) ) )
+    Ctr     <- sapply( seq( 1:x@M ), function( i ) sum( diag( qinmatr( x@hyperC[i,]) ) ) )
+    if ( .check.grDevice() && dev ) {
+        dev.new( title = "Histograms Hyperparameters" )        
+    }
+    lab.C.names <- vector( "list", 2 )
+    lab.C.names[[1]]    <- "tr(C)"
+    lab.C.names[[2]]    <- "log(det(C))"
+    vars                <- cbind( Ctr, Clogdet )
+    .symmetric.Hist( vars, lab.C.names )
+    if ( K > 1 ) {
+        weight              <- x@weight
+        weight.lab.names    <- vector( "list", K )
+        for ( k in 1:K ) {
+            weight.lab.names[[k]]   <- bquote( eta[.( k )] )
+        }
+        if ( .check.grDevice() && dev ) {
+            dev.new( title = "Histograms Weights" )
+        }
+        .symmetric.Hist( weight, weight.lab.names )
+    }
+}
+
 ### Plot Densities
 ### Plot Densities Poisson: Plots Kernel densities for
 ### the Poisson parameters the weights and the hyper-
@@ -253,5 +389,101 @@ setMethod("getHyper", "mcmcoutputhier",
     }
     lab.names[[2 * K]] <- "b"
     .symmetric.Dens(vars, lab.names)
+}
+
+".dens.Normal.Base.Hier" <- function( x, dev )
+{
+    .dens.Normal( x, dev )
+    C   <- x@hyper$C
+    if ( .check.grDevice() && dev ) {
+        dev.new( title = "Density Hyperparameter" )
+    }    
+    .symmetric.Dens( C, "C" )
+    if ( K > 1 ) {
+        weight              <- x@weight
+        weights.lab.names   <- vector( "list", K ) 
+        for ( k in 1:K ) {
+            weights.lab.names[[k]]  <- bquote( eta[.( k )] )
+        }
+        if ( K > 1 ) {
+            if ( .check.grDevice() && dev ) {
+                dev.new( title = "Densities Weights" )
+            }
+            .symmetric.Dens( weight, weights.lab.names )
+        }
+    }
+}
+
+".dens.Student.Base.Hier" <- function( x, dev )
+{
+    .dens.Student( x, dev )
+    C   <- x@hyper$C
+    if ( .check.grDevice() && dev ) {
+        dev.new( title = "Histogram Hyperparameter" )
+    }    
+    .symmetric.dens( C, "C" )
+    if ( K > 1 ) {
+        weight              <- x@weight
+        weight.lab.names    <- vector( "list", K )
+        for ( k in 1:K ) {
+            weight.lab.names[[k]]   <- bquote( eta[.( k )] )
+        }
+        if ( .check.grDevice() && dev ) {
+            dev.new( title = "Histograms Weights" )
+        }
+        .symmetric.Dens( weight, weight.lab.names )
+    }
+}
+
+".dens.Normult.Base.Hier"  <- function( x, dev ) 
+{
+    .dens.Normult( x, dev )   
+    Clogdet <- sapply( seq( 1:x@M ), function( i ) log( det( qinmatr( x@hyper$C[i,] ) ) ) )
+    Ctr     <- sapply( seq( 1:x@M ), function( i ) sum( diag( qinmatr( x@hyperC[i,]) ) ) )
+    if ( .check.grDevice() && dev ) {
+        dev.new( title = "Densities Hyperparameters" )        
+    }
+    lab.C.names <- vector( "list", 2 )
+    lab.C.names[[1]]    <- "tr(C)"
+    lab.C.names[[2]]    <- "log(det(C))"
+    vars                <- cbind( Ctr, Clogdet )
+    .symmetric.Dens( vars, lab.C.names )
+    if ( K > 1 ) {
+        weight              <- x@weight
+        weight.lab.names    <- vector( "list", K )        
+        for ( k in 1:K ) {
+            weight.lab.names[[k]]   <- bquote( eta[.( k ) ] )
+        }
+        if ( .check.grDevice() && dev ) {
+            dev.new( title = "Densities Weights" )
+        }
+        .symmetric.Dens( weight, weight.lab.names )
+    }
+}
+
+".dens.Studmult.Base.Hier"  <- function( x, dev ) 
+{
+    .dens.Studmult( x, dev )
+    Clogdet <- sapply( seq( 1:x@M ), function( i ) log( det( qinmatr( x@hyper$C[i,] ) ) ) )
+    Ctr     <- sapply( seq( 1:x@M ), function( i ) sum( diag( qinmatr( x@hyperC[i,]) ) ) )
+    if ( .check.grDevice() && dev ) {
+        dev.new( title = "Densities Hyperparameters" )        
+    }
+    lab.C.names <- vector( "list", 2 )
+    lab.C.names[[1]]    <- "tr(C)"
+    lab.C.names[[2]]    <- "log(det(C))"
+    vars                <- cbind( Ctr, Clogdet )
+    .symmetric.Dens( vars, lab.C.names )
+    if ( K > 1 ) {
+        weight              <- x@weight
+        weight.lab.names    <- vector( "list", K )
+        for ( k in 1:K ) {
+            weight.lab.names[[k]]   <- bquote( eta[.( k )] )
+        }
+        if ( .check.grDevice() && dev ) {
+            dev.new( title = "Densities Weights" )
+        }
+        .symmetric.Dens( weight, weight.lab.names )
+    }
 }
 

@@ -22,6 +22,22 @@ BEGIN_RCPP
     return __sexp_result;
 END_RCPP
 }
+// swap_3d_cc
+Rcpp::NumericVector swap_3d_cc(Rcpp::NumericVector values, Rcpp::IntegerMatrix index);
+RcppExport SEXP finmix_swap_3d_cc(SEXP valuesSEXP, SEXP indexSEXP) {
+BEGIN_RCPP
+    SEXP __sexp_result;
+    {
+        Rcpp::RNGScope __rngScope;
+        Rcpp::traits::input_parameter< Rcpp::NumericVector >::type values(valuesSEXP );
+        Rcpp::traits::input_parameter< Rcpp::IntegerMatrix >::type index(indexSEXP );
+        Rcpp::NumericVector __result = swap_3d_cc(values, index);
+        PROTECT(__sexp_result = Rcpp::wrap(__result));
+    }
+    UNPROTECT(1);
+    return __sexp_result;
+END_RCPP
+}
 // swapInteger_cc
 Rcpp::IntegerMatrix swapInteger_cc(Rcpp::IntegerMatrix values, Rcpp::IntegerMatrix index);
 RcppExport SEXP finmix_swapInteger_cc(SEXP valuesSEXP, SEXP indexSEXP) {
@@ -136,86 +152,30 @@ BEGIN_RCPP
     return __sexp_result;
 END_RCPP
 }
-// hungarian_cc
-arma::imat hungarian_cc(const arma::mat cost);
-RcppExport SEXP finmix_hungarian_cc(SEXP costSEXP) {
+// moments_cc
+Rcpp::List moments_cc(Rcpp::S4 classS4);
+RcppExport SEXP finmix_moments_cc(SEXP classS4SEXP) {
 BEGIN_RCPP
     SEXP __sexp_result;
     {
         Rcpp::RNGScope __rngScope;
-        Rcpp::traits::input_parameter< const arma::mat >::type cost(costSEXP );
-        arma::imat __result = hungarian_cc(cost);
+        Rcpp::traits::input_parameter< Rcpp::S4 >::type classS4(classS4SEXP );
+        Rcpp::List __result = moments_cc(classS4);
         PROTECT(__sexp_result = Rcpp::wrap(__result));
     }
     UNPROTECT(1);
     return __sexp_result;
 END_RCPP
 }
-// stephens1997a_poisson_cc
-arma::imat stephens1997a_poisson_cc(const Rcpp::NumericMatrix values1, const Rcpp::NumericMatrix values2, arma::vec pars, const arma::umat perm);
-RcppExport SEXP finmix_stephens1997a_poisson_cc(SEXP values1SEXP, SEXP values2SEXP, SEXP parsSEXP, SEXP permSEXP) {
+// permmoments_cc
+Rcpp::List permmoments_cc(Rcpp::S4 classS4);
+RcppExport SEXP finmix_permmoments_cc(SEXP classS4SEXP) {
 BEGIN_RCPP
     SEXP __sexp_result;
     {
         Rcpp::RNGScope __rngScope;
-        Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type values1(values1SEXP );
-        Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type values2(values2SEXP );
-        Rcpp::traits::input_parameter< arma::vec >::type pars(parsSEXP );
-        Rcpp::traits::input_parameter< const arma::umat >::type perm(permSEXP );
-        arma::imat __result = stephens1997a_poisson_cc(values1, values2, pars, perm);
-        PROTECT(__sexp_result = Rcpp::wrap(__result));
-    }
-    UNPROTECT(1);
-    return __sexp_result;
-END_RCPP
-}
-// stephens1997a_binomial_cc
-arma::imat stephens1997a_binomial_cc(const Rcpp::NumericMatrix values1, const Rcpp::NumericMatrix values2, arma::vec pars, const arma::umat perm);
-RcppExport SEXP finmix_stephens1997a_binomial_cc(SEXP values1SEXP, SEXP values2SEXP, SEXP parsSEXP, SEXP permSEXP) {
-BEGIN_RCPP
-    SEXP __sexp_result;
-    {
-        Rcpp::RNGScope __rngScope;
-        Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type values1(values1SEXP );
-        Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type values2(values2SEXP );
-        Rcpp::traits::input_parameter< arma::vec >::type pars(parsSEXP );
-        Rcpp::traits::input_parameter< const arma::umat >::type perm(permSEXP );
-        arma::imat __result = stephens1997a_binomial_cc(values1, values2, pars, perm);
-        PROTECT(__sexp_result = Rcpp::wrap(__result));
-    }
-    UNPROTECT(1);
-    return __sexp_result;
-END_RCPP
-}
-// stephens1997b_poisson_cc
-arma::imat stephens1997b_poisson_cc(const Rcpp::NumericVector values, const Rcpp::NumericMatrix comp_par, const Rcpp::NumericMatrix weight_par);
-RcppExport SEXP finmix_stephens1997b_poisson_cc(SEXP valuesSEXP, SEXP comp_parSEXP, SEXP weight_parSEXP) {
-BEGIN_RCPP
-    SEXP __sexp_result;
-    {
-        Rcpp::RNGScope __rngScope;
-        Rcpp::traits::input_parameter< const Rcpp::NumericVector >::type values(valuesSEXP );
-        Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type comp_par(comp_parSEXP );
-        Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type weight_par(weight_parSEXP );
-        arma::imat __result = stephens1997b_poisson_cc(values, comp_par, weight_par);
-        PROTECT(__sexp_result = Rcpp::wrap(__result));
-    }
-    UNPROTECT(1);
-    return __sexp_result;
-END_RCPP
-}
-// stephens1997b_binomial_cc
-arma::imat stephens1997b_binomial_cc(const Rcpp::NumericVector values, const Rcpp::NumericVector reps, const Rcpp::NumericMatrix comp_par, const Rcpp::NumericMatrix weight_par);
-RcppExport SEXP finmix_stephens1997b_binomial_cc(SEXP valuesSEXP, SEXP repsSEXP, SEXP comp_parSEXP, SEXP weight_parSEXP) {
-BEGIN_RCPP
-    SEXP __sexp_result;
-    {
-        Rcpp::RNGScope __rngScope;
-        Rcpp::traits::input_parameter< const Rcpp::NumericVector >::type values(valuesSEXP );
-        Rcpp::traits::input_parameter< const Rcpp::NumericVector >::type reps(repsSEXP );
-        Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type comp_par(comp_parSEXP );
-        Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type weight_par(weight_parSEXP );
-        arma::imat __result = stephens1997b_binomial_cc(values, reps, comp_par, weight_par);
+        Rcpp::traits::input_parameter< Rcpp::S4 >::type classS4(classS4SEXP );
+        Rcpp::List __result = permmoments_cc(classS4);
         PROTECT(__sexp_result = Rcpp::wrap(__result));
     }
     UNPROTECT(1);

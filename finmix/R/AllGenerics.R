@@ -26,6 +26,8 @@ setGeneric("hasT", function(object, verbose = FALSE) standardGeneric("hasT"))
 
 setGeneric("hasPar", function(object, verbose = FALSE) standardGeneric("hasPar"))
 
+setGeneric( "hasDf", function( object, verbose = FALSE ) standardGeneric( "hasDf" ) )
+
 setGeneric("mixturemar", function(object, J) standardGeneric("mixturemar"))
 
 setGeneric("getDist", function(object) standardGeneric("getDist"))
@@ -178,11 +180,11 @@ setGeneric("getSmoments", function(object) standardGeneric("getSmoments"))
 
 ## Class 'prior' -----------------------------------------------------
 
-setGeneric("hasPriorPar", function(object, model, verbose = FALSE) standardGeneric("hasPriorPar"))
+setGeneric( "hasPriorPar", function( object, model, verbose = FALSE ) standardGeneric( "hasPriorPar" ) )
 
 setGeneric("hasPriorWeight", function(object, model, verbose = FALSE) standardGeneric("hasPriorWeight"))
 
-setGeneric("generatePrior", function(object, fdata, model, varargin, coef.mat)
+setGeneric("generatePrior", function(object, ... )
            {
                standardGeneric("generatePrior")
            }
@@ -191,6 +193,8 @@ setGeneric("generatePrior", function(object, fdata, model, varargin, coef.mat)
 setGeneric("getHier", function(object) standardGeneric("getHier"))
 
 setGeneric("setHier<-", function(object, value) standardGeneric("setHier<-"))
+
+setGeneric( "setMHTune<-", function( object, value ) standardGeneric( "setMHTune<-" ) )
 
 ## Class 'mcmc' -------------------------------------------------------
 
@@ -232,9 +236,13 @@ setGeneric("getPostS", function(object) standardGeneric("getPostS"))
 
 setGeneric("getLoglikcd", function(object) standardGeneric("getLoglikcd"))
 
+## Class 'mcmcextract' --------------------------------------------------------------------------
+
+setGeneric( "moments", function( object ) standardGeneric( "moments" ) )
+
 ## Class 'mcmcoutputfix' ------------------------------------------------
 
-setGeneric("plotTraces", function(x, dev = TRUE, lik = 1, ...) standardGeneric("plotTraces"))
+setGeneric("plotTraces", function(x, dev = TRUE, lik = 1, col = FALSE, ...) standardGeneric("plotTraces"))
 
 setGeneric("plotHist", function(x, dev = TRUE, ...) standardGeneric("plotHist"))
 
@@ -247,6 +255,8 @@ setGeneric("plotPostDens", function(x, dev = TRUE, ...) standardGeneric("plotPos
 setGeneric("subseq", function(object, index) standardGeneric("subseq"))
 
 setGeneric("swapElements", function(object, index) standardGeneric("swapElements"))
+
+setGeneric( "extract", function( object, index ) standardGeneric( "extract" ) )
 
 setGeneric("getLog", function(object) standardGeneric("getLog"))
 

@@ -134,14 +134,14 @@ class FIX {
 				arma::vec* mixlik;
 				arma::vec* mixprior;
 		
-				Output (const Rcpp::S4&);
+				Output (Rcpp::S4&);
 				virtual void store (const unsigned int&, Node&);
 		};
 		Node node;
 		Output output;
 
 		FIX (const FinmixData&, const FinmixModel&, const FinmixPrior&,
-			const FinmixMCMC&, const Rcpp::S4&);
+			const FinmixMCMC&, Rcpp::S4&);
 		virtual ~FIX () {}
 		virtual void update ();
 		virtual void store (const unsigned int&);
@@ -196,10 +196,10 @@ template <typename PriorType, typename ParType, typename LogType,
 void FIX <PriorType, ParType, LogType, ParOutType>::Node::update () 
 {
 	hyperPar.update(K, y, S, T, par);
-	par.update(hyperPar);
-	hyperPar.updateHier(par);
-	log.update(K, y, S, expos, T, par, hyperPar);
-	if(RANPERM && K > 1) {
+    par.update(hyperPar);
+    hyperPar.updateHier(par);
+    log.update(K, y, S, expos, T, par, hyperPar);
+    if(RANPERM && K > 1) {
 		permIndex 	= arma::shuffle(compIndex, 1);
 		compIndex2  = (permIndex == compIndex);
 		if(arma::sum(compIndex) != K) {
@@ -233,7 +233,7 @@ void FIX <PriorType, ParType, LogType, ParOutType>::Node::update ()
  * ----------------------------------------------------------
  **/
 template <typename PriorType, typename ParType, typename LogType, typename ParOutType>
-FIX <PriorType, ParType, LogType, ParOutType>::Output::Output (const Rcpp::S4& classS4) : 
+FIX <PriorType, ParType, LogType, ParOutType>::Output::Output (Rcpp::S4& classS4) : 
 		M(Rcpp::as<unsigned int>((SEXP) classS4.slot("M"))),
 		RANPERM(Rcpp::as<bool>((SEXP) classS4.slot("ranperm"))),
 		par(Rcpp::as<Rcpp::List>((SEXP) classS4.slot("par"))) 
@@ -268,12 +268,12 @@ template <typename PriorType, typename ParType, typename LogType,
 void FIX <PriorType, ParType, LogType, ParOutType>::Output::store (const unsigned
 	int& m, Node& node)
 {
-	if (m >= node.BURNIN) {
+ 	if (m >= node.BURNIN) {
 		const unsigned int index = m - node.BURNIN;
 		(*mixlik)(index) = node.log.mixlik;
 		(*mixprior)(index) = node.log.mixprior;
-		par.store(index, node.par);
-	}
+        par.store(index, node.par);
+   	}
 }
 
 // ========================================================
@@ -307,7 +307,7 @@ template <typename PriorType, typename ParType, typename LogType,
 	typename ParOutType>
 FIX <PriorType, ParType, LogType, ParOutType>::FIX (const FinmixData& data,
 	const FinmixModel& model, const FinmixPrior& prior, const FinmixMCMC&
-	mcmc, const Rcpp::S4& classS4) : 
+	mcmc, Rcpp::S4& classS4) : 
 		node(data, model, prior, mcmc), output(classS4) {}
 
 /**

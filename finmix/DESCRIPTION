@@ -42,6 +42,7 @@ Collate:
     distributions.R
     dataclass.R
     RcppExports.R
+    mcmcextract.R
     mcmcoutputfix.R
     mcmcoutputfixhier.R
     mcmcoutputfixpost.R
@@ -63,6 +64,7 @@ Collate:
     mcmcoutputpermhier.R
     mcmcoutputpermpost.R
     mcmcoutputpermhierpost.R
+    mincol.R
     mcmcpermute.R
     mcmcestfix.R
     mcmcestind.R

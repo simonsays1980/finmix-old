@@ -20,13 +20,17 @@
  * along with finmix. If not, see <http://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-#ifndef PRIORLIKELIHOOD_H
-#define PRIORLIKELIHOOD_H
+#ifndef __FINMIX_PRIORLIKELIHOOD_H__
+#define __FINMIX_PRIORLIKELIHOOD_H__
 
 #include <RcppArmadillo.h>
 #include <R.h> 			// to interface with R
 #include <Rmath.h> 		// for using internal R C-functions
 #include "likelihood.h"
+#include "distributions.h"
+#include "rtruncnorm.h"
+#include "PriorCondPoissonFix.h"
+
 /**
  * Evaluates the prior likelihood for the 
  * weights. This function is used in every
@@ -129,38 +133,14 @@ priormixlik_poisson(const arma::rowvec& lambda,
 
 inline double 
 priormixlik_condpoisson (const arma::rowvec& lambda,
-	const arma::rowvec& prior_parA, const arma::rowvec& prior_parB,
-	const arma::rowvec& prior_cond, const bool& HIER, const double &g,
-	const double &G)
-{
-	unsigned int K = lambda.n_elem;
-	double priormixlik = 0.0;
-	if(!HIER) {
-		priormixlik = likelihood_ggamma(lambda, prior_parA, 
-			prior_parB(0), prior_cond);
-	} else {
-		double gN = g + K * prior_parA(0); 	// prior_parA must be the start value
-		double GN = G + arma::accu(lambda);
-		double b = gN/GN;
-		double scale = 1.0/b;
-		/* step 1: log likelihood of prior */
-		for(unsigned int k = 0; k < K; ++k) {
-			priormixlik += R::dgamma(lambda(k) - prior_cond(k), 
-				prior_parA(k), scale, 1);
-		}
-		/**
-		 * step 2: log likelihood of hyperprior with 
-		 * 	start values of hyper parameters.
-		 */
-		scale = 1.0/G;
-		priormixlik += R::dgamma(b, g, scale, 1);
-		/**
-		 * step 3: log likelihood of hyperprior with 
-		 * 	updated hyper parameters.
-		 */
-		scale = 1.0/GN;
-		priormixlik -= R::dgamma(b, gN, scale, 1);
-	}
+	const PriorCondPoissonFix& hyperPar)
+{	
+    unsigned int K = lambda.n_elem;
+    double priormixlik = R::dunif(lambda(0), hyperPar.a, hyperPar.b, 1); 
+    for(unsigned int k = 1; k < K; ++k) {
+        priormixlik += std::log(do_dtruncnorm(lambda(k), lambda(k - 1), 
+                    R_PosInf, lambda(k - 1), hyperPar.s));
+    }
 	return priormixlik;
 }
 
@@ -198,5 +178,128 @@ double priormixlik_binomial (const arma::rowvec& p,
          priormixlik -= R::lbeta(prior_parA(k), prior_parB(k));
      }
      return priormixlik;
+}
+
+inline
+double priormixlik_normal (const bool& INDEPENDENT, const bool& HIER, 
+        const arma::rowvec& bStart, const arma::rowvec& BStart,
+        const arma::rowvec& cStart, const arma::rowvec& CStart,
+        const arma::rowvec& mu, const arma::rowvec& sigma,
+        const double& g, const double& G)
+{
+    const unsigned int K = mu.n_elem;
+    double mixlik = 0.0 ;
+    if ( INDEPENDENT ) {
+        mixlik = arma::sum(arma::log(1.0 / BStart * M_PI * 2.0));
+        mixlik += arma::sum(arma::pow(mu - bStart, 2.0) / (1.0 / BStart));
+        mixlik *= -0.5;        
+    } else { /* conditionally conjugate prior */
+             /* here, B == N0 */
+        mixlik = arma::sum(arma::log(sigma / BStart * M_PI * 2.0));
+        mixlik += arma::sum(arma::pow(mu - bStart, 2.0) / (sigma / BStart));
+        mixlik *= -0.5;
+    }
+    /* add likelihood for sigma */
+    for (unsigned int k = 0; k < K; ++k) {
+        mixlik += cStart(k) * std::log(CStart(k));
+        mixlik -= R::lgammafn(cStart(k));
+        mixlik -= CStart(k) / sigma(k);
+        mixlik -= (cStart(k) + 1) * std::log(sigma(k));
+    }
+    if (HIER) {
+        double gN = g + arma::sum(cStart);
+        double GN = G + arma::sum( 1.0 / sigma );
+        double Cstar = gN / GN;
+        mixlik += R::dgamma(Cstar, g, 1.0 / G, 1);
+        mixlik -= R::dgamma(Cstar, gN, 1.0 / GN, 1);
+    }
+    return mixlik;
+}
+
+inline
+double priormixlik_normult (const bool& INDEPENDENT, const bool& HIER,
+        const arma::mat& bStart, const arma::cube& BInvStart,const  arma::cube& BStart, 
+        const arma::rowvec& cStart, arma::cube CStart, const arma::rowvec& logdetC,
+        const double& g, const arma::mat& G, const arma::mat& mu, 
+        const arma::cube& sigma)
+{
+    const unsigned int K = mu.n_cols;
+    const unsigned int r = mu.n_rows;
+    double mixlik = 0.0;
+    if (INDEPENDENT) {
+        mixlik += logdnormult(mu, bStart, BStart, BInvStart);
+    } else { /* conditionally conjugate prior */
+        mixlik += logdnormult(mu, bStart, BStart, BInvStart);
+    }
+    if (HIER) {
+        arma::rowvec gvec(K);
+        gvec.fill(g);
+        double gN       = g  + arma::sum(cStart);
+        arma::rowvec gNvec(K);
+        gNvec.fill(gN);
+        arma::mat GN    = G;
+        for (unsigned int k = 0; k < K; ++k) {
+            GN += CStart.slice(k);            
+        }
+        arma::mat Cstar = gN * arma::inv(GN);
+        for (unsigned int k = 0; k < K; ++k) {
+            CStart.slice(k) = Cstar;
+        }
+        mixlik += logdwishart(CStart, gvec, G, std::log(arma::det(G)));
+        mixlik += logdwishart(CStart, gNvec, GN, std::log(arma::det(GN)));
+    }
+    /* Prior for sigma (Wishart for sigmainv) */
+    mixlik += logdwishart(sigma, cStart, CStart, logdetC);    
+    return mixlik;
+}
+
+inline
+double priormixlik_student (const bool& INDEPENDENT, const bool& HIER,
+        const arma::rowvec& bStart, const arma::rowvec BStart, 
+        const arma::rowvec& cStart, arma::rowvec CStart,
+        const arma::rowvec& mu, const arma::rowvec& sigma, 
+        const double& g, const double& G,
+        const arma::rowvec& df, const double& trans,
+        const double& a0, const double& b0, const double& d)
+{
+    double loglik = priormixlik_normal(INDEPENDENT, HIER, bStart, BStart,
+            cStart, CStart, mu, sigma, g, G);
+    arma::rowvec fnu(mu.n_elem);
+    arma::rowvec nu = df - trans;
+    if (b0 == 1.0) {
+        fnu = std::log(d + a0) + (a0 - 1) * arma::log(nu) 
+            - (a0 + 1) * arma::log(nu + d); 
+    } else {
+        fnu = b0 * std::log(d) + (a0 - 1) * arma::log(nu)
+            - (a0 + b0) * arma::log(nu + d) - R::lbeta(a0, b0);
+    }
+    loglik += arma::sum(fnu);
+    return loglik;
+}
+
+inline 
+double priormixlik_studmult (const bool& INDEPENDENT, const bool& HIER,
+        const arma::mat& bStart, const arma::cube BInvStart, 
+        const arma::cube& BStart, const arma::rowvec& cStart, 
+        arma::cube CStart, const arma::rowvec& logdetC, 
+        const double& g, const arma::mat& G, const arma::mat& mu,
+        const arma::cube& sigma, const arma::rowvec& df, 
+        const double& trans, const double& a0, const double& b0,
+        const double& d)
+{
+    double loglik = priormixlik_normult(INDEPENDENT, HIER,
+            bStart, BInvStart, BStart, cStart, CStart, logdetC, 
+            g, G, mu, sigma); 
+    arma::rowvec fnu(mu.n_elem);
+    arma::rowvec nu = df - trans;
+    if (b0 == 1.0) {
+        fnu = std::log(d + a0) + (a0 - 1.0) * arma::log(nu)
+            - (a0 + 1.0) * arma::log(nu + d);        
+    } else {
+        fnu = b0 * std::log(d) + (a0 - 1.0) * arma::log(nu)
+            - (a0 + b0) * arma::log(nu + d) - R::lbeta(a0, b0);
+    }   
+    loglik += arma::sum(fnu);
+    return loglik;
 }
 #endif

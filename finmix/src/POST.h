@@ -98,7 +98,7 @@ class POST : public Super {
 			public:
 				PostOutType post;
 				
-				Output (const Rcpp::S4&);
+				Output (Rcpp::S4&);
 				virtual ~Output () {}	
 				virtual void store (const
 						unsigned int&,
@@ -109,7 +109,7 @@ class POST : public Super {
 		
 		POST (const FinmixData&, const FinmixModel&,
 			const FinmixPrior&, const FinmixMCMC&,
-			const Rcpp::S4&);
+			Rcpp::S4&);
 		virtual ~POST () {}
 		virtual void update ();
 		virtual void store (const unsigned int&);
@@ -176,7 +176,7 @@ POST <Super, PostOutType>::Node::Node (const FinmixData& data,
  * ----------------------------------------------------------
  **/
 template <typename Super, typename PostOutType> 
-POST <Super, PostOutType>::Output::Output (const Rcpp::S4& classS4) :
+POST <Super, PostOutType>::Output::Output (Rcpp::S4& classS4) :
 	Super::Output(classS4),
 	post(Rcpp::as<Rcpp::List>((SEXP) classS4.slot("post"))) {}
 
@@ -238,7 +238,7 @@ void POST <Super, PostOutType>::Output::store (const unsigned int& m,
 template <typename Super, typename PostOutType>
 POST <Super, PostOutType>::POST (const FinmixData& data, 
 	const FinmixModel& model, const FinmixPrior& prior, 
-	const FinmixMCMC& mcmc, const Rcpp::S4& classS4) :
+	const FinmixMCMC& mcmc, Rcpp::S4& classS4) :
 		Super(data, model, prior, mcmc, classS4),
 		node(data, model, prior, mcmc),
 		output(classS4) {}

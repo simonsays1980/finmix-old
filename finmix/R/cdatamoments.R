@@ -78,7 +78,7 @@ setMethod("show", "cdatamoments",
                   cat("     smoments    : Object of class", 
                       class(object@smoments), "\n")
               }
-              cat("     fdata        : Object of class",
+              cat("     fdata       : Object of class",
                   class(object@fdata), "\n")
           }
 )
