@@ -134,7 +134,7 @@ setMethod( "plotTraces", signature( x     = "mcmcoutputpermbase",
               }
               if ( lik %in% c( 1, 2 ) ) {
                   ## log ##
-                  .permtraces.Log.Base( x, dev )	
+                  .permtraces.Log.Base( x, dev, col )	
               }
           }
 )
@@ -375,7 +375,7 @@ setMethod( "plotPostDens", signature( x   = "mcmcoutputpermbase",
 }
 
 ### Traces log-likelihoods: Plots traces for the log-likelihoods.
-".permtraces.Log.Base" <- function( x, dev )
+".permtraces.Log.Base" <- function( x, dev, col )
 {
     if ( .check.grDevice() && dev ) {
         dev.new( title = "Log Likelihood Traceplots (permuted)" )
