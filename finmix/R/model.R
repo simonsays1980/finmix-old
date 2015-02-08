@@ -151,7 +151,7 @@ setMethod( "hasDf", "model",
 ### @see    ?simulate
 ### @author Lars Simon Zehnder
 ### ----------------------------------------------------------------------
-setMethod( "simulate", "model", 
+setMethod( "simulate_finmix", "model", 
            function( model, N = 100, varargin, seed = 0 )
            {
 ## TODO: CHeck model for parameters. Check varargin for dimension. Check
@@ -663,6 +663,9 @@ setReplaceMethod( "setT", "model",
     fdata.obj@sim   <- TRUE
     fdata.obj@y     <- matrix( rnorm( N, obj@par$mu[fdata.obj@S], 
                                       obj@par$sigma[fdata.obj@S] ) )
+    fdata.obj@T     <- matrix()
+    fdata.obj@exp   <- matrix()
+
     return( fdata.obj )
 }
 
@@ -1423,7 +1426,7 @@ setReplaceMethod( "setT", "model",
                             stop( paste( "Wrong specification of slot @par ",
                                          "in 'model' object. Slot @K does ",
                                          "not match dimension of parameter ",
-                                         "par@$sigma.", sep = "" ), call. = FALSE )
+                                         "par$sigma.", sep = "" ), call. = FALSE )
                         }
                     } else {
                         return( TRUE )
@@ -2612,7 +2615,7 @@ setReplaceMethod( "setT", "model",
                         "positive.", sep = "" ),
                  .call = FALSE )
        } else if ( !is.array( obj@par$sigma ) && !is.matrix( obj@par$sigma ) &&
-                   !is.matrix( obj@par$sigma ) ) {
+                   !is.vector( obj@par$sigma ) ) {
            warning( paste( "Wrong specification of slot @par: ",
                            "sigma must be either an array, a vector, ",
                            "or a matrix of dimension 1 x K.", sep = "" ),

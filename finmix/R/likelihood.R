@@ -17,7 +17,7 @@
 
 ".likelihood.normal" <- function(y, mu, sigma){
 	N <- nrow(y)
-	K <- ncol(mu)
+	K <- length(mu)
 	y <- matrix(y, nrow = N, ncol = K)
 	
 	err <- t(apply(y, 1, "-", mu))

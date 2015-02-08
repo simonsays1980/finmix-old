@@ -28,7 +28,7 @@
 setMethod("show", "mcmcoutputfixpost", 
           function(object) 
           {
-              cat("Object 'mcmcoutputfixpost\n")
+              cat("Object 'mcmcoutputfixpost'\n")
               cat("     class       :", class(object), "\n")
               cat("     M           :", object@M, "\n")
               cat("     burnin      :", object@burnin, "\n")

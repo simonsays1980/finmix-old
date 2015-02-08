@@ -30,9 +30,43 @@
 {
         hasY(value, verbose = TRUE)
         if (value@type == "continuous") {
-			.Object <- .cdatamoments(value = value)
+            tryCatch(
+			    {
+                    .Object <- .cdatamoments(value = value)
+                }, 
+                error = function( e ) 
+                {
+                    e$call      <- call( "datamoments" )
+                    e$message   <- paste0( e$message, "\nIs your data possibly discrete valued? ",
+                                           "In this case change the data type in the",
+                                           " 'fdata' object to 'discrete'. See ?setType.", sep = "" ) 
+                    stop( e )
+                }                
+            )
         } else { 
 			.Object <- .ddatamoments(value = value)
         }
 		return(.Object)
 }
+
+setMethod( "getMean", "datamoments", 
+          function( object ) 
+          {
+              return( object@mean )
+          }
+)
+
+setMethod( "getVar", "datamoments", 
+          function( object ) 
+          {
+              return( object@var )
+          }
+)
+
+setMethod( "getFdata", "datamoments", 
+          function( object ) 
+          {
+              return( object@fdata )
+          }
+)
+
