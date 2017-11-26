@@ -415,7 +415,7 @@ arma::mat rinvwishart (const double& df,
     const unsigned int Nu = 2 * df + 1;
     arma::mat unityS(r, r);
     arma::mat schurS(r, r);
-    arma::auxlib::schur_dec(unityS, schurS, scale);
+    arma::schur(unityS, schurS, scale);
     arma::colvec diagschurS = arma::diagvec(arma::max(schurS, arma::zeros(r, r)));
     arma::mat thSchur = arma::diagmat(arma::pow(diagschurS, 0.5));    
     arma::mat unity = unityS * thSchur;
